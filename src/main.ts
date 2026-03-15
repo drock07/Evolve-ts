@@ -4,6 +4,7 @@ import './evolve.less';
 import { global, save, seededRandom, webWorker, intervals, keyMap, atrack, resizeGame, breakdown, sizeApproximation, keyMultiplier, power_generated, p_on, support_on, int_on, gal_on, spire_on, set_qlevel, quantum_level, callback_queue, active_rituals } from './vars';
 import { notifyStateChange } from './state';
 import { mountResourcePanel } from './components/mountResourcePanel';
+import { mountApp } from './engine/mountApp';
 import { loc } from './locale';
 import { unlockAchieve, checkAchievements, drawAchieve, alevel, universeAffix, challengeIcon, unlockFeat, checkAdept } from './achieve';
 import { gameLoop, vBind, popover, clearPopper, flib, tagEvent, timeCheck, arpaTimeCheck, timeFormat, powerModifier, resetResBuffer, modRes, initMessageQueue, messageQueue, calc_mastery, calcPillar, darkEffect, calcQueueMax, calcRQueueMax, buildQueue, shrineBonusActive, getShrineBonus, eventActive, easterEggBind, trickOrTreatBind, powerGrid, deepClone, addATime, exceededATimeThreshold, loopTimers, calcQuantumLevel, drawPet } from './functions';
@@ -27,6 +28,9 @@ import { index, mainVue, initTabs, loadTab } from './index';
 import { setWeather, seasonDesc, astrologySign, astroVal } from './seasons';
 import { getTopChange } from './wiki/change';
 import { enableDebug, updateDebugData } from './debug';
+
+// Mount React root (provides GameContext to all React components)
+mountApp();
 
 {
     $(document).ready(function() {

@@ -22,6 +22,12 @@ export function mainVue(){
             s: global.settings
         },
         methods: {
+            soft_reset(){
+                window.soft_reset();
+            },
+            reset(){
+                window.reset();
+            },
             swapTab(tab){
                 if (!global.settings.tabLoad){
                     loadTab(tab);

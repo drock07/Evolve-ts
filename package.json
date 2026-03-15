@@ -42,6 +42,7 @@
     "buefy": "0.9.22",
     "chart.js": "3.8.2",
     "crypto-js": "4.2.0",
+    "immer": "^11.1.4",
     "jquery": "3.6.3",
     "lz-string": "1.5.0",
     "react": "^19.2.4",
