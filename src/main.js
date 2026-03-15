@@ -1,3 +1,6 @@
+import './globals.js';
+import './evolve.less';
+
 import { global, save, seededRandom, webWorker, intervals, keyMap, atrack, resizeGame, breakdown, sizeApproximation, keyMultiplier, power_generated, p_on, support_on, int_on, gal_on, spire_on, set_qlevel, quantum_level, callback_queue, active_rituals } from './vars.js';
 import { loc } from './locale.js';
 import { unlockAchieve, checkAchievements, drawAchieve, alevel, universeAffix, challengeIcon, unlockFeat, checkAdept } from './achieve.js';
@@ -863,7 +866,7 @@ export function execGameLoops(periods = 1){
 }
 
 if (window.Worker){
-    webWorker.w = new Worker("evolve/evolve.js");
+    webWorker.w = new Worker(new URL('./worker.js', import.meta.url));
     webWorker.w.addEventListener('message', function(e){
         const data = e.data;
         switch (data.loop) {

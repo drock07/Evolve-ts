@@ -1,3 +1,7 @@
+import './globals.js';
+import '../evolve.less';
+import './wiki.less';
+
 import { global, setGlobal, save } from './../vars.js';
 import { loc } from './../locale.js';
 import {} from './init.js';
