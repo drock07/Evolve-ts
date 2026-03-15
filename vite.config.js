@@ -10,9 +10,6 @@ export default defineConfig({
       'vue': 'vue/dist/vue.esm.js',
     },
   },
-  server: {
-    port: 4400,
-  },
   build: {
     outDir: 'dist',
     rollupOptions: {

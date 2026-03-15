@@ -33,6 +33,18 @@ importers:
         specifier: 2.7.14
         version: 2.7.14
     devDependencies:
+      '@types/crypto-js':
+        specifier: ^4.2.2
+        version: 4.2.2
+      '@types/jquery':
+        specifier: ^4.0.0
+        version: 4.0.0
+      '@types/lz-string':
+        specifier: ^1.5.0
+        version: 1.5.0
+      '@types/sortablejs':
+        specifier: ^1.15.9
+        version: 1.15.9
       gh-pages:
         specifier: ^6.1.1
         version: 6.1.1
@@ -42,6 +54,9 @@ importers:
       less:
         specifier: ^3.13.0
         version: 3.13.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       vite:
         specifier: ^8.0.0
         version: 8.0.0(less@3.13.0)
@@ -181,6 +196,19 @@ packages:
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
+
+  '@types/crypto-js@4.2.2':
+    resolution: {integrity: sha512-sDOLlVbHhXpAUAL0YHDUUwDZf3iN4Bwi4W6a0W0b+QcAezUbRtH4FVb+9J4h+XFPW7l/gQ9F8qC7P+Ec4k8QVQ==}
+
+  '@types/jquery@4.0.0':
+    resolution: {integrity: sha512-Z+to+A2VkaHq1DfI2oSwsoCdhCHMpTSgjWzNcbNlRGYzksDBpPUgEcAL+RQjOBJRaLoEAOHXxqDGBVP+BblBwg==}
+
+  '@types/lz-string@1.5.0':
+    resolution: {integrity: sha512-s84fKOrzqqNCAPljhVyC5TjAo6BH4jKHw9NRNFNiRUY5QSgZCmVm5XILlWbisiKl+0OcS7eWihmKGS5akc2iQw==}
+    deprecated: This is a stub types definition. lz-string provides its own type definitions, so you do not need this installed.
+
+  '@types/sortablejs@1.15.9':
+    resolution: {integrity: sha512-7HP+rZGE2p886PKV9c9OJzLBI6BBJu1O7lJGYnPyG3fS4/duUCcngkNCjsLwIMV+WMqANe3tt4irrXHSIe68OQ==}
 
   '@vue/compiler-sfc@2.7.14':
     resolution: {integrity: sha512-aNmNHyLPsw+sVvlQFQ2/8sjNuLtK54TC6cuKnVzAY93ks4ZBrvwQSnkkIh7bsbNhum5hJBS00wSDipQ937f5DA==}
@@ -529,6 +557,11 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   universalify@2.0.1:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
     engines: {node: '>= 10.0.0'}
@@ -680,6 +713,16 @@ snapshots:
     dependencies:
       tslib: 2.8.1
     optional: true
+
+  '@types/crypto-js@4.2.2': {}
+
+  '@types/jquery@4.0.0': {}
+
+  '@types/lz-string@1.5.0':
+    dependencies:
+      lz-string: 1.5.0
+
+  '@types/sortablejs@1.15.9': {}
 
   '@vue/compiler-sfc@2.7.14':
     dependencies:
@@ -1001,6 +1044,8 @@ snapshots:
 
   tslib@2.8.1:
     optional: true
+
+  typescript@5.9.3: {}
 
   universalify@2.0.1: {}
 
