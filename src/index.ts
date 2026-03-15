@@ -897,12 +897,21 @@ export function loadTab(tab){
 }
 
 export function index(){
-    clearElement($('body'));
+    // Clear legacy content from React-owned containers, but preserve the skeleton
+    clearElement($('#topBar'));
+    clearElement($('#race'));
+    clearElement($('#buildQueue'));
+    clearElement($('#msgQueue'));
+    clearElement($('#resources'));
+    clearElement($('#mainColumn .content'));
+
+    // Remove the loading spinner if present
+    $('.loading').remove();
 
     $('html').addClass(global.settings.font);
 
-    // Top Bar
-    $('body').append(`<div id="topBar" class="topBar">
+    // Top Bar — append content into React-owned #topBar
+    $('#topBar').append(`
         <h2 class="is-sr-only">Top Bar</h2>
         <span class="planetWrap">
             <span class="planet">{{ race.species | planet }}</span>
@@ -927,48 +936,46 @@ export function index(){
             </span>
         </span>
         <span class="version" id="versionLog"><a href="wiki.html#changelog" target="_blank"></a></span>
-    </div>`);
+    `);
 
-    let main = $(`<div id="main" class="main"></div>`);
-    let columns = $(`<div class="columns is-gapless"></div>`);
-    $('body').append(main);
-    main.append(columns);
+    // Left Column — append content into React-owned containers
+    // Race info
+    $('#race').append(`
+        <h2 class="is-sr-only">Race Info</h2>
+        <div class="name">{{ name() }}</div>
+        <div class="morale-contain"><span id="morale" v-show="city.morale.current" class="morale">${loc('morale')} <span class="has-text-warning">{{ city.morale.current | mRound }}%</span></div>
+        <div class="power"><span id="powerStatus" class="has-text-warning" v-show="city.powered"><span>MW</span> <span id="powerMeter" class="meter">{{ city.power | replicate | approx }}</span></span></div>
+    `);
 
-    // Left Column
-    columns.append(`<div class="column is-one-quarter leftColumn">
-        <div id="race" class="race colHeader">
-            <h2 class="is-sr-only">Race Info</h2>
-            <div class="name">{{ name() }}</div>
-            <div class="morale-contain"><span id="morale" v-show="city.morale.current" class="morale">${loc('morale')} <span class="has-text-warning">{{ city.morale.current | mRound }}%</span></div>
-            <div class="power"><span id="powerStatus" class="has-text-warning" v-show="city.powered"><span>MW</span> <span id="powerMeter" class="meter">{{ city.power | replicate | approx }}</span></span></div>
+    // Build queue — just needs v-show attribute
+    $('#buildQueue').attr('v-show', 'display');
+
+    // Message queue
+    $('#msgQueue').append(`
+        <div id="msgQueueHeader">
+            <h2 class="has-text-success">${loc('message_log')}</h2>
+            <span class="special" role="button" title="message queue options" @click="trigModal">
+                <svg version="1.1" x="0px" y="0px" width="12px" height="12px" viewBox="340 140 280 279.416" enable-background="new 340 140 280 279.416" xml:space="preserve">
+                    <path class="gear" d="M620,305.666v-51.333l-31.5-5.25c-2.333-8.75-5.833-16.917-9.917-23.917L597.25,199.5l-36.167-36.75l-26.25,18.083
+                    c-7.583-4.083-15.75-7.583-23.916-9.917L505.667,140h-51.334l-5.25,31.5c-8.75,2.333-16.333,5.833-23.916,9.916L399.5,163.333
+                    L362.75,199.5l18.667,25.666c-4.083,7.584-7.583,15.75-9.917,24.5l-31.5,4.667v51.333l31.5,5.25
+                    c2.333,8.75,5.833,16.334,9.917,23.917l-18.667,26.25l36.167,36.167l26.25-18.667c7.583,4.083,15.75,7.583,24.5,9.917l5.25,30.916
+                    h51.333l5.25-31.5c8.167-2.333,16.333-5.833,23.917-9.916l26.25,18.666l36.166-36.166l-18.666-26.25
+                    c4.083-7.584,7.583-15.167,9.916-23.917L620,305.666z M480,333.666c-29.75,0-53.667-23.916-53.667-53.666s24.5-53.667,53.667-53.667
+                    S533.667,250.25,533.667,280S509.75,333.666,480,333.666z"/>
+                </svg>
+            </span>
+            <span role="button" class="zero has-text-advanced" @click="clearLog(m.view)">${loc('message_log_clear')}</span>
+            <span role="button" class="zero has-text-advanced" @click="clearLog()">${loc('message_log_clear_all')}</span>
         </div>
-        <div id="sideQueue">
-            <div id="buildQueue" class="bldQueue standardqueuestyle has-text-info" v-show="display"></div>
-            <div id="msgQueue" class="msgQueue vscroll has-text-info" aria-live="polite">
-                <div id="msgQueueHeader">
-                    <h2 class="has-text-success">${loc('message_log')}</h2>
-                    <span class="special" role="button" title="message queue options" @click="trigModal">
-                        <svg version="1.1" x="0px" y="0px" width="12px" height="12px" viewBox="340 140 280 279.416" enable-background="new 340 140 280 279.416" xml:space="preserve">
-                            <path class="gear" d="M620,305.666v-51.333l-31.5-5.25c-2.333-8.75-5.833-16.917-9.917-23.917L597.25,199.5l-36.167-36.75l-26.25,18.083
-                            c-7.583-4.083-15.75-7.583-23.916-9.917L505.667,140h-51.334l-5.25,31.5c-8.75,2.333-16.333,5.833-23.916,9.916L399.5,163.333
-                            L362.75,199.5l18.667,25.666c-4.083,7.584-7.583,15.75-9.917,24.5l-31.5,4.667v51.333l31.5,5.25
-                            c2.333,8.75,5.833,16.334,9.917,23.917l-18.667,26.25l36.167,36.167l26.25-18.667c7.583,4.083,15.75,7.583,24.5,9.917l5.25,30.916
-                            h51.333l5.25-31.5c8.167-2.333,16.333-5.833,23.917-9.916l26.25,18.666l36.166-36.166l-18.666-26.25
-                            c4.083-7.584,7.583-15.167,9.916-23.917L620,305.666z M480,333.666c-29.75,0-53.667-23.916-53.667-53.666s24.5-53.667,53.667-53.667
-                            S533.667,250.25,533.667,280S509.75,333.666,480,333.666z"/>
-                        </svg>
-                    </span>
-                    <span role="button" class="zero has-text-advanced" @click="clearLog(m.view)">${loc('message_log_clear')}</span>
-                    <span role="button" class="zero has-text-advanced" @click="clearLog()">${loc('message_log_clear_all')}</span>
-                </div>
-                <h2 class="is-sr-only">${loc('message_filters')}</h2>
-                <div id="msgQueueFilters" class="hscroll msgQueueFilters"></div>
-                <h2 class="is-sr-only">${loc('messages')}</h2>
-                <div id="msgQueueLog" aria-live="polite"></div>
-            </div>
-        </div>
-        <div id="resources" class="resources vscroll"><h2 class="is-sr-only">${loc('tab_resources')}</h2></div>
-    </div>`);
+        <h2 class="is-sr-only">${loc('message_filters')}</h2>
+        <div id="msgQueueFilters" class="hscroll msgQueueFilters"></div>
+        <h2 class="is-sr-only">${loc('messages')}</h2>
+        <div id="msgQueueLog" aria-live="polite"></div>
+    `);
+
+    // Resources panel header
+    $('#resources').append(`<h2 class="is-sr-only">${loc('tab_resources')}</h2>`);
     message_filters.forEach(function (filter){
         $(`#msgQueueFilters`).append(`
             <span id="msgQueueFilter-${filter}" class="${filter === 'all' ? 'is-active' : ''}" aria-disabled="${filter === 'all' ? 'true' : 'false'}" @click="swapFilter('${filter}')" v-show="s.${filter}.vis" role="button">${loc('message_log_' + filter)}</span>
@@ -1161,11 +1168,8 @@ export function index(){
         }
     });
 
-    // Center Column
-    let mainColumn = $(`<div id="mainColumn" class="column is-three-quarters"></div>`);
-    columns.append(mainColumn);
-    let content = $(`<div class="content"></div>`);
-    mainColumn.append(content);
+    // Center Column — append into React-owned #mainColumn > .content
+    let content = $(`#mainColumn .content`);
 
     content.append(`<h2 class="is-sr-only">Tab Navigation</h2>`);
     let tabs = $(`<b-tabs id="mainTabs" v-model="s.civTabs" :animated="s.animated" @input="swapTab"></b-tabs>`);
@@ -1481,13 +1485,11 @@ export function index(){
     </b-tab-item>`);
     tabs.append(observe);
 
-    // Right Column
-    columns.append(`<div id="queueColumn" class="queueCol column"></div>`);
+    // Right Column — rendered by React in App.tsx
 
     let egg15 = easterEgg(15,8);
-    // Bottom Bar
-    $('body').append(`
-        <div class="promoBar">
+    // Bottom Bar — append into React-owned #promoBar
+    $('#promoBar').append(`
             <span class="left">
                 <h1>
                     <span class="has-text-warning">${egg15.length > 0 ? `Ev${egg15}lve` : `Evolve`}</span>
@@ -1506,6 +1508,5 @@ export function index(){
                     <li><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=PTRJZBW9J662C&currency_code=USD&source=url" target="_blank">Donate</a></li>
                 </ul>
             </span>
-        </div>
     `);
 }

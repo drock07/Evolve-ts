@@ -1,12 +1,12 @@
 /**
  * Mount the root React App component.
  *
- * Creates a container div and mounts the App, which provides
- * the GameContext to all React components. Call this early in
- * initialization, before any React components are mounted.
+ * Renders the App synchronously (via flushSync) so the DOM skeleton
+ * is available immediately for legacy code to append into.
  */
 
 import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
 import { createElement } from 'react';
 import { App } from '../App';
 
@@ -21,5 +21,7 @@ export function mountApp() {
     document.body.prepend(container);
 
     const root = createRoot(container);
-    root.render(createElement(App));
+    flushSync(() => {
+        root.render(createElement(App));
+    });
 }
