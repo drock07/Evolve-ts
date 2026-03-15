@@ -854,11 +854,12 @@ export function execGameLoops(periods = 1){
 
         // Always run a faster loop before a slower loop
         fastLoop();
-        if (doMid){ midLoop(); }
+        fastLoopRender();
+        if (doMid){ midLoop(); midLoopRender(); }
 
         // Perform callbacks before longLoop, so that any permanent results can be saved during longLoop
         doCallbacks();
-        if (doLong){ longLoop(); }
+        if (doLong){ longLoop(); longLoopRender(); }
 
         // Overflow prevention
         if (doMid && doLong){ loopTick = 0; }
@@ -882,15 +883,28 @@ resourceAlt();
 
 var firstRun = true;
 var gene_sequence = global.arpa['sequence'] && global.arpa['sequence']['on'] ? global.arpa.sequence.on : 0;
-function fastLoop(){
-    if (!global.race['no_craft']){
-        $('.craft').each(function(e){
-            if (typeof $(this).data('val') === 'number'){
-                $(this).html(sizeApproximation($(this).data('val') * keyMultiplier(),1));
-            }
-        });
-    }
 
+// ── Render state: dirty flags and deferred DOM data ──
+// These are set during compute loops and flushed in render passes.
+const dirty = {
+    tech: false,
+    evolution: false,
+    space: false,
+    edenic: false,
+    city: false,
+    firstRun: false,
+    map: false,
+};
+
+// Power/support warning state collected during computation.
+// Key = CSS selector, value = { warn: boolean, current?: number, max?: number }
+const powerWarnings: Record<string, { warn: boolean; current?: number; max?: number }> = {};
+
+function setPowerWarning(selector: string, isWarning: boolean, current?: number, max?: number) {
+    powerWarnings[selector] = { warn: isWarning, current, max };
+}
+
+function fastLoop(){
     const date = new Date();
     const astroSign = astrologySign();
     breakdown.p['Global'] = {};
@@ -1259,31 +1273,31 @@ function fastLoop(){
                 modRes('RNA', global.resource.RNA.max);
                 modRes('DNA', global.resource.RNA.max);
             }
-            drawEvolution();
+            dirty.evolution = true;
         }
         else if (global['resource']['RNA'].amount >= 10 && !global.evolution['membrane']){
             global.evolution['membrane'] = { count: 0 };
-            drawEvolution();
+            dirty.evolution = true;
         }
         else if (global['resource']['DNA'].amount >= 4 && !global.evolution['organelles']){
             global.evolution['organelles'] = { count: 0 };
-            drawEvolution();
+            dirty.evolution = true;
         }
         else if (global.evolution['organelles'] && global.evolution.organelles.count >= 2 && !global.evolution['nucleus']){
             global.evolution['nucleus'] = { count: 0 };
-            drawEvolution();
+            dirty.evolution = true;
         }
         else if (global.evolution['nucleus'] && global.evolution.nucleus.count >= 1 && !global.evolution['eukaryotic_cell']){
             global.evolution['eukaryotic_cell'] = { count: 0 };
-            drawEvolution();
+            dirty.evolution = true;
         }
         else if (global.evolution['eukaryotic_cell'] && global.evolution.eukaryotic_cell.count >= 1 && !global.evolution['mitochondria']){
             global.evolution['mitochondria'] = { count: 0 };
-            drawEvolution();
+            dirty.evolution = true;
         }
         else if (global.evolution['mitochondria'] && !global.tech['evo']){
             global.tech['evo'] = 1;
-            drawEvolution();
+            dirty.evolution = true;
         }
     }
     else {
@@ -1903,19 +1917,19 @@ function fastLoop(){
                 power_generated[title] = -(power);
 
                 if (p_on[generator.s] !== global[region][generator.s].on){
-                    $(`#${region}-${generator.s} .on`).addClass('warn');
-                    $(`#${region}-${generator.s} .on`).prop('title',`ON ${p_on[generator.s]}/${global[region][generator.s].on}`);
+                    setPowerWarning(`#${region}-${generator.s} .on`, true, p_on[generator.s], global[region][generator.s].on);
+
                 }
                 else {
-                    $(`#${region}-${generator.s} .on`).removeClass('warn');
-                    $(`#${region}-${generator.s} .on`).prop('title',`ON`);
+                    setPowerWarning(`#${region}-${generator.s} .on`, false);
+
                 }
             }
             else {
                 power_generated[title] = 0;
                 p_on[generator.s] = 0;
-                $(`#${region}-${generator.s} .on`).removeClass('warn');
-                $(`#${region}-${generator.s} .on`).prop('title',`ON`);
+                setPowerWarning(`#${region}-${generator.s} .on`, false);
+
             }
         });
 
@@ -2150,22 +2164,22 @@ function fastLoop(){
                 power_grid_temp -= power;
 
                 if (p_on[struct] !== global[region][struct].on){
-                    $(`#${region}-${struct} .on`).addClass('warn');
-                    $(`#${region}-${struct} .on`).prop('title',`ON ${p_on[struct]}/${global[region][struct].on}`);
+                    setPowerWarning(`#${region}-${struct} .on`, true, p_on[struct], global[region][struct].on);
+
                     // Remove the reset actions for reset structures that lose power
                     if (['matrix', 'atmo_terraformer', 'ascension_trigger'].includes(struct)){
                         callback_queue.set([c_action, 'postPower'], [true]);
                     }
                 }
                 else {
-                    $(`#${region}-${struct} .on`).removeClass('warn');
-                    $(`#${region}-${struct} .on`).prop('title',`ON`);
+                    setPowerWarning(`#${region}-${struct} .on`, false);
+
                 }
             }
             else {
                 p_on[struct] = 0;
-                $(`#${region}-${struct} .on`).removeClass('warn');
-                $(`#${region}-${struct} .on`).prop('title',`ON`);
+                setPowerWarning(`#${region}-${struct} .on`, false);
+
             }
         }
         power_grid -= totalPowerDemand;
@@ -2210,18 +2224,18 @@ function fastLoop(){
                 }
 
                 if (support_on['lander'] !== global.space.lander.on){
-                    $(`#space-lander .on`).addClass('warn');
-                    $(`#space-lander .on`).prop('title',`ON ${support_on['lander']}/${global.space.lander.on}`);
+                    setPowerWarning(`#space-lander .on`, true, support_on['lander'], global.space.lander.on);
+
                 }
                 else {
-                    $(`#space-lander .on`).removeClass('warn');
-                    $(`#space-lander .on`).prop('title',`ON`);
+                    setPowerWarning(`#space-lander .on`, false);
+
                 }
             }
             else {
                 global.space.fob.troops = 0;
-                $(`#space-lander .on`).addClass('warn');
-                $(`#space-lander .on`).prop('title',`ON 0/${global.space.lander.on}`);
+                setPowerWarning(`#space-lander .on`, true, 0, global.space.lander.on);
+
             }
         }
 
@@ -2249,11 +2263,10 @@ function fastLoop(){
                     if(p_on[parts[1]]){
                         p_on[parts[1]] = 0;
                     }
-                    $(`#${region}-${parts[1]} .on`).addClass('warn');
-                    $(`#${region}-${parts[1]} .on`).prop('title',`ON 0`);
+                    setPowerWarning(`#${region}-${parts[1]} .on`, true, 0);
                 }else {
-                    $(`#${region}-${parts[1]} .on`).removeClass('warn');
-                    $(`#${region}-${parts[1]} .on`).prop('title',`ON`);
+                    setPowerWarning(`#${region}-${parts[1]} .on`, false);
+
                 }
             }
             global.civic.meditator.display = true;
@@ -2295,12 +2308,12 @@ function fastLoop(){
                             }
                         }
                         if (p_on[sup.s] < global[sup.a][sup.s].on){
-                            $(`#space-${sup.s} .on`).addClass('warn');
-                            $(`#space-${sup.s} .on`).prop('title',`ON ${p_on[sup.s]}/${global[sup.a][sup.s].on}`);
+                            setPowerWarning(`#space-${sup.s} .on`, true, p_on[sup.s], global[sup.a][sup.s].on);
+
                         }
                         else {
-                            $(`#space-${sup.s} .on`).removeClass('warn');
-                            $(`#space-${sup.s} .on`).prop('title',`ON`);
+                            setPowerWarning(`#space-${sup.s} .on`, false);
+
                         }
                     }
                 }
@@ -2348,12 +2361,12 @@ function fastLoop(){
 
                         if ((operating * supportSize > remaining_support) && !sup.oc){
                             operating = Math.floor(remaining_support / supportSize);
-                            $(`#${id} .on`).addClass('warn');
-                            $(`#${id} .on`).prop('title',`ON ${operating}/${global[sup.a][area_structs[i]].on}`);
+                            setPowerWarning(`#${id} .on`, true, operating, global[sup.a][area_structs[i]].on);
+
                         }
                         else {
-                            $(`#${id} .on`).removeClass('warn');
-                            $(`#${id} .on`).prop('title',`ON`);
+                            setPowerWarning(`#${id} .on`, false);
+
                         }
 
                         if (actions[sup.a][sup.r2][area_structs[i]].hasOwnProperty('support_fuel')){
@@ -2468,12 +2481,12 @@ function fastLoop(){
                     let id = actions.interstellar.int_alpha[structs[i]].id;
                     if (used_support + operating > global.interstellar.starport.s_max){
                         operating -=  (used_support + operating) - global.interstellar.starport.s_max;
-                        $(`#${id} .on`).addClass('warn');
-                        $(`#${id} .on`).prop('title',`ON ${operating}/${global.interstellar[structs[i]].on}`);
+                        setPowerWarning(`#${id} .on`, true, operating, global.interstellar[structs[i]].on);
+
                     }
                     else {
-                        $(`#${id} .on`).removeClass('warn');
-                        $(`#${id} .on`).prop('title',`ON`);
+                        setPowerWarning(`#${id} .on`, false);
+
                     }
                     used_support += operating;
                     int_on[structs[i]] = operating;
@@ -2541,12 +2554,12 @@ function fastLoop(){
                     let max_operating = Math.floor((global.galaxy.starbase.s_max - used_support) / operating_cost);
                     if (operating > max_operating){
                         operating = max_operating;
-                        $(`#${id} .on`).addClass('warn');
-                        $(`#${id} .on`).prop('title',`ON ${operating}/${global.galaxy[gateway_structs[i]].on}`);
+                        setPowerWarning(`#${id} .on`, true, operating, global.galaxy[gateway_structs[i]].on);
+
                     }
                     else {
-                        $(`#${id} .on`).removeClass('warn');
-                        $(`#${id} .on`).prop('title',`ON`);
+                        setPowerWarning(`#${id} .on`, false);
+
                     }
                     used_support += operating * operating_cost;
                     gal_on[gateway_structs[i]] = operating;
@@ -2601,12 +2614,12 @@ function fastLoop(){
                     let id = actions.portal.prtl_spire[purifier_structs[i]].id;
                     if (used_support + operating > global.portal.purifier.s_max){
                         operating -= (used_support + operating) - global.portal.purifier.s_max;
-                        $(`#${id} .on`).addClass('warn');
-                        $(`#${id} .on`).prop('title',`ON ${operating}/${global.portal[purifier_structs[i]].on}`);
+                        setPowerWarning(`#${id} .on`, true, operating, global.portal[purifier_structs[i]].on);
+
                     }
                     else {
-                        $(`#${id} .on`).removeClass('warn');
-                        $(`#${id} .on`).prop('title',`ON`);
+                        setPowerWarning(`#${id} .on`, false);
+
                     }
                     used_support += operating * -(actions.portal.prtl_spire[purifier_structs[i]].support());
                     spire_on[purifier_structs[i]] = operating;
@@ -2642,12 +2655,12 @@ function fastLoop(){
                     if (used_support + (operating * -(actions.space.spc_belt[belt_structs[i]].support())) > global.space.space_station.s_max){
                         let excess = used_support + (operating * -(actions.space.spc_belt[belt_structs[i]].support())) - global.space.space_station.s_max;
                         operating -= Math.ceil(excess / -(actions.space.spc_belt[belt_structs[i]].support()));
-                        $(`#${id} .on`).addClass('warn');
-                        $(`#${id} .on`).prop('title',`ON ${operating}/${global.space[belt_structs[i]].on}`);
+                        setPowerWarning(`#${id} .on`, true, operating, global.space[belt_structs[i]].on);
+
                     }
                     else {
-                        $(`#${id} .on`).removeClass('warn');
-                        $(`#${id} .on`).prop('title',`ON`);
+                        setPowerWarning(`#${id} .on`, false);
+
                     }
                     used_support += (operating * -(actions.space.spc_belt[belt_structs[i]].support()));
                     support_on[belt_structs[i]] = operating;
@@ -2682,12 +2695,12 @@ function fastLoop(){
                     let id = actions.interstellar.int_nebula[structs[i]].id;
                     if (used_support + operating > global.interstellar.nexus.s_max){
                         operating -=  (used_support + operating) - global.interstellar.nexus.s_max;
-                        $(`#${id} .on`).addClass('warn');
-                        $(`#${id} .on`).prop('title',`ON ${operating}/${global.interstellar[structs[i]].on}`);
+                        setPowerWarning(`#${id} .on`, true, operating, global.interstellar[structs[i]].on);
+
                     }
                     else {
-                        $(`#${id} .on`).removeClass('warn');
-                        $(`#${id} .on`).prop('title',`ON`);
+                        setPowerWarning(`#${id} .on`, false);
+
                     }
                     used_support += operating;
                     int_on[structs[i]] = operating;
@@ -2787,10 +2800,10 @@ function fastLoop(){
             }
 
             if (global.eden.pillbox.staffed < p_on['pillbox'] * pillsize){
-                $(`#eden-pillbox .on`).addClass('warn');
+                setPowerWarning(`#eden-pillbox .on`, true);
             }
             else {
-                $(`#eden-pillbox .on`).removeClass('warn')
+                setPowerWarning(`#eden-pillbox .on`, false);
             }
         }
 
@@ -2815,7 +2828,7 @@ function fastLoop(){
             if (!global.settings.showGalactic){
                 global.settings.showGalactic = true;
                 global.settings.space.stargate = true;
-                renderSpace();
+                dirty.space = true;
             }
         }
         else {
@@ -2937,12 +2950,12 @@ function fastLoop(){
                         }
 
                         if (operating < num_on){
-                            $(`#${id} .on`).addClass('warn');
-                            $(`#${id} .on`).prop('title',`ON ${operating}/${num_on}`);
+                            setPowerWarning(`#${id} .on`, true, operating, num_on);
+
                         }
                         else {
-                            $(`#${id} .on`).removeClass('warn');
-                            $(`#${id} .on`).prop('title',`ON`);
+                            setPowerWarning(`#${id} .on`, false);
+
                         }
 
                         used_support += operating * operating_cost;
@@ -4297,29 +4310,29 @@ function fastLoop(){
                 if (global.tauceti.alien_space_station.decrypted >= (global.race['lone_survivor'] ? 1000000 : 250000000) && !global.tech['alien_data']){
                     global.tech['alien_data'] = 1;
                     messageQueue(loc('tau_gas2_alien_station_data1',[loc('tech_dist_womling')]),'success',false,['progress']);
-                    drawTech();
+                    dirty.tech = true;
                 }
                 else if (global.tauceti.alien_space_station.decrypted >= (global.race['lone_survivor'] ? 2000000 : 500000000) && global.tech['alien_data'] && global.tech.alien_data === 1){
                     global.tech.alien_data = 2;
                     global.race.tau_food_item = Math.rand(0,10);
                     messageQueue(loc('tau_gas2_alien_station_data2',[loc(`tau_gas2_alien_station_data2_r${global.race.tau_food_item || 0}`)]),'success',false,['progress']);
-                    drawTech();
+                    dirty.tech = true;
                 }
                 else if (global.tauceti.alien_space_station.decrypted >= (global.race['lone_survivor'] ? 3000000 : 750000000) && global.tech['alien_data'] && global.tech.alien_data === 2){
                     global.tech.alien_data = 3;
                     messageQueue(loc('tau_gas2_alien_station_data3'),'success',false,['progress']);
-                    drawTech();
+                    dirty.tech = true;
                 }
                 else if (global.tauceti.alien_space_station.decrypted >= (global.race['lone_survivor'] ? 4800000 : 1200000000) && global.tech['alien_data'] && global.tech.alien_data === 3){
                     global.tech.alien_data = 4;
                     global.race.tau_junk_item = Math.rand(0,10);
                     messageQueue(loc('tau_gas2_alien_station_data4',[loc(`tau_gas2_alien_station_data4_r${global.race.tau_junk_item || 0}`)]),'success',false,['progress']);
-                    drawTech();
+                    dirty.tech = true;
                 }
                 else if (global.tauceti.alien_space_station.decrypted >= (global.race['lone_survivor'] ? 6000000 : 1500000000) && global.tech['alien_data'] && global.tech.alien_data === 4){
                     global.tech.alien_data = 5;
                     messageQueue(loc('tau_gas2_alien_station_data5'),'success',false,['progress']);
-                    drawTech();
+                    dirty.tech = true;
                 }
                 else if (global.tauceti.alien_space_station.decrypted >= (global.race['lone_survivor'] ? 10000000 : 2500000000) && global.tech['alien_data'] && global.tech.alien_data === 5){
                     global.tech.alien_data = 6;
@@ -4333,7 +4346,7 @@ function fastLoop(){
                     else {
                         messageQueue(loc('tau_gas2_alien_station_data6'),'success',false,['progress']);
                     }
-                    drawTech();
+                    dirty.tech = true;
                 }
             }
         }
@@ -5372,14 +5385,14 @@ function fastLoop(){
 
             if (global.resource.Cipher.display && global.tech['outer'] && global.tech.outer === 2){
                 global.tech.outer = 3;
-                drawTech();
+                dirty.tech = true;
             }
         }
 
         if (!global.tech['isolation'] && global.space['digsite'] && global.space.digsite.count === 100){
             if (!global.tech['dig_control']){
                 global.tech['dig_control'] = 1;
-                drawTech();
+                dirty.tech = true;
             }
 
             let synd = syndicate('spc_eris');
@@ -5401,7 +5414,7 @@ function fastLoop(){
         
         if(global.portal['oven_complete'] && p_on['oven_complete'] && !global.tech['dish_reset'] && global.portal['devilish_dish'].done >= 100){
             global.tech['dish_reset'] = 1;
-            drawTech();
+            dirty.tech = true;
         }
 
         if (global.tech['isolation'] && global.tauceti['alien_outpost'] && p_on['alien_outpost']){
@@ -5988,8 +6001,8 @@ function fastLoop(){
                 if (global.eden.palace.energy <= 0){
                     global.eden.palace.energy = 0;
                     global.tech['palace'] = 1;
-                    drawTech();
-                    renderEdenic();
+                    dirty.tech = true;
+                    dirty.edenic = true;
                 }
             }
         }
@@ -7919,31 +7932,16 @@ function fastLoop(){
         // Power grid state
         global.city.power_total = -max_power;
         global.city.power = power_grid;
-        if (global.city.power < 0){
-            $('#powerMeter').addClass('low');
-            $('#powerMeter').removeClass('neutral');
-            $('#powerMeter').removeClass('high');
-        }
-        else if (global.city.power > 0){
-            $('#powerMeter').removeClass('low');
-            $('#powerMeter').removeClass('neutral');
-            $('#powerMeter').addClass('high');
-        }
-        else {
-            $('#powerMeter').removeClass('low');
-            $('#powerMeter').addClass('neutral');
-            $('#powerMeter').removeClass('high');
-        }
 
         if (p_on['world_controller'] && p_on['world_controller'] > 0){
             if (global.tech['wsc'] === 0){
                 global.tech['wsc'] = 1;
-                drawTech();
+                dirty.tech = true;
             }
         }
         else if (global.tech['wsc'] !== 0){
             global.tech['wsc'] = 0;
-            drawTech();
+            dirty.tech = true;
         }
 
         if (global.tech['portal'] >= 2){
@@ -7999,15 +7997,9 @@ function fastLoop(){
 
         if (firstRun){
             if (global.tech['piracy']){
-                renderSpace();
+                dirty.space = true;
             }
-            if (global.settings.portal.ruins){
-                vBind({el: `#srprtl_ruins`},'update');
-                vBind({el: `#foundry`},'update');
-            }
-            if (global.settings.portal.gate){
-                vBind({el: `#srprtl_gate`},'update');
-            }
+            dirty.firstRun = true;
         }
     }
 
@@ -8066,9 +8058,6 @@ function fastLoop(){
     // carport repair
     if (global.portal['carport']){
         if (global.portal.carport.damaged > 0){
-            if (!$('#portal-carport .count').hasClass('has-text-alert')){
-                $('#portal-carport .count').addClass('has-text-alert');
-            }
             global.portal.carport.repair++;
             if (global.portal.carport.repair >= actions.portal.prtl_fortress.carport.repair()){
                 global.portal.carport.repair = 0;
@@ -8076,11 +8065,6 @@ function fastLoop(){
             }
             //limit carport damage to account for removing high population
             global.portal.carport.damaged = Math.min(global.portal.carport.damaged, jobScale(global.portal.carport.count));
-        }
-        else {
-            if ($('#portal-carport .count').hasClass('has-text-alert')){
-                $('#portal-carport .count').removeClass('has-text-alert');
-            }
         }
     }
 
@@ -8097,6 +8081,84 @@ function fastLoop(){
         diffCalc(global.race.species,webWorker.mt);
     }
 
+    firstRun = false;
+}
+
+// ── Render pass: flush dirty flags and apply DOM updates ──
+function fastLoopRender(){
+    // Craft display
+    if (!global.race['no_craft']){
+        $('.craft').each(function(e){
+            if (typeof $(this).data('val') === 'number'){
+                $(this).html(sizeApproximation($(this).data('val') * keyMultiplier(),1));
+            }
+        });
+    }
+
+    // Power/support warnings
+    for (const [selector, state] of Object.entries(powerWarnings)){
+        const el = $(selector);
+        if (state.warn){
+            el.addClass('warn');
+            if (state.current !== undefined && state.max !== undefined){
+                el.prop('title', `ON ${state.current}/${state.max}`);
+            }
+            else if (state.current !== undefined){
+                el.prop('title', `ON ${state.current}`);
+            }
+        }
+        else {
+            el.removeClass('warn');
+            el.prop('title', `ON`);
+        }
+    }
+    // Clear for next tick
+    for (const key of Object.keys(powerWarnings)){
+        delete powerWarnings[key];
+    }
+
+    // Power meter indicator
+    if (global.race.species !== 'protoplasm'){
+        const pm = $('#powerMeter');
+        if (global.city.power < 0){
+            pm.addClass('low').removeClass('neutral').removeClass('high');
+        }
+        else if (global.city.power > 0){
+            pm.removeClass('low').removeClass('neutral').addClass('high');
+        }
+        else {
+            pm.removeClass('low').addClass('neutral').removeClass('high');
+        }
+    }
+
+    // Carport damage indicator
+    if (global.portal['carport']){
+        const el = $('#portal-carport .count');
+        if (global.portal.carport.damaged > 0){
+            if (!el.hasClass('has-text-alert')){
+                el.addClass('has-text-alert');
+            }
+        }
+        else {
+            if (el.hasClass('has-text-alert')){
+                el.removeClass('has-text-alert');
+            }
+        }
+    }
+
+    // firstRun-only Vue updates
+    if (dirty.firstRun){
+        if (global.settings.portal.ruins){
+            vBind({el: `#srprtl_ruins`},'update');
+            vBind({el: `#foundry`},'update');
+        }
+        if (global.settings.portal.gate){
+            vBind({el: `#srprtl_gate`},'update');
+        }
+        dirty.firstRun = false;
+    }
+
+    // Debug
     if (global.settings.expose){
         if (!window['evolve']){
             enableDebug();
@@ -8104,9 +8166,10 @@ function fastLoop(){
         updateDebugData();
     }
 
+    // Event binding (Easter, Halloween)
     let easter = eventActive('easter');
     if (easter.active){
-        for (i=1; i<=18; i++){
+        for (let i=1; i<=18; i++){
             if ($(`#egg${i}`).length > 0 && !$(`#egg${i}`).hasClass('binded')){
                 easterEggBind(i);
                 $(`#egg${i}`).addClass('binded');
@@ -8116,13 +8179,13 @@ function fastLoop(){
 
     let halloween = eventActive('halloween');
     if (halloween.active){
-        for (i=1; i<=8; i++){
+        for (let i=1; i<=8; i++){
             if ($(`#treat${i}`).length > 0 && !$(`#treat${i}`).hasClass('binded')){
                 trickOrTreatBind(i,false);
                 $(`#treat${i}`).addClass('binded');
             }
         }
-        for (i=1; i<=8; i++){
+        for (let i=1; i<=8; i++){
             if ($(`#trick${i}`).length > 0 && !$(`#trick${i}`).hasClass('binded')){
                 trickOrTreatBind(i,true);
                 $(`#trick${i}`).addClass('binded');
@@ -8130,7 +8193,12 @@ function fastLoop(){
         }
     }
 
-    firstRun = false;
+    // Flush dirty draw flags
+    if (dirty.evolution){ drawEvolution(); dirty.evolution = false; }
+    if (dirty.tech){ drawTech(); dirty.tech = false; }
+    if (dirty.space){ renderSpace(); dirty.space = false; }
+    if (dirty.edenic){ renderEdenic(); dirty.edenic = false; }
+    if (dirty.city){ drawCity(); dirty.city = false; }
 }
 
 function midLoop(){
@@ -8156,35 +8224,7 @@ function midLoop(){
         global.resource.RNA.max = caps['RNA'];
         global.resource.DNA.max = caps['DNA'];
 
-        Object.keys(actions.evolution).forEach(function (action){
-            if (actions.evolution[action] && actions.evolution[action].cost){
-                let c_action = actions.evolution[action];
-                let element = $('#'+c_action.id);
-                if (element.length > 0){
-                    if (checkAffordable(c_action,true)){
-                        if (element.hasClass('cnam')){
-                            element.removeClass('cnam');
-                        }
-                        if (checkAffordable(c_action)){
-                            if (element.hasClass('cna')){
-                                element.removeClass('cna');
-                            }
-                        }
-                        else if (!element.hasClass('cna')){
-                            element.addClass('cna');
-                        }
-                    }
-                    else {
-                        if (!element.hasClass('cnam')){
-                            element.addClass('cnam');
-                        }
-                        if (!element.hasClass('cna')){
-                            element.addClass('cna');
-                        }
-                    }
-                }
-            }
-        });
+        // Evolution affordability — rendered in midLoopRender
     }
     else {
         // Resource caps
@@ -10205,7 +10245,7 @@ function midLoop(){
                         global.tech.womling_tech++;
                         global.tauceti.womling_lab.tech = 0;
                         messageQueue(loc('tau_red_womling_advancement',[global.tech.womling_tech]),'advanced',false,['progress']);
-                        drawTech();
+                        dirty.tech = true;
                     }
                 }
             }
@@ -10365,14 +10405,7 @@ function midLoop(){
             else if (global.resource[res].amount < 0){
                 //global.resource[res].amount = 0;
             }
-            if (global.resource[res].amount >= global.resource[res].max * 0.99){
-                if (!$(`#res${res} .count`).hasClass('has-text-warning')){
-                    $(`#res${res} .count`).addClass('has-text-warning');
-                }
-            }
-            else if ($(`#res${res} .count`).hasClass('has-text-warning')){
-                $(`#res${res} .count`).removeClass('has-text-warning');
-            }
+            // Resource capacity warning — rendered in midLoopRender
         });
 
         let unlock_servants = false;
@@ -10597,7 +10630,7 @@ function midLoop(){
                             global.civic.foreign[`gov${i}`].anx = true;
                             messageQueue(loc('civics_spy_annex_success',[govTitle(i)]),'success',false,['spy']);
                             if (drawTechs){
-                                drawTech();
+                                dirty.tech = true;
                             }
                             break;
                         case 'purchase':
@@ -10606,7 +10639,7 @@ function midLoop(){
                             global.civic.foreign[`gov${i}`].buy = true;
                             messageQueue(loc('civics_spy_purchase_success',[govTitle(i)]),'success',false,['spy']);
                             if (drawTechsAlt){
-                                drawTech();
+                                dirty.tech = true;
                             }
                             break;
                     }
@@ -10680,30 +10713,7 @@ function midLoop(){
         cityList.forEach(function (action){
             if (actions.city[action] && actions.city[action].cost){
                 let c_action = actions.city[action];
-                let element = $('#'+c_action.id);
-                if (element.length > 0){
-                    if (checkAffordable(c_action,true)){
-                        if (element.hasClass('cnam')){
-                            element.removeClass('cnam');
-                        }
-                        if (checkAffordable(c_action)){
-                            if (element.hasClass('cna')){
-                                element.removeClass('cna');
-                            }
-                        }
-                        else if (!element.hasClass('cna')){
-                            element.addClass('cna');
-                        }
-                    }
-                    else {
-                        if (!element.hasClass('cnam')){
-                            element.addClass('cnam');
-                        }
-                        if (!element.hasClass('cna')){
-                            element.addClass('cna');
-                        }
-                    }
-                }
+                // Affordability classes — rendered in midLoopRender
                 if (global.city[action]){
                     let tc = timeCheck(c_action,false,true);
                     global.city[action]['time'] = timeFormat(tc.t);
@@ -10712,35 +10722,7 @@ function midLoop(){
             }
         });
 
-        Object.keys(actions.tech).forEach(function (action){
-            if (actions.tech[action] && actions.tech[action].cost){
-                let c_action = actions.tech[action];
-                let element = $('#'+c_action.id);
-                if (element.length > 0){
-                    if (checkAffordable(c_action,true)){
-                        if (element.hasClass('cnam')){
-                            element.removeClass('cnam');
-                        }
-                        if (checkAffordable(c_action)){
-                            if (element.hasClass('cna')){
-                                element.removeClass('cna');
-                            }
-                        }
-                        else if (!element.hasClass('cna')){
-                            element.addClass('cna');
-                        }
-                    }
-                    else {
-                        if (!element.hasClass('cnam')){
-                            element.addClass('cnam');
-                        }
-                        if (!element.hasClass('cna')){
-                            element.addClass('cna');
-                        }
-                    }
-                }
-            }
-        });
+        // Tech affordability classes — rendered in midLoopRender
 
         let spc_locations = ['space','interstellar','galaxy','portal','tauceti','eden'];
         for (let i=0; i<spc_locations.length; i++){
@@ -10750,30 +10732,7 @@ function midLoop(){
                     let s_region = actions[location][region][action] && actions[location][region][action].hasOwnProperty('region') ? actions[location][region][action].region : location;
                     if ((global[s_region][action] || actions[location][region][action].grant) && actions[location][region][action] && actions[location][region][action].cost){
                         let c_action = actions[location][region][action];
-                        let element = $('#'+c_action.id);
-                        if (element.length > 0){
-                            if (checkAffordable(c_action,true)){
-                                if (element.hasClass('cnam')){
-                                    element.removeClass('cnam');
-                                }
-                                if (checkAffordable(c_action)){
-                                    if (element.hasClass('cna')){
-                                        element.removeClass('cna');
-                                    }
-                                }
-                                else if (!element.hasClass('cna')){
-                                    element.addClass('cna');
-                                }
-                            }
-                            else {
-                                if (!element.hasClass('cnam')){
-                                    element.addClass('cnam');
-                                }
-                                if (!element.hasClass('cna')){
-                                    element.addClass('cna');
-                                }
-                            }
-                        }
+                        // Affordability classes — rendered in midLoopRender
                         if (global[s_region][action]){
                             global[s_region][action]['time'] = timeFormat(timeCheck(c_action));
                         }
@@ -10838,7 +10797,7 @@ function midLoop(){
                     messageQueue(loc('gene_therapy',[loc('trait_' + trait + '_name'),gene,plasma,plasmid_type]),'success',false,['progress']);
                 }
                 arpa('Genetics');
-                drawTech();
+                dirty.tech = true;
             }
         }
 
@@ -10861,7 +10820,7 @@ function midLoop(){
 
         if (global.tech['foundry'] === 3 && (global.race['kindling_kindred'] || global.race['smoldering'])){
             global.tech['foundry'] = 4;
-            drawTech();
+            dirty.tech = true;
         }
 
         if (global.race['kindling_kindred'] || global.race['smoldering']){
@@ -10890,7 +10849,7 @@ function midLoop(){
                 global.tech['asteroid'] = 4;
                 global.resource.Elerium.display = true;
                 modRes('Elerium',1,true);
-                drawTech();
+                dirty.tech = true;
                 messageQueue(loc('discover_elerium'),'info',false,['progress']);
             }
         }
@@ -10904,7 +10863,7 @@ function midLoop(){
                 initStruct(actions.space.spc_gas_moon.oil_extractor);
                 global.tech['gas_moon'] = 2;
                 messageQueue(loc('discover_oil',[planetName().gas_moon]),'info',false,['progress']);
-                renderSpace();
+                dirty.space = true;
             }
         }
 
@@ -10917,7 +10876,7 @@ function midLoop(){
             if (global.portal.hasOwnProperty('spire') && global.portal.spire.count >= 50 && !global.tech['edenic'] && Object.keys(global.pillars).length >= 10){
                 messageQueue(loc('eden_purify_well_msg',[50]),'info',false,['progress']);
                 global.tech['edenic'] = 1;
-                drawTech();
+                dirty.tech = true;
             }
 
             let progress = 0;
@@ -10955,7 +10914,7 @@ function midLoop(){
                 global.tech.waygate = 3;
                 global.resource.Demonic_Essence.display = true;
                 global.resource.Demonic_Essence.amount = 1;
-                drawTech();
+                dirty.tech = true;
             }
             if (global.portal.spire.progress >= 100){
                 global.portal.spire.progress = 0;
@@ -10969,7 +10928,7 @@ function midLoop(){
                 arpa('Blood');
                 if (!global.tech.hasOwnProperty('b_stone')){
                     global.tech['b_stone'] = 1;
-                    drawTech();
+                    dirty.tech = true;
                 }
 
                 messageQueue(
@@ -10979,7 +10938,7 @@ function midLoop(){
                 global.portal.spire.count++;
                 if (global.portal.spire.count > 10 && global.tech['hell_spire'] && global.tech.hell_spire < 10){
                     global.tech['hell_spire'] = 10;
-                    drawTech();
+                    dirty.tech = true;
                 }
 
                 let affix = universeAffix();
@@ -11027,7 +10986,7 @@ function midLoop(){
                 if(global.portal['devilish_dish'].done >= 0.05 && global.tech['dish'] === 3){
                     messageQueue(loc('dish_progress'),'info',false,['progress']);
                     global.tech['dish'] = 4;
-                    drawTech();
+                    dirty.tech = true;
                 }
             }
             global.portal['devilish_dish'].time = progress === 0 ? timeFormat(-1) : timeFormat((100 - global.portal['devilish_dish'].done) / progress);
@@ -11035,7 +10994,7 @@ function midLoop(){
 
         if (global.tech['asphodel'] && global.tech.asphodel === 4 && Math.rand(0,25) === 0){
             global.tech['asphodel'] = 5;
-            drawTech();
+            dirty.tech = true;
             messageQueue(loc('eden_asphodel_hostile'),'info',false,['progress']);
         }
 
@@ -11056,9 +11015,7 @@ function midLoop(){
                 global.city.s_alter.harvest--;
             }
 
-            if ($(`#popper[data-id="city-s_alter"]`).length > 0){
-                updateDesc(actions.city.s_alter,'city','s_alter');
-            }
+            // Popper update for s_alter — rendered in midLoopRender
         }
 
         if (global.race['casting']){
@@ -11169,9 +11126,7 @@ function midLoop(){
             buildGene(blockGeneBuffer);
         }
 
-        if (p_on['soul_forge']){
-            vBind({el: `#fort`},'update');
-        }
+        // Fort vBind update — rendered in midLoopRender
 
         checkAchievements();
     }
@@ -11417,111 +11372,7 @@ function midLoop(){
 
     resourceAlt();
 
-    $(`.costList`).each(function (){
-        $(this).children().each(function (){
-            let elm = $(this);
-            this.className.split(/\s+/).forEach(function(cls){
-                if (cls.startsWith(`res-`)){
-                    let res = cls.split(`-`)[1];
-                    if (global.resource.hasOwnProperty(res)){
-                        let res_val = elm.attr(`data-${res}`);
-                        let fail_max = global.resource[res].max >= 0 && res_val > global.resource[res].max ? true : false;
-                        let avail = elm.attr(`data-ok`) ? elm.attr(`data-ok`) : 'has-text-dark';
-                        if (global.resource[res].amount + global.resource[res].diff < res_val || fail_max){
-                            if (elm.hasClass(avail)){
-                                elm.removeClass(avail);
-                                elm.addClass('has-text-danger');
-                            }
-                        }
-                        else if (elm.hasClass('has-text-danger') || elm.hasClass('has-text-alert')){
-                            elm.removeClass('has-text-danger');
-                            elm.addClass(avail);
-                        }
-                    }
-                }
-            });
-        });
-    });
-
-    {
-        let msgHeight = $(`#msgQueue`).height();
-        let buildHeight = $(`#buildQueue`).height();
-        let totHeight = $(`.leftColumn`).height();
-        let rem = $(`#topBar`).height();
-        let min = rem * 5;
-        let max = totHeight - (5 * rem);
-
-        if (global.settings.q_resize !== 'manual') {
-            const buildQueueElement = $(`#buildQueue`).get(0);
-            if (['auto', 'grow'].includes(global.settings.q_resize) &&
-                buildQueueElement.scrollHeight > buildQueueElement.clientHeight
-            ) {
-                // The build queue has a scroll-bar.
-                buildHeight += buildQueueElement.scrollHeight - buildQueueElement.clientHeight;
-            } else if (['auto', 'shrink'].includes(global.settings.q_resize)) {
-                let minHeight = rem;
-                buildQueueElement.childNodes.forEach(function (e) {
-                    minHeight += e.clientHeight || 0;
-                });
-
-                if (buildQueueElement.clientHeight > minHeight) {
-                    // The build queue is larger than it needs to be.
-                    buildHeight = Math.min(buildHeight, minHeight);
-                }
-            }
-        }
-
-        if (msgHeight < min) {
-            if (buildHeight > min){
-                buildHeight -= (min - msgHeight);
-            }
-            msgHeight = min;
-        }
-        if (buildHeight < min) {
-            buildHeight = min;
-        }
-        if (msgHeight + buildHeight > max){
-            msgHeight -= (msgHeight + buildHeight) - max;
-            if (msgHeight < rem) {
-                msgHeight = rem;
-            }
-            if (msgHeight + buildHeight > max){
-                buildHeight -= (msgHeight + buildHeight) - max;
-                if (buildHeight < rem) {
-                    buildHeight = rem;
-                }
-            }
-        }
-
-        if ($(`#msgQueue`).hasClass('right')){
-            $(`#resources`).height(`calc(100vh - 5rem)`);
-            if ($(`#msgQueue`).hasClass('vscroll')){
-                $(`#msgQueue`).removeClass('vscroll');
-                $(`#msgQueue`).addClass('sticky');
-            }
-            msgHeight = `calc(100vh - ${buildHeight}px - 6rem)`;
-        }
-        else {
-            $(`#resources`).height(`calc(100vh - 5rem - ${buildHeight}px - ${msgHeight}px)`);
-            if ($(`#msgQueue`).hasClass('sticky')){
-                $(`#msgQueue`).removeClass('sticky');
-                $(`#msgQueue`).addClass('vscroll');
-                msgHeight = 100;
-            }
-        }
-
-        $(`#msgQueue`).height(msgHeight);
-        $(`#buildQueue`).height(buildHeight);
-        global.settings.msgQueueHeight = msgHeight;
-        global.settings.buildQueueHeight = buildHeight;
-    }
-
-    if ($(`#mechList`).length > 0){
-        $(`#mechList`).css('height',`calc(100vh - 11.5rem - ${$(`#mechAssembly`).height()}px)`);
-    }
-    if ($(`#shipList`).length > 0){
-        $(`#shipList`).css('height',`calc(100vh - 11.5rem - ${$(`#shipPlans`).height()}px)`);
-    }
+    // costList, layout, mechList, shipList — rendered in midLoopRender
 }
 
 let sythMap = {
@@ -12023,7 +11874,7 @@ function longLoop(){
                 global.race['decayed'] = global.stats.days;
                 global.tech['decay'] = 1;
                 messageQueue(loc('deterioration5',[flib('name')]),'danger',false,['progress']);
-                drawTech();
+                dirty.tech = true;
             }
         }
 
@@ -12047,18 +11898,18 @@ function longLoop(){
         if (!global.tech['genesis'] && global.race.deterioration >= 1 && global.tech['high_tech'] && global.tech['high_tech'] >= 10){
             global.tech['genesis'] = 1;
             messageQueue(loc('genesis'),'special',false,['progress']);
-            drawTech();
+            dirty.tech = true;
         }
 
         if (global.settings['cLabels'] !== cLabels){
-            drawCity();
+            dirty.city = true;
         }
 
         if (global.tech['xeno'] && global.tech['xeno'] >= 5 && !global.tech['piracy']){
             if (Math.rand(0,5) === 0){
                 global.tech['piracy'] = 1;
                 messageQueue(loc('galaxy_piracy_msg',[races[global.galaxy.alien2.id].name]),'info',false,['progress']);
-                renderSpace();
+                dirty.space = true;
             }
         }
 
@@ -12176,7 +12027,7 @@ function longLoop(){
                         global.tech.eris_scan = 100;
                         global.tech.eris = 2;
                         messageQueue(loc('space_eris_scan',[planetName().eris]),'info',false,['progress']);
-                        renderSpace();
+                        dirty.space = true;
                     }
                 }
                 if (global.tech.hasOwnProperty('tauceti') && global.tech.tauceti >= 1 && tScan >= 1){
@@ -12213,9 +12064,8 @@ function longLoop(){
                     });
                 }
 
-                if ($('#mapCanvas').length > 0) {
-                    drawMap();
-                }
+                // Map rendering — handled in longLoopRender
+                dirty.map = true;
             }
 
             if (global.tech['triton'] && global.tech.triton >= 3){
@@ -12312,7 +12162,7 @@ function longLoop(){
                 global.resource.Steel.display = true;
                 global.tech.smelting = 2;
                 defineIndustry();
-                drawTech();
+                dirty.tech = true;
             }
             if (global.resource.Knowledge.max >= (actions.tech.electricity.cost.Knowledge() * know_adjust) && global.tech['high_tech'] && global.tech.high_tech === 1){
                 messageQueue(loc(tech_source,[loc('tech_electricity')]),'info',false,['progress']);
@@ -12322,8 +12172,8 @@ function longLoop(){
                 initStruct(actions.city.coal_power);
                 global.settings.showPowerGrid = true;
                 setPowerGrid();
-                drawTech();
-                drawCity();
+                dirty.tech = true;
+                dirty.city = true;
             }
             if (global.resource.Knowledge.max >= (actions.tech.electronics.cost.Knowledge() * know_adjust) && global.tech['high_tech'] && global.tech.high_tech === 3 && global.tech['titanium']){
                 messageQueue(loc(tech_source,[loc('tech_electronics')]),'info',false,['progress']);
@@ -12333,15 +12183,15 @@ function longLoop(){
                     initStruct(actions.city.casino);
                     initStruct(actions.space.spc_hell.spc_casino);
                 }
-                drawTech();
-                drawCity();
+                dirty.tech = true;
+                dirty.city = true;
             }
             if (global.resource.Knowledge.max >= (actions.tech.fission.cost.Knowledge() * know_adjust) && global.tech['high_tech'] && global.tech.high_tech === 4 && global.tech['uranium']){
                 messageQueue(loc(tech_source,[loc('tech_fission')]),'info',false,['progress']);
                 global.tech.high_tech = 5;
                 initStruct(actions.city.fission_power);
-                drawTech();
-                drawCity();
+                dirty.tech = true;
+                dirty.city = true;
             }
             if (global.resource.Knowledge.max >= (actions.tech.rocketry.cost.Knowledge() * know_adjust) && global.tech['high_tech'] && global.tech.high_tech === 6){
                 messageQueue(loc(tech_source,[loc('tech_rocketry')]),'info',false,['progress']);
@@ -12351,20 +12201,20 @@ function longLoop(){
                     messageQueue(loc(`civics_rival_unlocked`,[govTitle(3)]),'info',false,['progress','combat']);
                 }
                 arpa('Physics');
-                drawTech();
-                drawCity();
+                dirty.tech = true;
+                dirty.city = true;
             }
             if (global.resource.Knowledge.max >= (actions.tech.artifical_intelligence.cost.Knowledge() * know_adjust) && global.tech['high_tech'] && global.tech.high_tech === 9){
                 messageQueue(loc(tech_source,[loc('tech_artificial_intelligence')]),'info',false,['progress']);
                 global.tech.high_tech = 10;
-                drawTech();
-                drawCity();
+                dirty.tech = true;
+                dirty.city = true;
             }
             if (global.resource.Knowledge.max >= (actions.tech.quantum_computing.cost.Knowledge() * know_adjust) && global.tech['high_tech'] && global.tech.high_tech === 10 && global.tech['nano']){
                 messageQueue(loc(tech_source,[loc('tech_quantum_computing')]),'info',false,['progress']);
                 global.tech.high_tech = 11;
-                drawTech();
-                drawCity();
+                dirty.tech = true;
+                dirty.city = true;
             }
             if (
                 global.resource.Knowledge.max >= (actions.tech[global.race['truepath'] ? 'virtual_reality_tp' : 'virtual_reality'].cost.Knowledge() * know_adjust) && global.tech['high_tech'] && global.tech.high_tech === 11 && global.tech['stanene']
@@ -12372,21 +12222,21 @@ function longLoop(){
                 ){
                 messageQueue(loc(tech_source,[loc('tech_virtual_reality')]),'info',false,['progress']);
                 global.tech.high_tech = 12;
-                drawTech();
-                drawCity();
+                dirty.tech = true;
+                dirty.city = true;
             }
             if (global.race['truepath']){
                 if (global.resource.Knowledge.max >= (actions.tech.quantium.cost.Knowledge() * know_adjust) && global.tech['supercollider'] && global.tech.supercollider >= 10 && global.tech['enceladus'] && global.tech.enceladus >= 3 && !global.tech['quantium']){
                     messageQueue(loc(tech_source,[loc('tech_quantium')]),'info',false,['progress']);
                     global.tech['quantium'] = 1;
                     global.resource.Quantium.display = true;
-                    drawTech();
+                    dirty.tech = true;
                     loadFoundry();
                 }
                 if (global.resource.Knowledge.max >= (actions.tech.alien_biotech.cost.Knowledge() * know_adjust) && global.tech['genetics'] && global.tech.genetics >= 8 && global.tech['kuiper'] && !global.tech['biotech']){
                     messageQueue(loc(tech_source,[loc('tech_alien_biotech')]),'info',false,['progress']);
                     global.tech['biotech'] = 1;
-                    drawTech();
+                    dirty.tech = true;
                 }
             }
             else {
@@ -12395,40 +12245,40 @@ function longLoop(){
                     global.tech.high_tech = 14;
                     global.settings.space.neutron = true;
                     global.settings.space.blackhole = true;
-                    drawTech();
-                    drawCity();
+                    dirty.tech = true;
+                    dirty.city = true;
                 }
                 if (global.resource.Knowledge.max >= (actions.tech.ai_core.cost.Knowledge() * know_adjust) && global.tech['high_tech'] && global.tech.high_tech === 14 && global.tech['blackhole'] && global.tech['blackhole'] >= 3){
                     messageQueue(loc(tech_source,[loc('tech_ai_core')]),'info',false,['progress']);
                     global.tech.high_tech = 15;
                     initStruct(actions.interstellar.int_neutron.citadel);
-                    drawTech();
-                    drawCity();
+                    dirty.tech = true;
+                    dirty.city = true;
                 }
                 if (global.resource.Knowledge.max >= (actions.tech.graphene_processing.cost.Knowledge() * know_adjust) && global.tech['ai_core'] && global.tech.ai_core === 2){
                     messageQueue(loc(tech_source,[loc('tech_graphene_processing')]),'info',false,['progress']);
                     global.tech.ai_core = 3;
-                    drawTech();
+                    dirty.tech = true;
                 }
                 if (global.resource.Knowledge.max >= (actions.tech.nanoweave.cost.Knowledge() * know_adjust) && global.tech['science'] && global.tech.science >= 18 && !global.tech['nanoweave']){
                     messageQueue(loc(tech_source,[loc('tech_nanoweave')]),'info',false,['progress']);
                     global.tech['nanoweave'] = 1;
                     global.resource.Nanoweave.display = true;
-                    drawTech();
+                    dirty.tech = true;
                     loadFoundry();
                 }
                 if (global.resource.Knowledge.max >= (actions.tech.orichalcum_analysis.cost.Knowledge() * know_adjust) && global.tech['high_tech'] && global.tech.high_tech === 16 && global.tech['chthonian'] && global.tech['chthonian'] >= 3){
                     messageQueue(loc(tech_source,[loc('tech_orichalcum_analysis')]),'info',false,['progress']);
                     messageQueue(loc('tech_orichalcum_analysis_result'),'info',false,['progress']);
                     global.tech.high_tech = 17;
-                    drawTech();
-                    drawCity();
+                    dirty.tech = true;
+                    dirty.city = true;
                 }
                 if (global.resource.Knowledge.max >= (actions.tech.infernium_fuel.cost.Knowledge() * know_adjust) && global.tech['smelting'] && global.tech.smelting === 7 && global.tech['hell_ruins'] && global.tech['hell_ruins'] >= 4){
                     messageQueue(loc(tech_source,[loc('tech_infernium_fuel')]),'info',false,['progress']);
                     global.tech.smelting = 8;
                     defineIndustry();
-                    drawTech();
+                    dirty.tech = true;
                 }
             }
         }
@@ -12444,38 +12294,38 @@ function longLoop(){
                 if (global.race['steelen']){
                     global.tech['smelting'] = 2;
                 }
-                drawTech();
-                drawCity();
+                dirty.tech = true;
+                dirty.city = true;
             }
             if (moldFathom >= 0.04 && global.resource.Knowledge.max >= (actions.tech.dynamite.cost.Knowledge() * know_adjust) && checkTechRequirements('dynamite',false) && global.tech['explosives'] && global.tech.explosives === 1){
                 messageQueue(loc(tech_source,[loc('tech_dynamite')]),'info',false,['progress']);
                 global.tech.explosives = 2;
-                drawTech();
+                dirty.tech = true;
             }
             if (moldFathom >= 0.08 && global.resource.Knowledge.max >= (actions.tech.portland_cement.cost.Knowledge() * know_adjust) && checkTechRequirements('portland_cement',false) && global.tech['cement'] && global.tech.cement === 3){
                 messageQueue(loc(tech_source,[loc('tech_portland_cement')]),'info',false,['progress']);
                 global.tech.cement = 4;
-                drawTech();
+                dirty.tech = true;
             }
             if (moldFathom >= 0.12 && global.resource.Knowledge.max >= (actions.tech.oxygen_converter.cost.Knowledge() * know_adjust) && checkTechRequirements('oxygen_converter',false) && global.tech['smelting'] && global.tech.smelting === 4){
                 messageQueue(loc(tech_source,[loc('tech_oxygen_converter')]),'info',false,['progress']);
                 global.tech.smelting = 5;
-                drawTech();
+                dirty.tech = true;
             }
             if (moldFathom >= 0.15 && global.resource.Knowledge.max >= (actions.tech.machinery.cost.Knowledge() * know_adjust) && checkTechRequirements('machinery',false) && global.tech['foundry'] && global.tech.foundry === 6){
                 messageQueue(loc(tech_source,[loc('tech_machinery')]),'info',false,['progress']);
                 global.tech.foundry = 7;
-                drawTech();
+                dirty.tech = true;
             }
             if (moldFathom >= 0.20 && global.resource.Knowledge.max >= (actions.tech.uranium_storage.cost.Knowledge() * know_adjust) && checkTechRequirements('uranium_storage',false) && global.tech['uranium'] && global.tech.uranium === 1){
                 messageQueue(loc(tech_source,[loc('tech_uranium_storage')]),'info',false,['progress']);
                 global.tech.uranium = 1;
-                drawTech();
+                dirty.tech = true;
             }
             if (moldFathom >= 0.25 && global.resource.Knowledge.max >= (actions.tech.synthetic_fur.cost.Knowledge() * know_adjust) && checkTechRequirements('synthetic_fur',false) && !global.tech['synthetic_fur']){
                 messageQueue(loc(tech_source,[actions.tech.synthetic_fur.title()]),'info',false,['progress']);
                 global.tech['synthetic_fur'] = 1;
-                drawTech();
+                dirty.tech = true;
             }
             if (moldFathom >= 0.35 && global.resource.Knowledge.max >= (actions.tech.rover.cost.Knowledge() * know_adjust) && checkTechRequirements('rover',false) && global.tech['space_explore'] && global.tech.space_explore === 1){
                 messageQueue(loc(tech_source,[loc('tech_rover')]),'info',false,['progress']);
@@ -12487,31 +12337,31 @@ function longLoop(){
                     support: 0,
                     s_max: 0
                 };
-                drawTech();
+                dirty.tech = true;
             }
             let late_tech_source = `trait_infiltrator_thrall_alt`;
             if (moldFathom >= 0.4 && global.resource.Knowledge.max >= (actions.tech.starcharts.cost.Knowledge() * know_adjust) && checkTechRequirements('starcharts',false) && global.tech['space_explore'] && global.tech.space_explore === 3){
                 messageQueue(loc(late_tech_source,[loc('tech_starcharts')]),'info',false,['progress']);
                 global.tech.space_explore = 4;
-                drawTech();
+                dirty.tech = true;
             }
             if (moldFathom >= 0.5 && global.resource.Knowledge.max >= (actions.tech.nano_tubes.cost.Knowledge() * know_adjust) && checkTechRequirements('nano_tubes',false) && !global.tech['nano']){
                 messageQueue(loc(late_tech_source,[loc('tech_nano_tubes')]),'info',false,['progress']);
                 global.tech['nano'] = 1;
                 global.resource.Nano_Tube.display = true;
-                drawTech();
+                dirty.tech = true;
             }
             if (global.race['truepath']){
                 if (moldFathom >= 0.65 && global.resource.Knowledge.max >= (actions.tech.stanene_tp.cost.Knowledge() * know_adjust) && checkTechRequirements('stanene_tp',false) && !global.tech['stanene']){
                     messageQueue(loc(late_tech_source,[loc('tech_stanene')]),'info',false,['progress']);
                     global.tech['stanene'] = 1;
                     global.resource.Stanene.display = true;
-                    drawTech();
+                    dirty.tech = true;
                 }
                 if (moldFathom >= 0.8 && global.resource.Knowledge.max >= (actions.tech.anitgrav_bunk.cost.Knowledge() * know_adjust) && checkTechRequirements('anitgrav_bunk',false) && global.tech['marines'] && global.tech.marines === 1){
                     messageQueue(loc(late_tech_source,[loc('tech_anitgrav_bunk')]),'info',false,['progress']);
                     global.tech.marines = 2;
-                    drawTech();
+                    dirty.tech = true;
                 }
             }
             else {
@@ -12519,22 +12369,22 @@ function longLoop(){
                     messageQueue(loc(late_tech_source,[loc('tech_stanene')]),'info',false,['progress']);
                     global.tech['stanene'] = 1;
                     global.resource.Stanene.display = true;
-                    drawTech();
+                    dirty.tech = true;
                 }
                 if (moldFathom >= 0.78 && global.resource.Knowledge.max >= (actions.tech.hydroponics.cost.Knowledge() * know_adjust) && checkTechRequirements('hydroponics',false) && global.tech['mars'] && global.tech.mars === 5){
                     messageQueue(loc(late_tech_source,[loc('tech_hydroponics')]),'info',false,['progress']);
                     global.tech.mars = 6;
-                    drawTech();
+                    dirty.tech = true;
                 }
                 if (moldFathom >= 0.92 && global.resource.Knowledge.max >= (actions.tech.orichalcum_panels.cost.Knowledge() * know_adjust) && checkTechRequirements('orichalcum_panels',false) && global.tech['swarm'] && global.tech.swarm === 5){
                     messageQueue(loc(late_tech_source,[loc('tech_orichalcum_panels')]),'info',false,['progress']);
                     global.tech.swarm = 6;
-                    drawTech();
+                    dirty.tech = true;
                 }
                 if (moldFathom >= 1 && global.resource.Knowledge.max >= (actions.tech.cybernetics.cost.Knowledge() * know_adjust) && checkTechRequirements('cybernetics',false) && global.tech['high_tech'] && global.tech.high_tech === 17){
                     messageQueue(loc(late_tech_source,[loc('tech_cybernetics')]),'info',false,['progress']);
                     global.tech.high_tech = 18;
-                    drawTech();
+                    dirty.tech = true;
                 }
             }
         }
@@ -12543,9 +12393,9 @@ function longLoop(){
             global.tech.tauceti = 4;
             global.resource.Materials.display = false;
             global.resource.Bolognium.display = true;
-            renderSpace();
+            dirty.space = true;
             renderTauCeti();
-            drawTech();
+            dirty.tech = true;
         }
 
         if (global.race['truepath'] && global.tech['tauceti'] && !global.race['lone_survivor']){
@@ -12572,7 +12422,7 @@ function longLoop(){
                         delete global.race['quarantine'];
                         delete global.race['qDays'];
                         messageQueue(loc('tau_plague5b',[races[global.race.species].home]),'info',false,['progress']);
-                        drawTech();
+                        dirty.tech = true;
                     }
                 }
                 else if (global.tech.plague === 3 && global.tech['disease'] && global.tech.disease >= 2 && Math.rand(0,50) === 0){
@@ -12651,12 +12501,12 @@ function longLoop(){
             if (!global.race.governor.config.hasOwnProperty('trash') || (global.race.governor.config.hasOwnProperty('trash') && !global.race.governor.config.trash['stab'])){
                 messageQueue(loc('interstellar_blackhole_unstable'),'danger',false,['progress']);
             }
-            drawTech();
+            dirty.tech = true;
         }
         else if (global.interstellar['stellar_engine'] && global.interstellar.stellar_engine.exotic >= 0.025){
             if (global.tech['whitehole'] && global.tech['stablized']){
                 delete global.tech['stablized'];
-                drawTech();
+                dirty.tech = true;
             }
         }
 
@@ -12672,13 +12522,13 @@ function longLoop(){
             global.civic.garrison.workers -= milPerShip;
             global.civic.garrison.crew -= milPerShip;
             messageQueue(loc('galaxy_encounter'),'info',false,['progress']);
-            drawTech();
+            dirty.tech = true;
         }
 
         if (global.galaxy['scavenger'] && global.tech['conflict'] && global.tech['conflict'] === 4 && gal_on['scavenger'] > 0 && Math.rand(0, 50) <= gal_on['scavenger']){
             global.tech['conflict'] = 5;
             messageQueue(loc('galaxy_scavenger_find'),'info',false,['progress']);
-            drawTech();
+            dirty.tech = true;
         }
 
         if (!global.tech['syndicate'] && !global.race['lone_survivor'] && global.tech['outer'] && Math.rand(0, 20) === 0){
@@ -12689,7 +12539,7 @@ function longLoop(){
 
         if (!global.tech['corrupted_ai'] && p_on['ai_core2'] && calcAIDrift() === 100){
             global.tech['corrupted_ai'] = 1;
-            drawTech();
+            dirty.tech = true;
         }
 
         if (global.arpa.sequence && global.arpa.sequence['auto'] && global.tech['genetics'] && global.tech['genetics'] === 7){
@@ -12697,9 +12547,7 @@ function longLoop(){
         }
 
         if (global.race['orbit_decay']){
-            if (!global.race['orbit_decayed']){
-                $(`#infoTimer`).html(`T-${global.race['orbit_decay'] - global.stats.days}`);
-            }
+            // infoTimer display — rendered in longLoopRender
             orbitDecayed();
         }
         if (global.race['truepath'] && global.city.ptrait.includes('kamikaze') && orbitLength() <= 10){
@@ -12799,16 +12647,7 @@ function longLoop(){
         delete global.tech['santa'];
     }
 
-    if (eventActive('fool')){
-        if (!$(`body`).hasClass('fool')){
-            $(`body`).addClass('fool');
-            drawAchieve({fool: true});
-        }
-    }
-    else if ($(`body`).hasClass('fool')){
-        $(`body`).removeClass('fool');
-        drawAchieve();
-    }
+    // April Fools display — rendered in longLoopRender
 
     const currentTimestamp = date.valueOf();
     // Checking if a substantial amount of time elapsed since last longLoop, indicating system suspension,
@@ -12854,6 +12693,323 @@ function longLoop(){
         gameLoop('stop');
         gameLoop('start');
     }
+}
+
+// ── midLoop render pass ──
+function midLoopRender(){
+    // Evolution affordability
+    if (global.race.species === 'protoplasm'){
+        Object.keys(actions.evolution).forEach(function (action){
+            if (actions.evolution[action] && actions.evolution[action].cost){
+                let c_action = actions.evolution[action];
+                let element = $('#'+c_action.id);
+                if (element.length > 0){
+                    if (checkAffordable(c_action,true)){
+                        if (element.hasClass('cnam')){
+                            element.removeClass('cnam');
+                        }
+                        if (checkAffordable(c_action)){
+                            if (element.hasClass('cna')){
+                                element.removeClass('cna');
+                            }
+                        }
+                        else if (!element.hasClass('cna')){
+                            element.addClass('cna');
+                        }
+                    }
+                    else {
+                        if (!element.hasClass('cnam')){
+                            element.addClass('cnam');
+                        }
+                        if (!element.hasClass('cna')){
+                            element.addClass('cna');
+                        }
+                    }
+                }
+            }
+        });
+    }
+    else {
+        // Resource capacity warnings
+        Object.keys(global.resource).forEach(function (res){
+            if (global.resource[res].display && global.resource[res].max >= 0){
+                if (global.resource[res].amount >= global.resource[res].max * 0.99){
+                    if (!$(`#res${res} .count`).hasClass('has-text-warning')){
+                        $(`#res${res} .count`).addClass('has-text-warning');
+                    }
+                }
+                else if ($(`#res${res} .count`).hasClass('has-text-warning')){
+                    $(`#res${res} .count`).removeClass('has-text-warning');
+                }
+            }
+        });
+
+        // City affordability
+        let cityList = Object.keys(global.city);
+        if (global.race['hooved']){
+            cityList.push('horseshoe');
+        }
+        if (global.tech['slaves'] && global.tech['slaves'] >= 2){
+            cityList.push('slave_market');
+        }
+        cityList.forEach(function (action){
+            if (actions.city[action] && actions.city[action].cost){
+                let c_action = actions.city[action];
+                let element = $('#'+c_action.id);
+                if (element.length > 0){
+                    if (checkAffordable(c_action,true)){
+                        if (element.hasClass('cnam')){
+                            element.removeClass('cnam');
+                        }
+                        if (checkAffordable(c_action)){
+                            if (element.hasClass('cna')){
+                                element.removeClass('cna');
+                            }
+                        }
+                        else if (!element.hasClass('cna')){
+                            element.addClass('cna');
+                        }
+                    }
+                    else {
+                        if (!element.hasClass('cnam')){
+                            element.addClass('cnam');
+                        }
+                        if (!element.hasClass('cna')){
+                            element.addClass('cna');
+                        }
+                    }
+                }
+            }
+        });
+
+        // Tech affordability
+        Object.keys(actions.tech).forEach(function (action){
+            if (actions.tech[action] && actions.tech[action].cost){
+                let c_action = actions.tech[action];
+                let element = $('#'+c_action.id);
+                if (element.length > 0){
+                    if (checkAffordable(c_action,true)){
+                        if (element.hasClass('cnam')){
+                            element.removeClass('cnam');
+                        }
+                        if (checkAffordable(c_action)){
+                            if (element.hasClass('cna')){
+                                element.removeClass('cna');
+                            }
+                        }
+                        else if (!element.hasClass('cna')){
+                            element.addClass('cna');
+                        }
+                    }
+                    else {
+                        if (!element.hasClass('cnam')){
+                            element.addClass('cnam');
+                        }
+                        if (!element.hasClass('cna')){
+                            element.addClass('cna');
+                        }
+                    }
+                }
+            }
+        });
+
+        // Space/interstellar/etc affordability
+        let spc_locations = ['space','interstellar','galaxy','portal','tauceti','eden'];
+        for (let i=0; i<spc_locations.length; i++){
+            let location = spc_locations[i];
+            Object.keys(actions[location]).forEach(function (region){
+                Object.keys(actions[location][region]).forEach(function (action){
+                    let s_region = actions[location][region][action] && actions[location][region][action].hasOwnProperty('region') ? actions[location][region][action].region : location;
+                    if ((global[s_region][action] || actions[location][region][action].grant) && actions[location][region][action] && actions[location][region][action].cost){
+                        let c_action = actions[location][region][action];
+                        let element = $('#'+c_action.id);
+                        if (element.length > 0){
+                            if (checkAffordable(c_action,true)){
+                                if (element.hasClass('cnam')){
+                                    element.removeClass('cnam');
+                                }
+                                if (checkAffordable(c_action)){
+                                    if (element.hasClass('cna')){
+                                        element.removeClass('cna');
+                                    }
+                                }
+                                else if (!element.hasClass('cna')){
+                                    element.addClass('cna');
+                                }
+                            }
+                            else {
+                                if (!element.hasClass('cnam')){
+                                    element.addClass('cnam');
+                                }
+                                if (!element.hasClass('cna')){
+                                    element.addClass('cna');
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Popper update for s_alter
+        if (global.city['s_alter'] && $(`#popper[data-id="city-s_alter"]`).length > 0){
+            updateDesc(actions.city.s_alter,'city','s_alter');
+        }
+
+        // Fort vBind update
+        if (p_on['soul_forge']){
+            vBind({el: `#fort`},'update');
+        }
+    }
+
+    // Cost list affordability colors
+    $(`.costList`).each(function (){
+        $(this).children().each(function (){
+            let elm = $(this);
+            this.className.split(/\s+/).forEach(function(cls){
+                if (cls.startsWith(`res-`)){
+                    let res = cls.split(`-`)[1];
+                    if (global.resource.hasOwnProperty(res)){
+                        let res_val = elm.attr(`data-${res}`);
+                        let fail_max = global.resource[res].max >= 0 && res_val > global.resource[res].max ? true : false;
+                        let avail = elm.attr(`data-ok`) ? elm.attr(`data-ok`) : 'has-text-dark';
+                        if (global.resource[res].amount + global.resource[res].diff < res_val || fail_max){
+                            if (elm.hasClass(avail)){
+                                elm.removeClass(avail);
+                                elm.addClass('has-text-danger');
+                            }
+                        }
+                        else if (elm.hasClass('has-text-danger') || elm.hasClass('has-text-alert')){
+                            elm.removeClass('has-text-danger');
+                            elm.addClass(avail);
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+    // Layout height calculations
+    {
+        let msgHeight = $(`#msgQueue`).height();
+        let buildHeight = $(`#buildQueue`).height();
+        let totHeight = $(`.leftColumn`).height();
+        let rem = $(`#topBar`).height();
+        let min = rem * 5;
+        let max = totHeight - (5 * rem);
+
+        if (global.settings.q_resize !== 'manual') {
+            const buildQueueElement = $(`#buildQueue`).get(0);
+            if (buildQueueElement){
+                if (['auto', 'grow'].includes(global.settings.q_resize) &&
+                    buildQueueElement.scrollHeight > buildQueueElement.clientHeight
+                ) {
+                    buildHeight += buildQueueElement.scrollHeight - buildQueueElement.clientHeight;
+                } else if (['auto', 'shrink'].includes(global.settings.q_resize)) {
+                    let minHeight = rem;
+                    buildQueueElement.childNodes.forEach(function (e) {
+                        minHeight += e.clientHeight || 0;
+                    });
+                    if (buildQueueElement.clientHeight > minHeight) {
+                        buildHeight = Math.min(buildHeight, minHeight);
+                    }
+                }
+            }
+        }
+
+        if (msgHeight < min) {
+            if (buildHeight > min){
+                buildHeight -= (min - msgHeight);
+            }
+            msgHeight = min;
+        }
+        if (buildHeight < min) {
+            buildHeight = min;
+        }
+        if (msgHeight + buildHeight > max){
+            msgHeight -= (msgHeight + buildHeight) - max;
+            if (msgHeight < rem) {
+                msgHeight = rem;
+            }
+            if (msgHeight + buildHeight > max){
+                buildHeight -= (msgHeight + buildHeight) - max;
+                if (buildHeight < rem) {
+                    buildHeight = rem;
+                }
+            }
+        }
+
+        if ($(`#msgQueue`).hasClass('right')){
+            $(`#resources`).height(`calc(100vh - 5rem)`);
+            if ($(`#msgQueue`).hasClass('vscroll')){
+                $(`#msgQueue`).removeClass('vscroll');
+                $(`#msgQueue`).addClass('sticky');
+            }
+            msgHeight = `calc(100vh - ${buildHeight}px - 6rem)`;
+        }
+        else {
+            $(`#resources`).height(`calc(100vh - 5rem - ${buildHeight}px - ${msgHeight}px)`);
+            if ($(`#msgQueue`).hasClass('sticky')){
+                $(`#msgQueue`).removeClass('sticky');
+                $(`#msgQueue`).addClass('vscroll');
+                msgHeight = 100;
+            }
+        }
+
+        $(`#msgQueue`).height(msgHeight);
+        $(`#buildQueue`).height(buildHeight);
+        global.settings.msgQueueHeight = msgHeight;
+        global.settings.buildQueueHeight = buildHeight;
+    }
+
+    if ($(`#mechList`).length > 0){
+        $(`#mechList`).css('height',`calc(100vh - 11.5rem - ${$(`#mechAssembly`).height()}px)`);
+    }
+    if ($(`#shipList`).length > 0){
+        $(`#shipList`).css('height',`calc(100vh - 11.5rem - ${$(`#shipPlans`).height()}px)`);
+    }
+
+    // Flush dirty draw flags
+    if (dirty.evolution){ drawEvolution(); dirty.evolution = false; }
+    if (dirty.tech){ drawTech(); dirty.tech = false; }
+    if (dirty.space){ renderSpace(); dirty.space = false; }
+    if (dirty.edenic){ renderEdenic(); dirty.edenic = false; }
+    if (dirty.city){ drawCity(); dirty.city = false; }
+}
+
+// ── longLoop render pass ──
+function longLoopRender(){
+    // Orbit decay timer
+    if (global.race['orbit_decay'] && !global.race['orbit_decayed']){
+        $(`#infoTimer`).html(`T-${global.race['orbit_decay'] - global.stats.days}`);
+    }
+
+    // April Fools
+    if (eventActive('fool')){
+        if (!$(`body`).hasClass('fool')){
+            $(`body`).addClass('fool');
+            drawAchieve({fool: true});
+        }
+    }
+    else if ($(`body`).hasClass('fool')){
+        $(`body`).removeClass('fool');
+        drawAchieve();
+    }
+
+    // Map rendering
+    if (dirty.map){
+        if ($('#mapCanvas').length > 0) {
+            drawMap();
+        }
+        dirty.map = false;
+    }
+
+    // Flush dirty draw flags
+    if (dirty.evolution){ drawEvolution(); dirty.evolution = false; }
+    if (dirty.tech){ drawTech(); dirty.tech = false; }
+    if (dirty.space){ renderSpace(); dirty.space = false; }
+    if (dirty.edenic){ renderEdenic(); dirty.edenic = false; }
+    if (dirty.city){ drawCity(); dirty.city = false; }
 }
 
 function buildGene(blockGeneBuffer = false){
