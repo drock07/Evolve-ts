@@ -12,6 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "jsx": "react-jsx",
     "types": ["jquery", "sortablejs", "lz-string", "crypto-js"]
   },
   "include": ["src/**/*"],

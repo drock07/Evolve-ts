@@ -2186,7 +2186,7 @@ export function craftingPopover(id,res,type,extra){
     });
 }
 
-function breakdownPopover(id,name,type){
+export function breakdownPopover(id,name,type){
     popover(`${id}`,function(){
         let bd = $(`<div class="resBreakdown"><div class="has-text-info">{{ res.name | namespace }}</div></div>`);
         if(type === 'p' && name === global.race.species){
