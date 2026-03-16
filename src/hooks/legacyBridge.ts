@@ -32,4 +32,7 @@ export const legacy = {
     gameLoop: null as any,
     loopTimers: null as any,
     initMessageQueue: null as any,
+
+    // From main.ts
+    execGameLoops: null as any,
 };

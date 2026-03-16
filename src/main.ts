@@ -242,6 +242,7 @@ legacy.flib = flib;
 legacy.gameLoop = gameLoop;
 legacy.loopTimers = loopTimers;
 legacy.initMessageQueue = initMessageQueue;
+legacy.execGameLoops = execGameLoops;
 
 // Mount React root, then run legacy init once DOM is ready
 mountApp().then(() => {
@@ -1414,22 +1415,8 @@ export function execGameLoops(periods = 1) {
   notifyStateChange();
 }
 
-if (window.Worker) {
-  webWorker.w = new Worker(new URL("./worker.js", import.meta.url));
-  webWorker.w.addEventListener(
-    "message",
-    function (e) {
-      const data = e.data;
-      switch (data.loop) {
-        case "main":
-          execGameLoops(data.periods);
-          break;
-      }
-    },
-    false,
-  );
-}
-gameLoop("start");
+// Worker creation and gameLoop('start') are now handled by
+// useGameEngine hook in src/engine/useGameEngine.ts
 
 resourceAlt();
 
