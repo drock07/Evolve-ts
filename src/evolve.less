@@ -5512,3 +5512,50 @@ div.bigbang {
     position: absolute;
     top: 1rem;
 }
+
+// Headless UI Switch styling
+.switch.setting,
+.reset .switch {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    margin: 0 .5rem .5rem 0;
+
+    button[role="switch"] {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        width: 2.75em;
+        height: 1.575em;
+        padding: .2em;
+        background: #b5b5b5;
+        border-radius: 1em;
+        border: none;
+        cursor: pointer;
+        transition: background 150ms ease-out;
+        position: relative;
+
+        &::after {
+            content: '';
+            display: block;
+            width: 1.175em;
+            height: 1.175em;
+            background: #f5f5f5;
+            border-radius: 50%;
+            transition: transform 150ms ease-out;
+            transform: translateX(0);
+        }
+
+        &[data-checked] {
+            background: #7957d5;
+
+            &::after {
+                transform: translateX(1.175em);
+            }
+        }
+    }
+
+    .control-label {
+        padding-left: .5em;
+    }
+}

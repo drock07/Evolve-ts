@@ -18,6 +18,8 @@ import { useResourceData } from './hooks/useResourceData';
 import { useEvolutionData } from './hooks/useEvolutionData';
 import { useTopBarData } from './hooks/useTopBarData';
 import { useRacePanelData } from './hooks/useRacePanelData';
+import { useSettingsData } from './hooks/useSettingsData';
+import { SettingsPanel } from './components/SettingsPanel';
 import { global } from './vars';
 import { loc } from './locale';
 
@@ -39,6 +41,7 @@ export function App() {
     const evolutionActions = useEvolutionData();
     const topBar = useTopBarData();
     const racePanel = useRacePanelData();
+    const settings = useSettingsData();
     const [selectedTab, setSelectedTab] = useState(global.settings.civTabs || 0);
 
     useEffect(() => {
@@ -107,7 +110,7 @@ export function App() {
                                         <GameTab visible={true} label={loc('tab_settings')} />
                                     </ul>
                                 </TabList>
-                                <TabPanels>
+                                <TabPanels className="tab-content">
                                     {/* Evolution — React component */}
                                     <TabPanel id="evolution" className="tab-item sticky">
                                         <EvolutionTab actions={evolutionActions} />
@@ -131,8 +134,10 @@ export function App() {
                                     {/* Stats — legacy mounts here */}
                                     <TabPanel><div id="mTabStats"></div></TabPanel>
 
-                                    {/* Settings — legacy mounts here */}
-                                    <TabPanel><div id="mTabSettings"></div></TabPanel>
+                                    {/* Settings — React component */}
+                                    <TabPanel id="mTabSettings" className="settings sticky">
+                                        <SettingsPanel data={settings.data} callbacks={settings.callbacks} />
+                                    </TabPanel>
                                 </TabPanels>
                             </TabGroup>
                         </div>

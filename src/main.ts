@@ -224,7 +224,7 @@ import { defineGovernor, govern, govActive, removeTask } from "./governor";
 import { production, highPopAdjust, teamster, factoryBonus } from "./prod";
 import { swissKnife } from "./tech";
 import { vacuumCollapse } from "./resets";
-import { index, mainVue, initTabs, loadTab } from "./index";
+import { index, initTabs, loadTab } from "./index";
 import { setWeather, seasonDesc, astrologySign, astroVal } from "./seasons";
 import { getTopChange } from "./wiki/change";
 import { enableDebug, updateDebugData } from "./debug";
@@ -281,9 +281,7 @@ function legacyInit() {
     calcRQueueMax();
   }
 
-  if (global.race.species !== 'protoplasm') {
-    mainVue();
-  }
+  // mainVue() removed — settings panel is now a React component
 
   if (global["new"]) {
     messageQueue(loc("new"), "warning", false, ["progress"]);
