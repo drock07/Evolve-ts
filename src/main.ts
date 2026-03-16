@@ -241,6 +241,7 @@ legacy.seasonDesc = seasonDesc;
 legacy.flib = flib;
 legacy.gameLoop = gameLoop;
 legacy.loopTimers = loopTimers;
+legacy.initMessageQueue = initMessageQueue;
 
 // Mount React root, then run legacy init once DOM is ready
 mountApp().then(() => {
@@ -262,7 +263,6 @@ function legacyInit() {
     });
   }
 
-  $(`#msgQueue`).height(global.settings.msgQueueHeight);
   $(`#buildQueue`).height(global.settings.buildQueueHeight);
 
   if (global.queue.rename === true) {

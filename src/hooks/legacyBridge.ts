@@ -31,4 +31,5 @@ export const legacy = {
     flib: null as any,
     gameLoop: null as any,
     loopTimers: null as any,
+    initMessageQueue: null as any,
 };

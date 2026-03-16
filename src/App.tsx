@@ -19,7 +19,9 @@ import { useEvolutionData } from './hooks/useEvolutionData';
 import { useTopBarData } from './hooks/useTopBarData';
 import { useRacePanelData } from './hooks/useRacePanelData';
 import { useSettingsData } from './hooks/useSettingsData';
+import { useMessageQueueData } from './hooks/useMessageQueueData';
 import { SettingsPanel } from './components/SettingsPanel';
+import { MessageQueue } from './components/MessageQueue';
 import { global } from './vars';
 import { loc } from './locale';
 
@@ -42,6 +44,7 @@ export function App() {
     const topBar = useTopBarData();
     const racePanel = useRacePanelData();
     const settings = useSettingsData();
+    const messageQueue = useMessageQueueData();
     const [selectedTab, setSelectedTab] = useState(global.settings.civTabs || 0);
 
     useEffect(() => {
@@ -86,7 +89,9 @@ export function App() {
                         </div>
                         <div id="sideQueue">
                             <div id="buildQueue" className="bldQueue standardqueuestyle has-text-info"></div>
-                            <div id="msgQueue" className="msgQueue vscroll has-text-info" aria-live="polite"></div>
+                            <div id="msgQueue" className="msgQueue vscroll has-text-info" aria-live="polite">
+                                <MessageQueue data={messageQueue.data} callbacks={messageQueue.callbacks} />
+                            </div>
                         </div>
                         <div id="resources" className="resources vscroll">
                             <ResourcePanel label="Resources" resources={resources} />
