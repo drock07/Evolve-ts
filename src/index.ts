@@ -668,17 +668,4 @@ export function loadTab(tab){
     }
 }
 
-export function index(){
-    // Most UI is now rendered by React.
-    // This function handles remaining legacy init.
-
-    clearElement($('#buildQueue'));
-
-    // Remove the loading spinner if present
-    $('.loading').remove();
-
-    $('html').addClass(global.settings.font);
-
-    // Build queue — just needs v-show attribute
-    $('#buildQueue').attr('v-show', 'display');
-}
+// index() removed — all UI init is now handled by React App.tsx

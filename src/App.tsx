@@ -48,6 +48,14 @@ export function App() {
     const [selectedTab, setSelectedTab] = useState(global.settings.civTabs || 0);
 
     useEffect(() => {
+        // Remove the loading spinner
+        document.querySelector('.loading')?.remove();
+
+        // Set font class on html element
+        if (global.settings.font) {
+            document.documentElement.classList.add(global.settings.font);
+        }
+
         notifyAppReady();
     }, []);
 

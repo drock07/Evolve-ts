@@ -224,7 +224,7 @@ import { defineGovernor, govern, govActive, removeTask } from "./governor";
 import { production, highPopAdjust, teamster, factoryBonus } from "./prod";
 import { swissKnife } from "./tech";
 import { vacuumCollapse } from "./resets";
-import { index, initTabs, loadTab } from "./index";
+import { initTabs, loadTab } from "./index";
 import { setWeather, seasonDesc, astrologySign, astroVal } from "./seasons";
 import { getTopChange } from "./wiki/change";
 import { enableDebug, updateDebugData } from "./debug";
@@ -249,8 +249,7 @@ mountApp().then(() => {
 });
 
 function legacyInit() {
-  index();
-  // Version string is now rendered by React TopBar component
+  // index() removed — all UI init is now handled by React
 
   initMessageQueue();
 
