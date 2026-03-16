@@ -1,5 +1,4 @@
 import { global, save, seededRandom, webWorker, keyMultiplier, keyMap, srSpeak, sizeApproximation, p_on, support_on, int_on, gal_on, spire_on, tmp_vars, setupStats, callback_queue } from './vars';
-import { mountResourcePanel } from './components/mountResourcePanel';
 import { loc } from './locale';
 import { timeCheck, timeFormat, vBind, popover, clearPopper, flib, tagEvent, clearElement, costMultiplier, darkEffect, genCivName, powerModifier, powerCostMod, calcPrestige, adjustCosts, modRes, messageQueue, buildQueue, format_emblem, shrineBonusActive, calc_mastery, calcPillar, calcGenomeScore, getShrineBonus, eventActive, easterEgg, getHalloween, trickOrTreat, deepClone, hoovedRename, get_qlevel } from './functions';
 import { unlockAchieve, challengeIcon, alevel, universeAffix, checkAdept } from './achieve';
@@ -8567,7 +8566,6 @@ function sentience(){
 
     clearElement($('#resources'));
     defineResources();
-    mountResourcePanel();
     if (!global.race['kindling_kindred'] && !global.race['smoldering']){
         global.resource.Lumber.display = true;
     }

@@ -17,7 +17,7 @@ import { arpa, clearGeneticsDrag } from './arpa';
 
 export function mainVue(){
     vBind({
-        el: '#mainColumn div:first-child',
+        el: '#mTabSettings',
         data: {
             s: global.settings
         },
@@ -897,55 +897,15 @@ export function loadTab(tab){
 }
 
 export function index(){
-    // Clear legacy content from React-owned containers, but preserve the skeleton
-    clearElement($('#topBar'));
-    clearElement($('#race'));
+    // Top bar and race panel are now rendered by React — do not clear or append
     clearElement($('#buildQueue'));
     clearElement($('#msgQueue'));
-    clearElement($('#resources'));
-    clearElement($('#mainColumn .content'));
+    // #resources and #mainColumn .content are owned by React — do not clear them
 
     // Remove the loading spinner if present
     $('.loading').remove();
 
     $('html').addClass(global.settings.font);
-
-    // Top Bar — append content into React-owned #topBar
-    $('#topBar').append(`
-        <h2 class="is-sr-only">Top Bar</h2>
-        <span class="planetWrap">
-            <span class="planet">{{ race.species | planet }}</span>
-            <span class="universe" v-show="showUniverse()">{{ race.universe | universe }}</span>
-            <span class="pet" id="playerPet" v-show="showPet()" @click="petPet()"></span>
-            <span class="simulation" v-show="showSim()">${loc(`evo_challenge_simulation`)}</span>
-        </span>
-        <span class="calendar">
-            <span class="infoTimer" id="infoTimer"></span>
-            <span v-show="city.calendar.day">
-                <span class="is-sr-only" v-html="sign()"></span><span id="astroSign" class="astro" v-html="getAstroSign()"></span>
-                <b-tooltip :label="moon()" :aria-label="moon()" position="is-bottom" size="is-small" multilined animated><i id="moon" class="moon wi"></i></b-tooltip>
-                <span class="year">${loc('year')} <span class="has-text-warning">{{ city.calendar.year }}</span></span>
-                <span class="day">${loc('day')} <span class="has-text-warning">{{ city.calendar.day }}</span></span>
-                <span class="season">{{ season() }}</span>
-                <b-tooltip :label="weather()" :aria-label="weather()" position="is-bottom" size="is-small" multilined animated><i id="weather" class="weather wi"></i></b-tooltip>
-                <b-tooltip :label="temp()" :aria-label="temp()" position="is-bottom" size="is-small" multilined animated><i id="temp" class="temp wi"></i></b-tooltip>
-                <b-tooltip :label="atRemain()" v-show="s.at" :aria-label="atRemain()" position="is-bottom" size="is-small" multilined animated><span class="atime has-text-caution">{{ s.at | remain }}</span></b-tooltip>
-                <span role="button" class="atime" style="padding: 0 0.5rem; margin-left: 0.5rem; cursor: pointer" @click="pause" :aria-label="pausedesc()">
-                    <span id="pausegame"></span>
-                </span>
-            </span>
-        </span>
-        <span class="version" id="versionLog"><a href="wiki.html#changelog" target="_blank"></a></span>
-    `);
-
-    // Left Column — append content into React-owned containers
-    // Race info
-    $('#race').append(`
-        <h2 class="is-sr-only">Race Info</h2>
-        <div class="name">{{ name() }}</div>
-        <div class="morale-contain"><span id="morale" v-show="city.morale.current" class="morale">${loc('morale')} <span class="has-text-warning">{{ city.morale.current | mRound }}%</span></div>
-        <div class="power"><span id="powerStatus" class="has-text-warning" v-show="city.powered"><span>MW</span> <span id="powerMeter" class="meter">{{ city.power | replicate | approx }}</span></span></div>
-    `);
 
     // Build queue — just needs v-show attribute
     $('#buildQueue').attr('v-show', 'display');
@@ -1168,74 +1128,8 @@ export function index(){
         }
     });
 
-    // Center Column — append into React-owned #mainColumn > .content
-    let content = $(`#mainColumn .content`);
-
-    content.append(`<h2 class="is-sr-only">Tab Navigation</h2>`);
-    let tabs = $(`<b-tabs id="mainTabs" v-model="s.civTabs" :animated="s.animated" @input="swapTab"></b-tabs>`);
-    content.append(tabs);
-
-    // Evolution Tab
-    let evolution = $(`<b-tab-item id="evolution" class="tab-item sticky" :visible="s.showEvolve">
-        <template slot="header">
-            {{ 'tab_evolve' | label }}
-        </template>
-    </b-tab-item>`);
-    tabs.append(evolution);
-
-    // City Tab
-    let city = $(`<b-tab-item :visible="s.showCiv">
-        <template slot="header">
-            {{ 'tab_civil' | label }}
-        </template>
-        <div id="mTabCivil"></div>
-    </b-tab-item>`);
-    tabs.append(city);
-
-    // Civics Tab
-    let civic = $(`<b-tab-item :visible="s.showCivic">
-        <template slot="header">
-            {{ 'tab_civics' | label }}
-        </template>
-        <div id="mTabCivic"></div>
-    </b-tab-item>`);
-    tabs.append(civic);
-
-    // Research Tab
-    let research = $(`<b-tab-item :visible="s.showResearch">
-        <template slot="header">
-            {{ 'tab_research' | label }}
-        </template>
-        <div id="mTabResearch"></div>
-    </b-tab-item>`);
-    tabs.append(research);
-
-    // Resources Tab
-    let resources = $(`<b-tab-item :visible="s.showResources">
-        <template slot="header">
-            {{ 'tab_resources' | label }}
-        </template>
-        <div id="mTabResource"></div>
-    </b-tab-item>`);
-    tabs.append(resources);
-
-    // ARPA Tab
-    let arpa = $(`<b-tab-item :visible="s.showGenetics">
-        <template slot="header">
-            {{ 'tech_arpa' | label }}
-        </template>
-        <div id="mTabArpa"></div>
-    </b-tab-item>`);
-    tabs.append(arpa);
-
-    // Stats Tab
-    let stats = $(`<b-tab-item :visible="s.showAchieve">
-        <template slot="header">
-            {{ 'tab_stats' | label }}
-        </template>
-        <div id="mTabStats"></div>
-    </b-tab-item>`);
-    tabs.append(stats);
+    // Tab navigation and panels are rendered by React GameTabs component.
+    // Legacy code appends content into the React-rendered panel divs.
 
     let iconlist = '';
     let icons = [
@@ -1305,11 +1199,8 @@ export function index(){
         });
     }
 
-    // Settings Tab
-    let settings = $(`<b-tab-item id="settings" class="settings sticky">
-        <template slot="header">
-            {{ 'tab_settings' | label }}
-        </template>
+    // Settings Tab — append content into React-rendered #mTabSettings
+    let settings = $(`<div>
         <div class="theme">
             <span>{{ 'theme' | label }} </span>
             <b-dropdown hoverable>
@@ -1474,39 +1365,13 @@ export function index(){
                 </div>
             </b-collapse>
         </div>
-    </b-tab-item>`);
+    </div>`);
 
-    tabs.append(settings);
+    $('#mTabSettings').append(settings);
 
-    // (Hidden Last Tab) Hell Observation Tab
-    let observe = $(`<b-tab-item disabled>
-        <template slot="header"></template>
-        <div id="mTabObserve"></div>
-    </b-tab-item>`);
-    tabs.append(observe);
+    // Evolution, City, Civics, Research, Resources, ARPA, Stats, Observe tabs —
+    // panel divs rendered by React GameTabs. Content appended by loadTab().
 
     // Right Column — rendered by React in App.tsx
-
-    let egg15 = easterEgg(15,8);
-    // Bottom Bar — append into React-owned #promoBar
-    $('#promoBar').append(`
-            <span class="left">
-                <h1>
-                    <span class="has-text-warning">${egg15.length > 0 ? `Ev${egg15}lve` : `Evolve`}</span>
-                    by
-                    <span class="has-text-success">Demagorddon</span>
-                </h1>
-            </span>
-            <span class="right">
-                <h2 class="is-sr-only">External Links</h2>
-                <ul class="external-links">
-                    <li><a href="wiki.html" target="_blank">Wiki</a></li>
-                    <li><a href="https://www.reddit.com/r/EvolveIdle/" target="_blank">Reddit</a></li>
-                    <li><a href="https://discord.gg/dcwdQEr" target="_blank">Discord</a></li>
-                    <li><a href="https://github.com/pmotschmann/Evolve" target="_blank">GitHub</a></li>
-                    <li><a href="https://www.patreon.com/demagorddon" target="_blank">Patreon</a></li>
-                    <li><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=PTRJZBW9J662C&currency_code=USD&source=url" target="_blank">Donate</a></li>
-                </ul>
-            </span>
-    `);
+    // Bottom Bar — rendered by React in App.tsx
 }
