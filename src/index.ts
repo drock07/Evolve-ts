@@ -1,7 +1,7 @@
 import { global, tmp_vars, save, message_logs, message_filters, webWorker } from './vars';
-import { loc, locales } from './locale';
-import { setupStats, alevel } from './achieve';
-import { vBind, initMessageQueue, clearElement, flib, tagEvent, gameLoop, popover, clearPopper, powerGrid, easterEgg, trickOrTreat, drawIcon } from './functions';
+import { loc } from './locale';
+import { setupStats } from './achieve';
+import { vBind, initMessageQueue, clearElement, flib, tagEvent, gameLoop, popover, clearPopper, powerGrid, easterEgg } from './functions';
 import { tradeRatio, atomic_mass, supplyValue, marketItem, containerItem, loadEjector, loadSupply, loadAlchemy, initResourceTabs, drawResourceTab, tradeSummery } from './resources';
 import { defineJobs, } from './jobs';
 import { clearSpyopDrag } from './governor';
@@ -901,79 +901,4 @@ export function index(){
     });
 
     // Tab navigation, panels, and settings are rendered by React.
-    // Legacy code appends content into the React-rendered panel divs.
-
-    // TODO: Remove once all settings references are ported
-    let iconlist = '';
-    let icons = [
-        {i: 'nuclear',      f: 'steelem',               r: 2 },
-        {i: 'zombie',       f: 'the_misery',            r: 2 },
-        {i: 'fire',         f: 'ill_advised',           r: 2 },
-        {i: 'mask',         f: 'friday',                r: 1 },
-        {i: 'skull',        f: 'demon_slayer',          r: 2 },
-        {i: 'taijitu',      f: 'equilibrium',           r: 2 },
-        {i: 'martini',      f: 'utopia',                r: 2 },
-        {i: 'lightbulb',    f: 'energetic',             r: 2 },
-        {i: 'trash',        f: 'garbage_pie',           r: 2 },
-        {i: 'banana',       f: 'banana',                r: 2 },
-        {i: 'turtle',       f: 'finish_line',           r: 2 },
-        {i: 'floppy',       f: 'digital_ascension',     r: 2 },
-        {i: 'slime',        f: 'slime_lord',            r: 2 },
-        {i: 'sludge',       f: 'grand_death_tour',      r: 2 },
-        {i: 'lightning',    f: 'annihilation',          r: 2 },
-        {i: 'trophy',       f: 'wish',                  r: 2 },
-        {i: 'robot',        f: 'planned_obsolescence',  r: 2 },
-        {i: 'heart',        f: 'valentine',             r: 1 },
-        {i: 'clover',       f: 'leprechaun',            r: 1 },
-        {i: 'bunny',        f: 'easter',                r: 1 },
-        {i: 'egg',          f: 'egghunt',               r: 1 },
-        {i: 'rocket',       f: 'launch_day',            r: 1 },
-        {i: 'sun',          f: 'solstice',              r: 1 },
-        {i: 'firework',     f: 'firework',              r: 1 },
-        {i: 'ghost',        f: 'halloween',             r: 1 },
-        {i: 'candy',        f: 'trickortreat',          r: 1 },
-        {i: 'turkey',       f: 'thanksgiving',          r: 1 },
-        {i: 'meat',         f: 'immortal',              r: 1 },
-        {i: 'present',      f: 'xmas',                  r: 1 },
-    ];
-
-    let irank = alevel();
-    if (irank < 2){ irank = 2; }
-    for (let i=0; i<icons.length; i++){
-        if (global.stats.feat[icons[i].f] && global.stats.feat[icons[i].f] >= icons[i].r){
-            iconlist = iconlist + `<b-dropdown-item v-on:click="icon('${icons[i].i}')">${drawIcon(icons[i].i, 16, irank)} {{ '${icons[i].i}' | label }}</b-dropdown-item>`;
-        }
-        else if (global.settings.icon === icons[i].i){
-            global.settings.icon = 'star';
-        }
-    }
-
-    let egg9 = easterEgg(9,14);
-    let hideEgg = '';
-    if (egg9.length > 0){
-        hideEgg = `<b-dropdown-item>${egg9}</b-dropdown-item>`;
-    }
-
-    let trick = trickOrTreat(5,12,true);
-    let hideTreat = '';
-    if (trick.length > 0){
-        hideTreat = `<b-dropdown-item>${trick}</b-dropdown-item>`;
-    }
-
-    let localelist = '';
-    let current_locale = '';
-    if (Object.keys(locales).length > 1){
-        Object.keys(locales).forEach(function (locale){
-          let selected = global.settings.locale;
-            if (selected === locale) {
-              current_locale = locales[locale];
-            }
-            localelist = localelist + `<b-dropdown-item v-on:click="lChange('${locale}')">${locales[locale]}</b-dropdown-item>`;
-        });
-    }
-
-    // Settings tab is now rendered by React SettingsPanel component.
-
-    // Right Column — rendered by React in App.tsx
-    // Bottom Bar — rendered by React in App.tsx
 }

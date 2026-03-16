@@ -93,10 +93,18 @@ function getIconOptions(): DropdownOption[] {
         { i: 'meat', f: 'immortal', r: 1 },
         { i: 'present', f: 'xmas', r: 1 },
     ];
+    let currentIconValid = global.settings.icon === 'star';
     for (const icon of icons) {
         if (global.stats.feat[icon.f] && global.stats.feat[icon.f] >= icon.r) {
             opts.push({ value: icon.i, label: loc(icon.i) });
+            if (global.settings.icon === icon.i) {
+                currentIconValid = true;
+            }
         }
+    }
+    // Fallback to star if the selected icon isn't unlocked
+    if (!currentIconValid) {
+        global.settings.icon = 'star';
     }
     return opts;
 }
