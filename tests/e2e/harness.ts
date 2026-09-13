@@ -1,4 +1,7 @@
 import type { Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import LZString from 'lz-string';
 
 /**
  * Shared driver for the golden-master tests.
@@ -189,4 +192,36 @@ export async function seedScenario(page: Page): Promise<void> {
         g.resource.Lumber.amount = 100;
         g.resource.Stone.amount = 100;
     });
+}
+
+/**
+ * Playwright compiles these files to CJS, so `import.meta.url` is not
+ * available; resolve from the repo root instead, which is where the runner
+ * is invoked from.
+ */
+function readFixture(name: string): string {
+    return readFileSync(resolve(process.cwd(), 'tests/fixtures/saves', `${name}.txt`), 'utf8').trim();
+}
+
+/**
+ * Load an exported save file for use with `bootGame({ save })`.
+ *
+ * Exports from the game's UI are LZString base64; localStorage holds the
+ * UTF16 form. Fixtures are stored in their exported shape — that is what a
+ * player actually hands you, and it is a third the size of raw JSON — so
+ * they get re-encoded here.
+ */
+export function loadSaveFixture(name: string): string {
+    const exported = readFixture(name);
+
+    const json = LZString.decompressFromBase64(exported);
+    if (!json || !json.trimStart().startsWith('{')) {
+        throw new Error(`Fixture ${name} is not a valid LZString base64 save export`);
+    }
+    return LZString.compressToUTF16(json);
+}
+
+/** Parsed contents of a fixture, for asserting on what a save actually holds. */
+export function readSaveFixture(name: string): Record<string, any> {
+    return JSON.parse(LZString.decompressFromBase64(readFixture(name))!);
 }

@@ -1,0 +1,300 @@
+{
+  "amphitheatre": {
+    "bn": "Stone",
+    "count": 13,
+    "evil": 0,
+    "time": "14m 24s"
+  },
+  "apartment": {
+    "bn": false,
+    "count": 6,
+    "on": 6,
+    "time": "0s"
+  },
+  "bank": {
+    "bn": "Stone",
+    "count": 24,
+    "time": "1s"
+  },
+  "basic_housing": {
+    "bn": false,
+    "count": 45,
+    "time": "0s"
+  },
+  "biolab": {
+    "bn": "Alloy",
+    "count": 15,
+    "on": 15,
+    "time": "1h 23m"
+  },
+  "biome": "grassland",
+  "boot_camp": {
+    "bn": false,
+    "count": 4,
+    "time": "0s"
+  },
+  "calendar": {
+    "day": 358,
+    "moon": 9,
+    "orbit": 365,
+    "season": 3,
+    "temp": 0,
+    "weather": 2,
+    "wind": 0,
+    "year": 212
+  },
+  "casino": {
+    "bn": "Plywood",
+    "count": 1,
+    "on": 1,
+    "time": "8h 43m"
+  },
+  "cement_plant": {
+    "bn": false,
+    "cnvay": 0.78883,
+    "count": 4,
+    "on": 4,
+    "time": "0s"
+  },
+  "coal_mine": {
+    "bn": false,
+    "count": 9,
+    "cpow": 0.82827,
+    "on": 9,
+    "time": "0s",
+    "upow": 0.0072
+  },
+  "coal_power": {
+    "bn": false,
+    "count": 15,
+    "on": 15,
+    "time": "0s"
+  },
+  "cold": 10,
+  "cottage": {
+    "bn": "Plywood",
+    "count": 29,
+    "time": "3h 19m"
+  },
+  "factory": {
+    "Alloy": 3,
+    "Furs": 0,
+    "Lux": 0,
+    "Nano": 0,
+    "Polymer": 3,
+    "Stanene": 0,
+    "bn": false,
+    "count": 6,
+    "on": 6,
+    "time": "0s"
+  },
+  "farm": {
+    "bn": "Lumber",
+    "count": 29,
+    "time": "3s"
+  },
+  "fission_power": {
+    "bn": false,
+    "count": 2,
+    "on": 2,
+    "time": "0s"
+  },
+  "foundry": {
+    "Aerogel": 0,
+    "Brick": 2,
+    "Bronze": 0,
+    "Mythril": 0,
+    "Nanoweave": 0,
+    "Plywood": 2,
+    "Quantium": 0,
+    "Scarletite": 0,
+    "Sheet_Metal": 3,
+    "Wrought_Iron": 1,
+    "bn": false,
+    "count": 12,
+    "crafting": 8,
+    "time": "0s"
+  },
+  "garrison": {
+    "bn": "Stone",
+    "count": 19,
+    "on": 19,
+    "time": "15m 57s"
+  },
+  "geology": {},
+  "hospital": {
+    "bn": false,
+    "count": 1,
+    "time": "0s"
+  },
+  "hot": 0,
+  "library": {
+    "bn": "Plywood",
+    "count": 29,
+    "time": "20m 21s"
+  },
+  "lumber_yard": {
+    "bn": false,
+    "count": 8,
+    "time": "0s"
+  },
+  "market": {
+    "active": true,
+    "mtrade": 18,
+    "qty": 1000,
+    "trade": 7
+  },
+  "mass_driver": {
+    "bn": "Iridium",
+    "count": 0,
+    "on": 0,
+    "time": "6m 34s"
+  },
+  "metal_refinery": {
+    "bn": false,
+    "cnvay": 0.60298,
+    "count": 11,
+    "on": 0,
+    "time": "0s"
+  },
+  "mill": {
+    "bn": false,
+    "count": 12,
+    "on": 9,
+    "time": "0s"
+  },
+  "mine": {
+    "bn": false,
+    "count": 8,
+    "cpow": 14.49479,
+    "ipow": 8.05266,
+    "on": 8,
+    "time": "0s"
+  },
+  "morale": {
+    "bliss_den": 0,
+    "blood_thirst": 0,
+    "broadcast": 56,
+    "cap": 118,
+    "current": 118,
+    "entertain": 42,
+    "leadership": 0,
+    "potential": 164.8,
+    "restaurant": 0,
+    "rev": 0,
+    "season": -5,
+    "shrine": 0,
+    "stress": -38.2,
+    "tavern": 0,
+    "tax": 0,
+    "unemployed": 0,
+    "vr": 0,
+    "warmonger": 0,
+    "weather": 0,
+    "zoo": 0
+  },
+  "oil_depot": {
+    "bn": false,
+    "count": 7,
+    "time": "0s"
+  },
+  "oil_power": {
+    "bn": "Aluminium",
+    "count": 7,
+    "on": 7,
+    "time": "1m 53s"
+  },
+  "oil_well": {
+    "bn": false,
+    "count": 5,
+    "time": "0s"
+  },
+  "power": 6,
+  "power_total": 154,
+  "powered": true,
+  "ptrait": [],
+  "rock_quarry": {
+    "almcvy": 0.60298,
+    "asbestos": 50,
+    "bn": false,
+    "cnvay": 7.53729,
+    "count": 6,
+    "on": 2,
+    "time": "0s"
+  },
+  "sawmill": {
+    "bn": false,
+    "count": 5,
+    "on": 0,
+    "psaw": 0,
+    "time": "0s"
+  },
+  "shed": {
+    "bn": "Iron",
+    "count": 31,
+    "time": "20m 31s"
+  },
+  "silo": {
+    "bn": false,
+    "count": 6,
+    "time": "0s"
+  },
+  "smelter": {
+    "Coal": 12,
+    "Inferno": 0,
+    "Iridium": 0,
+    "Iron": 4,
+    "Oil": 0,
+    "Star": 0,
+    "StarCap": 0,
+    "Steel": 8,
+    "Wood": 0,
+    "bn": false,
+    "cap": 12,
+    "count": 12,
+    "time": "0s"
+  },
+  "storage_yard": {
+    "bn": false,
+    "count": 2,
+    "time": "0s"
+  },
+  "sun": 1,
+  "temple": {
+    "bn": "Lumber",
+    "count": 30,
+    "time": "13m 43s"
+  },
+  "tourist_center": {
+    "bn": "Plywood",
+    "count": 1,
+    "on": 1,
+    "time": "3h 38m"
+  },
+  "trade": {
+    "bn": false,
+    "count": 2,
+    "time": "0s"
+  },
+  "university": {
+    "bn": "Stone",
+    "count": 18,
+    "time": "4m 47s"
+  },
+  "wardenclyffe": {
+    "bn": "Copper",
+    "count": 28,
+    "on": 28,
+    "time": "8m 21s"
+  },
+  "warehouse": {
+    "bn": false,
+    "count": 2,
+    "time": "0s"
+  },
+  "wharf": {
+    "bn": false,
+    "count": 1,
+    "time": "0s"
+  }
+}

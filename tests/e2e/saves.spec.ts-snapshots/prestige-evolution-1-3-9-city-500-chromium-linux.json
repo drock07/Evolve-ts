@@ -1,0 +1,49 @@
+{
+  "biome": "taiga",
+  "calendar": {
+    "day": 0,
+    "moon": 0,
+    "orbit": 570,
+    "season": 0,
+    "temp": 1,
+    "weather": 2,
+    "wind": 0,
+    "year": 0
+  },
+  "cold": 0,
+  "geology": {},
+  "hot": 0,
+  "market": {
+    "active": false,
+    "mtrade": 0,
+    "qty": 10,
+    "trade": 0
+  },
+  "morale": {
+    "bliss_den": 0,
+    "blood_thirst": 0,
+    "broadcast": 0,
+    "cap": 0,
+    "current": 0,
+    "entertain": 0,
+    "leadership": 0,
+    "potential": 0,
+    "restaurant": 0,
+    "rev": 0,
+    "season": 0,
+    "shrine": 0,
+    "stress": 0,
+    "tax": 0,
+    "unemployed": 0,
+    "vr": 0,
+    "warmonger": 0,
+    "weather": 0,
+    "zoo": 0
+  },
+  "power": 0,
+  "powered": false,
+  "ptrait": [
+    "rage"
+  ],
+  "sun": 0
+}

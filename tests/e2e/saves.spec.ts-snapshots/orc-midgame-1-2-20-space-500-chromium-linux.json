@@ -1,0 +1,46 @@
+{
+  "gps": {
+    "count": 4,
+    "time": "0s"
+  },
+  "helium_mine": {
+    "count": 1,
+    "on": 1,
+    "time": "0s"
+  },
+  "iridium_mine": {
+    "count": 2,
+    "on": 2,
+    "time": "35m 36s"
+  },
+  "moon_base": {
+    "count": 2,
+    "on": 2,
+    "s_max": 4,
+    "support": 4,
+    "time": "1h 51m"
+  },
+  "nav_beacon": {
+    "count": 0,
+    "on": 0,
+    "time": "2m 47s"
+  },
+  "observatory": {
+    "count": 1,
+    "on": 1,
+    "time": "25m 16s"
+  },
+  "propellant_depot": {
+    "count": 4,
+    "time": "25m 20s"
+  },
+  "satellite": {
+    "count": 3,
+    "time": "1h 19m"
+  },
+  "spc_casino": {
+    "count": 0,
+    "on": 0,
+    "time": "13h 53m"
+  }
+}
