@@ -1,5 +1,12 @@
+import type { CityState, CivicState } from './types/state';
+
 export var save = window.localStorage;
-export var global = {
+/**
+ * Skeleton for a brand-new game. Most subtrees start empty and are filled in
+ * by newGameData() below, by the define*() functions in jobs.ts / actions.ts
+ * / resources.ts, or wholesale by a loaded save.
+ */
+const initialGlobal = {
     seed: 1,
     warseed: 1,
     resource: {},
@@ -29,6 +36,32 @@ export var global = {
         l: false
     }
 };
+
+/**
+ * The game state tree.
+ *
+ * Typed one subtree at a time. Everything not named in the Omit below keeps
+ * the shape inferred from `initialGlobal` — which for the empty ones is `{}`,
+ * so those still report "property does not exist". That is deliberate: those
+ * errors are the worklist, and an index signature would silence them by
+ * turning the whole tree into `any`.
+ *
+ * To type another subtree: describe it in src/types/state.ts from the save
+ * fixtures, then add its key here.
+ */
+export type GameState = Omit<typeof initialGlobal, 'city' | 'civic'> & {
+    city: CityState;
+    civic: CivicState;
+};
+
+/**
+ * The cast is load-bearing and honest: `initialGlobal` really is an incomplete
+ * skeleton at module-evaluation time, and nothing can read a populated `city`
+ * or `civic` off it until the define*() calls or a save load have run. Making
+ * the fields optional instead would push a `?.` onto thousands of call sites
+ * to describe a state that only exists for a few milliseconds at startup.
+ */
+export var global: GameState = initialGlobal as unknown as GameState;
 export var tmp_vars = {};
 export var breakdown = {
     c: {},
@@ -2238,6 +2271,7 @@ window.soft_reset = function reset(source){
     let biome = global.city.biome;
     let atmo = global.city.ptrait;
     let geo = global.city.geology;
+    // Partial by design — morale, market and the structures are added by the define*() passes.
     global.city = {
         calendar: {
             day: 0,
@@ -2251,7 +2285,7 @@ window.soft_reset = function reset(source){
         biome: biome,
         ptrait: atmo,
         geology: geo
-    };
+    } as unknown as CityState;
 
     if (global.tech['theology'] && global.tech['theology'] >= 1){
         global.tech = { theology: 1 };
@@ -2345,7 +2379,8 @@ export function clearStates(){
     global.eden = {};
     global.starDock = {};
     global.tauceti = {};
-    global.civic = { new: 0 };
+    // Partial by design — jobs are added by defineJobs() immediately after. See the note on `global` above.
+    global.civic = { new: 0 } as unknown as CivicState;
     global.civic['foreign'] = {
         gov0: {
             unrest: 0,

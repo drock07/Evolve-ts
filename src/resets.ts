@@ -1,3 +1,4 @@
+import type { CityState } from './types/state';
 import { global, save, seededRandom, webWorker, clearSavedMessages, clearStates } from './vars';
 import { tagEvent, calcPrestige, updateResetStats } from './functions';
 import { races, planetTraits } from './races';
@@ -1262,6 +1263,7 @@ export function gardenOfEden(){
 }
 
 function resetCommon(args){
+    // Partial by design — the define*() passes repopulate the rest.
     global.city = {
         calendar: {
             day: 0,
@@ -1274,7 +1276,7 @@ function resetCommon(args){
         },
         biome: args.biome,
         ptrait: args.ptrait
-    };
+    } as unknown as CityState;
 
     if (args.geology){
         global.city['geology'] = args.geology;
