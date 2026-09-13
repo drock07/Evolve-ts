@@ -3,6 +3,7 @@ import type {
     GenesState, BloodState, StatsState, GameStateRuntime,
     RaceState, SpaceState, EvolutionState, SupportState, PrestigeState,
     PortalState, InterstellarState, TauCetiState, EdenState, GalaxyState, StarDockState,
+    SettingsState, MessageFilter, ArpaSettings,
 } from './types/state';
 
 export var save = window.localStorage;
@@ -889,6 +890,9 @@ if (convertVersion(global['version']) < 101010){
 
 if (convertVersion(global['version']) < 101011){
     if (global.hasOwnProperty('settings') && !global.settings.hasOwnProperty('msgFilters')){
+        // Writes the pre-1.1.11 boolean form on purpose: the migration block
+        // below (`< 101012`) is what upgrades each entry to a MessageFilter
+        // object. This intermediate shape exists for a few statements only.
         global.settings['msgFilters'] = {
             all: true,
             progress: true,
@@ -902,7 +906,7 @@ if (convertVersion(global['version']) < 101011){
             minor_events: true,
             achievements: (global.stats['achieve'] && Object.keys(global.stats.achieve).length > 0) || (global.stats['feat'] && Object.keys(global.stats.feat).length > 0),
             hell: global.settings.showPortal || global.stats.blackhole || global.stats.ascend || global.stats.descend
-        }
+        } as unknown as Record<string, MessageFilter>
     }
     if (global.race.hasOwnProperty('inflation')){
         ['supercollider','stock_exchange','launch_facility','monuments','railway','roid_eject','nexus','syphon'].forEach(function(arpa){
@@ -1359,6 +1363,8 @@ if (global.civic['cement_worker'] && global.civic.cement_worker.impact === 0.25)
 }
 
 if (!global['settings']){
+    // Partial by design: the migration blocks below add every key a save
+    // of the current version carries.
     global['settings'] = {
         showEvolve: true,
         showAchieve: false,
@@ -1370,7 +1376,7 @@ if (!global['settings']){
         theme: 'gruvboxDark',
         locale: 'en-US',
         icon: 'star'
-    };
+    } as unknown as SettingsState;
 }
 
 if (!global.settings['space']){
@@ -1963,11 +1969,12 @@ if (global.city['foundry'] && !global.city.foundry['Quantium']){
 }
 
 if (!global.settings['arpa']){
+    // crispr and blood are added by the later migration blocks.
     global.settings['arpa'] = {
         arpaTabs: 0,
         physics: true,
         genetics: false
-    };
+    } as unknown as ArpaSettings;
 }
 if (!global.settings.arpa['crispr']){
     global.settings.arpa['crispr'] = false;

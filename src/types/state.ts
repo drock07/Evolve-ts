@@ -366,7 +366,7 @@ export interface GameStateRuntime {
     pillars: {};
     queue: {};
     r_queue: {};
-    settings: {};
+    settings: SettingsState;
     special: {};
     starDock: StarDockState;
 }
@@ -579,3 +579,146 @@ export type GalaxyState = GalaxyFixed & { [structure: string]: GameStructure };
 
 /** The bioseed launch facility. Three structures, no special keys. */
 export type StarDockState = Record<string, GameStructure>;
+
+// ── global.settings ──────────────────────────────────────────────────────────
+
+/** One entry in the message-queue filter config. */
+export interface MessageFilter {
+    unlocked: boolean;
+    vis: boolean;
+    max: number;
+    save: number;
+}
+
+/** ARPA tab visibility and selected sub-tab. */
+export interface ArpaSettings {
+    arpaTabs: number;
+    physics: boolean;
+    genetics: boolean;
+    crispr: boolean;
+    blood: boolean;
+    [extra: string]: StateScalar;
+}
+
+/**
+ * The keys of `global.settings` that are known ahead of time.
+ *
+ * Mostly `show*` visibility flags driving tab and panel rendering, plus the
+ * selected index for each tab group. Both save fixtures agree on every type
+ * here; the ones marked optional are absent from the older of the two.
+ */
+export interface SettingsFixed {
+    // Display and locale
+    theme: string;
+    font: string;
+    icon: string;
+    locale: string;
+    affix: string;
+    animated: boolean;
+    boring: boolean;
+    touch: boolean;
+    cLabels: boolean;
+    /** Developer switch: logs missing locale strings and exposes window.evolve. */
+    expose: boolean;
+    pause: boolean;
+    disableReset: boolean;
+
+    // Tab selection — indexes into the tab groups
+    civTabs: number;
+    govTabs: number;
+    govTabs2: number;
+    hellTabs: number;
+    marketTabs: number;
+    resTabs: number;
+    spaceTabs: number;
+    statsTabs: number;
+
+    // Panel sizing, stored as CSS lengths
+    buildQueueHeight: string | number;
+    msgQueueHeight: string;
+
+    /** Accumulated play time, in ms. */
+    at: number;
+
+    // Queue behaviour
+    qAny: boolean;
+    qAny_res: boolean;
+    qKey?: boolean;
+    q_merge: string;
+    /** Added after both fixtures were saved. */
+    queuestyle?: string;
+    q_resize?: string;
+
+    // Keyboard
+    mKeys: boolean;
+    keyMap: Record<string, string>;
+
+    // Tab and panel visibility
+    showEvolve: boolean;
+    showCity: boolean;
+    showCiv: boolean;
+    showCivic: boolean;
+    showResearch: boolean;
+    showResources: boolean;
+    showStorage: boolean;
+    showMarket: boolean;
+    showGenetics: boolean;
+    showAchieve: boolean;
+    showIndustry: boolean;
+    showPowerGrid: boolean;
+    showEjector: boolean;
+    showCargo: boolean;
+    showAlchemy: boolean;
+    showMil: boolean;
+    showGovernor: boolean;
+    showSpace: boolean;
+    showDeep: boolean;
+    showGalactic: boolean;
+    showPortal: boolean;
+    showOuter: boolean;
+    showShipYard: boolean;
+    showMechLab: boolean;
+    showPsychic?: boolean;
+    showTau?: boolean;
+    showWish?: boolean;
+    lowPowerBalance?: boolean;
+    tabLoad: boolean;
+
+    // Region sub-tab visibility, keyed by region id
+    space: Record<string, boolean>;
+    portal: Record<string, boolean>;
+    tau?: Record<string, boolean>;
+    eden?: Record<string, boolean>;
+    arpa: ArpaSettings;
+
+    // Message queue
+    msgFilters: Record<string, MessageFilter>;
+
+    // String packs
+    sPackOn: boolean;
+    sPackMsg: string;
+
+    /** Minor-trait display order. */
+    mtorder: string[];
+
+    /**
+     * Per-resource storage-bar toggles. Written by the React resource panel
+     * rather than by the engine, and absent from saves that predate it.
+     */
+    resBar?: Record<string, boolean>;
+}
+
+/** Values settings can hold when read through a computed key. */
+export type SettingsValue =
+    | boolean | number | string | string[]
+    | Record<string, unknown>
+    | undefined;
+
+/**
+ * Settings are read by computed key in a few places — App.tsx resolves tab
+ * visibility as `global.settings[key]`, and vars.ts initialises whole groups
+ * in a loop — so an index signature is needed alongside the known keys. Same
+ * intersection as the other subtrees: declared keys keep their real types,
+ * and only a dynamic read widens to the union.
+ */
+export type SettingsState = SettingsFixed & { [key: string]: SettingsValue };

@@ -473,11 +473,16 @@ $(document).keydown(function (e) {
                 s.showAlchemy,
               ];
               break;
-            case quickMap.showGenetics:
-              s = global.settings.arpa;
+            case quickMap.showGenetics: {
+              // `s` is global.settings in every other branch; this one used to
+              // reassign it to the arpa sub-object, so one variable held two
+              // unrelated shapes. Scoped to its own name instead — same values,
+              // same order, no reassignment.
+              const arpa = global.settings.arpa;
               tabName = "arpaTabs";
-              tabList = [s.physics, s.genetics, s.crispr, s.blood];
+              tabList = [arpa.physics, arpa.genetics, arpa.crispr, arpa.blood];
               break;
+            }
             case quickMap.showAchieve:
               tabName = "statsTabs";
               tabList = ["Stats", "Achievements", "Perks"]; // always visible
