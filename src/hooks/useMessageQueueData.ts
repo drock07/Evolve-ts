@@ -108,6 +108,7 @@ export function useMessageQueueData(): { data: MessageQueueData; callbacks: Mess
                 global.settings.msgFilters[filter].save = save;
                 global.lastMsg[filter].splice(save);
             });
+            notifyStateChange();
         },
     };
 

@@ -4,6 +4,7 @@
  */
 
 import { useGameTick } from './useGameState';
+import { notifyStateChange } from '../state';
 import { global } from '../vars';
 import { loc } from '../locale';
 import { TopBarData, TopBarCallbacks } from '../components/TopBar';
@@ -100,6 +101,7 @@ export function useTopBarData(): { data: TopBarData; callbacks: TopBarCallbacks 
             } else {
                 global.settings.pause = true;
             }
+            notifyStateChange();
         },
     };
 

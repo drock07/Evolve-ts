@@ -4,6 +4,7 @@
  */
 
 import { useGameTick } from './useGameState';
+import { notifyStateChange } from '../state';
 import { global, save, webWorker, sizeApproximation } from '../vars';
 import { loc, locales } from '../locale';
 import { legacy } from './legacyBridge';
@@ -244,6 +245,7 @@ export function useSettingsData(): { data: SettingsPanelData; callbacks: Setting
                     s.q_resize = value;
                     break;
             }
+            notifyStateChange();
         },
         onToggleChange: (id, value) => {
             (s as any)[id] = value;
@@ -260,9 +262,11 @@ export function useSettingsData(): { data: SettingsPanelData; callbacks: Setting
             if (id === 'tabLoad') {
                 // Trigger tab reload
             }
+            notifyStateChange();
         },
         onKeyMapChange: (id, value) => {
             (s.keyMap as any)[id] = value;
+            notifyStateChange();
         },
         onImport: (data) => {
             if (data.length > 0) {
@@ -306,10 +310,15 @@ export function useSettingsData(): { data: SettingsPanelData; callbacks: Setting
                 try {
                     JSON.parse(evt.target!.result as string);
                 } catch {
+                    // Notify on the failure path too: the message is what the
+                    // user sees, and it is set asynchronously from FileReader,
+                    // so nothing else will repaint it.
                     s.sPackMsg = loc('string_pack_error', [file.name]);
+                    notifyStateChange();
                     return;
                 }
                 s.sPackMsg = loc('string_pack_using', [file.name]);
+                notifyStateChange();
                 save.setItem('string_pack_name', file.name);
                 save.setItem('string_pack', LZString.compressToUTF16(evt.target!.result as string));
                 if (s.sPackOn) {
@@ -328,9 +337,11 @@ export function useSettingsData(): { data: SettingsPanelData; callbacks: Setting
                     reloadPage();
                 }
             }
+            notifyStateChange();
         },
         onDisableResetToggle: (value) => {
             s.disableReset = value;
+            notifyStateChange();
         },
     };
 

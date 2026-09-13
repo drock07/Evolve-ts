@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+import { notifyStateChange } from '../state';
 import { global, sizeApproximation, keyMultiplier, tmp_vars, breakdown } from '../vars';
 import { loc } from '../locale';
 import { legacy } from './legacyBridge';
@@ -147,6 +148,7 @@ export function useResourceData(): ResourcePanelItem[] {
             onToggleBar: () => {
                 global.settings.resBar[name] = !global.settings.resBar[name];
                 global.resource[name].bar = global.settings.resBar[name];
+                notifyStateChange();
             },
             onMouseOver: () => {
                 $(`.res-${name}`).each(function () {
