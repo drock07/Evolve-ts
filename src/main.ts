@@ -229,6 +229,7 @@ import { setWeather, seasonDesc, astrologySign, astroVal } from "./seasons";
 import { getTopChange } from "./wiki/change";
 import { enableDebug, updateDebugData } from "./debug";
 import { legacy } from './hooks/legacyBridge';
+import { installTestHooks } from './testHooks';
 
 // Populate legacy bridge so React hooks can access these without circular deps
 legacy.actions = actions;
@@ -243,6 +244,9 @@ legacy.gameLoop = gameLoop;
 legacy.loopTimers = loopTimers;
 legacy.initMessageQueue = initMessageQueue;
 legacy.execGameLoops = execGameLoops;
+
+// No-op unless the page URL carries ?e2e=1 (see src/testHooks.ts)
+installTestHooks(execGameLoops);
 
 // Mount React root, then run legacy init once DOM is ready
 mountApp().then(() => {
@@ -665,7 +669,6 @@ function legacyDOMInit() {
     },
   );
 
-  var moraleCap = 125;
 
   popover(
     "morale",
@@ -1377,6 +1380,12 @@ function legacyDOMInit() {
 
   $("#lbl_city").html("Village");
 } // end legacyDOMInit
+
+// Module-scoped: assigned in fastLoop() and read by the morale popover in
+// legacyDOMInit(). The React migration briefly moved this inside
+// legacyDOMInit(), which put it out of scope for fastLoop() and threw a
+// ReferenceError on the first tick after leaving the evolution phase.
+var moraleCap = 125;
 
 var loopTick = 0; // Used to synchronize the fast, mid, and long loops to each other
 export function execGameLoops(periods = 1) {
