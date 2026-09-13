@@ -8,6 +8,7 @@ import { syndicate } from './truepath';
 import { govActive, defineGovernor } from './governor';
 import { govEffect } from './civics';
 import { highPopAdjust, production, teamster } from './prod';
+import { astrologySign, astroVal } from './seasons';
 import { loc } from './locale';
 
 export const resource_values = {
@@ -1117,7 +1118,7 @@ export function marketItem(mount,market_item,name,color,full){
                 if (global.race['persuasive']){
                     rate *= 1 + (global.race['persuasive'] / 100);
                 }
-                if (astroSign === 'capricorn'){
+                if (astrologySign() === 'capricorn'){
                     rate *= 1 + (astroVal('capricorn')[0] / 100);
                 }
                 if (global.race['ocular_power'] && global.race['ocularPowerConfig'] && global.race.ocularPowerConfig.c){
