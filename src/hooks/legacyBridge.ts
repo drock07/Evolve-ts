@@ -36,6 +36,10 @@ export const legacy = {
     // From civics.ts
     /** Raise or lower the tax rate; honours keyMultiplier when n is omitted. */
     adjustTax: null as any,
+    /** Toggle the MAD missiles between live and safe. */
+    madArm: null as any,
+    /** Fire the missiles: detonation animation, then a game reset. */
+    madLaunch: null as any,
 
     // From index.ts
     /** Draws a legacy tab's markup into its panel and binds Vue to it. */

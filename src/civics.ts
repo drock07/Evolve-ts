@@ -1,4 +1,5 @@
 import { mountTaxRates } from './components/mountTaxRates';
+import { mountMad } from './components/mountMad';
 import { global, seededRandom, keyMultiplier, sizeApproximation, p_on } from './vars';
 import { loc } from './locale';
 import { calcPrestige, clearElement, popover, clearPopper, vBind, timeFormat, modRes, messageQueue, genCivName, darkEffect, eventActive, easterEgg, trickOrTreat } from './functions';
@@ -34,13 +35,13 @@ export function defineGovernment(define?){
     var tabs = $(`<b-tabs class="resTabs govTabs2" v-show="vis()" v-model="s.govTabs2" :animated="s.animated">
         <b-tab-item id="r_govern0">
             <template slot="header">
-                <h2 class="is-sr-only">${loc('civics_government')}}</h2>
+                <h2 class="is-sr-only">${loc('civics_government')}</h2>
                 <span aria-hidden="true">${loc('civics_government')}</span>
             </template>
         </b-tab-item>
         <b-tab-item id="r_govern1" :visible="s.showGovernor">
             <template slot="header">
-                <h2 class="is-sr-only">${loc('governor')}}</h2>
+                <h2 class="is-sr-only">${loc('governor')}</h2>
                 <span aria-hidden="true">${loc('governor')}</span>
             </template>
         </b-tab-item>
@@ -2376,6 +2377,33 @@ export function garrisonSize(max?, args = {}){
     return troops;
 }
 
+/**
+ * Toggle the missiles between live and safe.
+ *
+ * Note the inversion: `armed: false` is the LIVE state. Only the flag is
+ * changed here — the button label and the hazard class are the view's job now.
+ */
+export function madArm(){
+    global.civic.mad.armed = !global.civic.mad.armed;
+}
+
+/**
+ * Fire. Runs the detonation animation and then resets the game via warhead().
+ *
+ * Guarded exactly as the Vue original was: live missiles only, and never
+ * during a cataclysm run.
+ */
+export function madLaunch(){
+    if (!global.civic.mad.armed && !global.race['cataclysm']){
+        $('body').addClass('nuke');
+        let nuke = $('<div class="nuke"></div>');
+        $('body').append(nuke);
+        setTimeout(function(){ nuke.addClass('burn'); }, 500);
+        setTimeout(function(){ nuke.addClass('b'); }, 600);
+        setTimeout(function(){ warhead(); }, 4000);
+    }
+}
+
 function defineMad(){
     if (global.race['sludge'] || global.race['ultra_sludge']){ return false; }
     if ($(`#mad`).length === 0){
@@ -2397,40 +2425,9 @@ function defineMad(){
             $('#mad .arm').html(loc(altText ? 'civics_mad_disarm_grenades' : 'civics_mad_disarm_missiles'));
         }
 
-        vBind({
-            el: '#mad',
-            data: global.civic['mad'],
-            methods: {
-                launch(){
-                    if (!global.civic.mad.armed && !global.race['cataclysm']){
-                        $('body').addClass('nuke');
-                        let nuke = $('<div class="nuke"></div>');
-                        $('body').append(nuke);
-                        setTimeout(function(){
-                            nuke.addClass('burn');
-                        }, 500);
-                        setTimeout(function(){
-                            nuke.addClass('b');
-                        }, 600);
-                        setTimeout(function(){
-                            warhead();
-                        }, 4000);
-                    }
-                },
-                arm(){
-                    if (global.civic.mad.armed){
-                        $('#mad .arm').html(loc(altText ? 'civics_mad_disarm_grenades' : 'civics_mad_disarm_missiles'));
-                        global.civic.mad.armed = false;
-                        $('#mad').addClass('armed');
-                    }
-                    else {
-                        $('#mad .arm').html(loc(altText ? 'civics_mad_arm_grenades' : 'civics_mad_arm_missiles'));
-                        global.civic.mad.armed = true;
-                        $('#mad').removeClass('armed');
-                    }
-                }
-            }
-        });
+        // Contents rendered by the React MadControl island; civics.ts keeps
+        // building the container so the surrounding layout is untouched.
+        mountMad();
 
         ['mdarm','mdlaunch'].forEach(function(k){
             popover(`mad${k}`,

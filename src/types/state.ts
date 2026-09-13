@@ -206,6 +206,16 @@ export interface CivicFixed {
     // tests/unit/state-shapes.test.ts.
     taxes?: CivicTaxes;
     garrison?: CivicGarrison;
+    /**
+     * Mutual Assured Destruction.
+     *
+     * `armed` means the opposite of what it reads as: when it is FALSE the
+     * missiles are live — warhead() and launch() both guard on `!armed`, the
+     * hazard-stripe CSS class is added then, and the button offers to disarm.
+     * `armed: true` is the safe state, which is why the launch button binds
+     * :disabled="armed". Renaming it would break every existing save, so it
+     * is documented rather than corrected.
+     */
     mad?: { display: boolean; armed: boolean };
     /** Rival governments, keyed gov0..govN. */
     foreign: Record<string, Record<string, StateScalar>>;
