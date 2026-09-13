@@ -122,10 +122,13 @@ test.describe('modal behaviour', () => {
     test('opens as a real modal dialog, not just a styled div', async ({ page }) => {
         await openModal(page);
 
+        // More than one Modal exists on the page — the message queue has its
+        // own — so target the open one rather than the first in the document.
+        //
         // A dialog opened with showModal() reports open and sits in the top
         // layer; one merely shown with the open attribute does not.
         const modal = await page.evaluate(() => {
-            const d = document.querySelector('dialog.evolveModal') as HTMLDialogElement | null;
+            const d = document.querySelector('dialog.evolveModal[open]') as HTMLDialogElement | null;
             return { exists: !!d, open: d?.open ?? false, matchesTopLayer: d?.matches(':modal') ?? false };
         });
         expect(modal.exists).toBe(true);
@@ -141,7 +144,7 @@ test.describe('modal behaviour', () => {
 
     test('the close button closes it', async ({ page }) => {
         await openModal(page);
-        await page.locator('dialog.evolveModal .modalClose').click();
+        await page.locator('dialog.evolveModal[open] .modalClose').click();
         await expect(page.locator('#govModal')).toHaveCount(0);
     });
 
@@ -149,11 +152,11 @@ test.describe('modal behaviour', () => {
         await openModal(page);
 
         // A click inside the panel must not dismiss.
-        await page.locator('dialog.evolveModal .modalBox').click({ position: { x: 5, y: 5 } });
+        await page.locator('dialog.evolveModal[open] .modalBox').click({ position: { x: 5, y: 5 } });
         await expect(page.locator('#govModal')).toHaveCount(1);
 
         // The backdrop is the dialog element itself, outside the panel box.
-        await page.locator('dialog.evolveModal').click({ position: { x: 2, y: 2 } });
+        await page.locator('dialog.evolveModal[open]').click({ position: { x: 2, y: 2 } });
         await expect(page.locator('#govModal')).toHaveCount(0);
     });
 
@@ -168,7 +171,7 @@ test.describe('modal behaviour', () => {
         // showModal() moves focus inside; this is the containment a hand-rolled
         // modal has to implement by hand.
         const inside = await page.evaluate(
-            () => !!document.activeElement?.closest('dialog.evolveModal'),
+            () => !!document.activeElement?.closest('dialog.evolveModal[open]'),
         );
         expect(inside, 'focus did not move into the dialog').toBe(true);
 

@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { Dialog, DialogPanel, DialogTitle, DialogBackdrop } from '@headlessui/react';
+import { Modal } from './Modal';
 
 // ── Types ──
 
@@ -86,12 +86,8 @@ function MessageSettingsModal({ open, onClose, filters, labels, callbacks }: {
     });
 
     return (
-        <Dialog open={open} onClose={onClose} className="modal is-active">
-            <DialogBackdrop className="modal-background" />
-            <div className="modal-content">
-                <DialogPanel className="modalBox" style={{ padding: '1rem', borderRadius: '1rem', textAlign: 'center' }}>
-                    <DialogTitle className="has-text-warning modalTitle">{labels.title}</DialogTitle>
-                    <div className="modalBody vscroll">
+        <Modal open={open} onClose={onClose} title={labels.title}>
+            <div className="modalBody vscroll">
                         {/* Visibility */}
                         <div>
                             <div><span className="has-text-warning">{labels.settingsVisible}</span></div>
@@ -149,10 +145,8 @@ function MessageSettingsModal({ open, onClose, filters, labels, callbacks }: {
                                 <button className="button" onClick={() => callbacks.onApplySave(saveInputs)}>{labels.apply}</button>
                             </div>
                         </div>
-                    </div>
-                </DialogPanel>
             </div>
-        </Dialog>
+        </Modal>
     );
 }
 
