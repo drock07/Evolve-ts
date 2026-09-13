@@ -1,4 +1,4 @@
-import type { CityState } from './types/state';
+import type { CityState, RaceState } from './types/state';
 import { global, save, seededRandom, webWorker, clearSavedMessages, clearStates } from './vars';
 import { tagEvent, calcPrestige, updateResetStats } from './functions';
 import { races, planetTraits } from './races';
@@ -64,7 +64,7 @@ export function warhead(){
             universe: global.race.universe,
             seeded: false,
             ascended: global.race.hasOwnProperty('ascended') ? global.race.ascended : false,
-        };
+        } as unknown as RaceState;
         if (corruption > 0){
             global.race['corruption'] = corruption;
         }
@@ -205,7 +205,7 @@ export function bioseed(){
         geck: gecks,
         seed: Math.floor(seededRandom(10000)),
         ascended: false,
-    };
+    } as unknown as RaceState;
     if (corruption > 0){
         global.race['corruption'] = corruption;
     }
@@ -280,7 +280,7 @@ export function cataclysm_end(){
             universe: global.race.universe,
             seeded: false,
             ascended: global.race.hasOwnProperty('ascended') ? global.race.ascended : false,
-        };
+        } as unknown as RaceState;
         if (corruption > 0){
             global.race['corruption'] = corruption;
         }
@@ -410,7 +410,7 @@ export function big_bang(){
         //geck: gecks,
         seed: Math.floor(seededRandom(10000)),
         ascended: false
-    };
+    } as unknown as RaceState;
     if (corruption > 0){
         global.race['corruption'] = corruption;
     }
@@ -509,7 +509,7 @@ export function vacuumCollapse(){
             //geck: gecks,
             seed: Math.floor(seededRandom(10000)),
             ascended: false,
-        };
+        } as unknown as RaceState;
         if (corruption > 0){
             global.race['corruption'] = corruption;
         }
@@ -607,7 +607,7 @@ export function ascend(){
         seeded: false,
         seed: Math.floor(seededRandom(10000)),
         ascended: true,
-    };
+    } as unknown as RaceState;
     if (corruption > 0){
         global.race['corruption'] = corruption;
     }
@@ -729,7 +729,7 @@ export function descension(){
         seed: Math.floor(seededRandom(10000)),
         corruption: 5,
         ascended: global.race.hasOwnProperty('ascended') ? global.race.ascended : false,
-    };
+    } as unknown as RaceState;
     if (srace){
         global.race['srace'] = srace;
     }
@@ -818,7 +818,7 @@ export function apotheosis(){
         seeded: false,
         seed: Math.floor(seededRandom(10000)),
         ascended: true,
-    };
+    } as unknown as RaceState;
     if (corruption > 0){
         global.race['corruption'] = corruption;
     }
@@ -912,7 +912,7 @@ export function terraform(planet){
         seed: Math.floor(seededRandom(10000)),
         ascended: global.race.hasOwnProperty('ascended') ? global.race.ascended : false,
         rejuvenated: true,
-    };
+    } as unknown as RaceState;
     if (corruption > 0){
         global.race['corruption'] = corruption;
     }
@@ -991,7 +991,7 @@ export function aiApocalypse(){
         seeded: false,
         seed: Math.floor(seededRandom(10000)),
         ascended: global.race.hasOwnProperty('ascended') ? global.race.ascended : false,
-    };
+    } as unknown as RaceState;
     if (corruption > 0){
         global.race['corruption'] = corruption;
     }
@@ -1073,7 +1073,7 @@ export function matrix(){
         seeded: false,
         seed: Math.floor(seededRandom(10000)),
         ascended: global.race.hasOwnProperty('ascended') ? global.race.ascended : false,
-    };
+    } as unknown as RaceState;
     if (corruption > 0){
         global.race['corruption'] = corruption;
     }
@@ -1158,7 +1158,7 @@ export function retirement(){
         seeded: false,
         seed: Math.floor(seededRandom(10000)),
         ascended: global.race.hasOwnProperty('ascended') ? global.race.ascended : false,
-    };
+    } as unknown as RaceState;
     if (corruption > 0){
         global.race['corruption'] = corruption;
     }
@@ -1243,7 +1243,7 @@ export function gardenOfEden(){
         seeded: false,
         seed: Math.floor(seededRandom(10000)),
         ascended: global.race.hasOwnProperty('ascended') ? global.race.ascended : false,
-    };
+    } as unknown as RaceState;
     if (corruption > 0){
         global.race['corruption'] = corruption;
     }

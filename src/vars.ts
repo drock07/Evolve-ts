@@ -1,6 +1,7 @@
 import type {
     CityState, CivicState, ResourceState, TechState,
     GenesState, BloodState, StatsState, GameStateRuntime,
+    RaceState, SpaceState, EvolutionState, SupportState, PrestigeState,
 } from './types/state';
 
 export var save = window.localStorage;
@@ -60,6 +61,9 @@ type TypedSubtrees = {
     genes: GenesState;
     blood: BloodState;
     stats: StatsState;
+    race: RaceState;
+    space: SpaceState;
+    evolution: EvolutionState;
 };
 
 export type GameState =
@@ -2054,7 +2058,7 @@ if (global['arpa'] && global.arpa['launch_facility'] && global.arpa.launch_facil
 }
 
 function newGameData(){
-    global['race'] = { species : 'protoplasm', gods: 'none', old_gods: 'none', seeded: false };
+    global['race'] = { species : 'protoplasm', gods: 'none', old_gods: 'none', seeded: false } as unknown as RaceState;
     global['seed'] = Math.rand(0,10000);
     global['warseed'] = Math.rand(0,10000);
     global['new'] = true;
@@ -2278,7 +2282,7 @@ window.soft_reset = function reset(source){
     if (global.race.hasOwnProperty('corruption')){
         replace['corruption'] = global.race.corruption;
     }
-    global['race'] = replace;
+    global['race'] = replace as unknown as RaceState;
 
     let orbit = global.city.calendar.orbit;
     let biome = global.city.biome;

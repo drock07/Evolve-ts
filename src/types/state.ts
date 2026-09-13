@@ -30,7 +30,8 @@ export type StateScalar = number | string | boolean | undefined;
 // ── global.city ──────────────────────────────────────────────────────────────
 
 /**
- * A constructed structure.
+ * A constructed structure. Shared by global.city and global.space, whose
+ * entries have the identical shape.
  *
  * `count`, `time` and `bn` appear on every structure in both save fixtures;
  * `on` only on the ~half that consume power. The index signature carries
@@ -38,7 +39,7 @@ export type StateScalar = number | string | boolean | undefined;
  * craft assignments (`Plywood`, `Brick`, …), factory production splits (`Lux`,
  * `Alloy`, …) — which are all numbers in practice.
  */
-export interface CityStructure {
+export interface GameStructure {
     /** How many are built. */
     count: number;
     /** How many are powered on, for structures that draw power. */
@@ -119,11 +120,11 @@ export interface CityFixed {
 /**
  * Intersection rather than an interface with an index signature: TypeScript
  * requires a declared property to be assignable to the index type, and
- * `CityCalendar` is not a `CityStructure`. The cost is that a special key
- * reads as `Fixed & CityStructure`; the benefit is that both halves stay
+ * `CityCalendar` is not a `GameStructure`. The cost is that a special key
+ * reads as `Fixed & GameStructure`; the benefit is that both halves stay
  * typed instead of collapsing to `any`.
  */
-export type CityState = CityFixed & { [structure: string]: CityStructure };
+export type CityState = CityFixed & { [structure: string]: GameStructure };
 
 // ── global.civic ─────────────────────────────────────────────────────────────
 
@@ -332,7 +333,9 @@ export interface GameStateRuntime {
     power: unknown[];
 
     /** Prestige currencies. Absent from saves older than 1.3. */
-    prestige?: {};
+    prestige?: PrestigeState;
+    /** Support pools per region. */
+    support: SupportState;
 
     // Not yet typed — each is a subtree of its own.
     arpa: {};
@@ -346,5 +349,101 @@ export interface GameStateRuntime {
     settings: {};
     special: {};
     starDock: {};
-    support: {};
 }
+
+// ── global.space ─────────────────────────────────────────────────────────────
+
+/**
+ * Space structures, flat rather than nested by sector — `spc_casino` and
+ * `spc_moon_base` sit side by side, with the sector encoded in the id. The
+ * entries have the same shape as city structures.
+ */
+export interface SpaceFixed {
+    /** Syndicate pressure per region, keyed by region id. */
+    syndicate?: Record<string, number>;
+    /** Orbital positions, used by the Tau Ceti transit calculations. */
+    position?: Record<string, number>;
+}
+
+export type SpaceState = SpaceFixed & Record<string, GameStructure>;
+
+// ── global.race ──────────────────────────────────────────────────────────────
+
+/** A prestige currency as stored on pre-1.3 saves, before global.prestige existed. */
+export interface RacePrestige {
+    count: number;
+    /** Anti-plasmids, on the Plasmid record only. */
+    anti?: number;
+}
+
+/** The keys of `global.race` that are not trait levels. */
+export interface RaceFixed {
+    species: string;
+    universe: string;
+    gods: string;
+    old_gods: string;
+    /** Species picked at the sentience step. */
+    chose?: string;
+    ascended?: boolean;
+    seeded?: boolean;
+    /**
+     * Minor gene levels contributed by the species, and structures/techs held
+     * in reserve across a reset. Both are genuinely absent on the race
+     * skeleton the reset paths in resets.ts build, and are repopulated by the
+     * define*() passes straight afterwards.
+     */
+    minor?: Record<string, number>;
+    purgatory?: Record<string, Record<string, unknown>>;
+
+    // Prestige currencies lived here before the 1.3 migration moved them to
+    // global.prestige. Still read by that migration, so still typed.
+    Plasmid?: RacePrestige;
+    Phage?: RacePrestige;
+    Dark?: RacePrestige;
+    Harmony?: RacePrestige;
+    AICore?: RacePrestige;
+}
+
+/**
+ * Everything else on `global.race` is a trait level, keyed by trait name —
+ * which is why the engine reads it as `global.race['brute']` throughout. A
+ * trait the species lacks is absent rather than zero.
+ */
+export type RaceState = RaceFixed & Record<string, number>;
+
+// ── global.prestige ──────────────────────────────────────────────────────────
+
+/** Prestige currencies, post-1.3. Keyed by resource name. */
+export type PrestigeState = Record<string, RacePrestige>;
+
+// ── global.evolution ─────────────────────────────────────────────────────────
+
+/** An evolution-phase upgrade; `count` is how many times it has been bought. */
+export interface EvolutionAction {
+    count: number;
+}
+
+/** The keys of `global.evolution` that are not upgrades. */
+export interface EvolutionFixed {
+    dna?: number;
+    /** Target DNA for the final evolution step. */
+    final?: number;
+    /** One-shot flags marking that a prestige bonus has been applied. */
+    mloaded?: number;
+    gmloaded?: number;
+    gselect?: boolean;
+}
+
+/**
+ * Evolution-phase progress. Same shape of problem as `global.city`: upgrade
+ * records share a namespace with a few scalar flags.
+ */
+export type EvolutionState = EvolutionFixed & Record<string, EvolutionAction>;
+
+// ── global.support ───────────────────────────────────────────────────────────
+
+/**
+ * Support-consuming structures per region, keyed by region id. Each value is
+ * a list of structure ids drawing on that region's support pool.
+ */
+export type SupportState = Record<string, string[]>;

@@ -5534,7 +5534,7 @@ function challengeEffect(c){
         }
         case 'warlord':
         {
-            if (global.prestige.Artifact === 0){
+            if (global.prestige.Artifact.count === 0){
                 return `<div>${loc('evo_challenge_warlord_effect')}</div><div class="has-text-danger">${loc('evo_challenge_warlord_warn',[1,loc(`resource_Artifact_name`)])}</div>`;
             }
             break;

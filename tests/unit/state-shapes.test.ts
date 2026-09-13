@@ -56,7 +56,7 @@ describe.each(FIXTURES)('%s', name => {
     });
 
     it('city structure extras are all primitives', () => {
-        // CityStructure's index signature is `number | string | boolean |
+        // GameStructure's index signature is `number | string | boolean |
         // undefined`; an object or array here would silently not typecheck.
         const offenders: string[] = [];
         for (const [key, value] of Object.entries(save.city ?? {})) {
