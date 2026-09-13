@@ -1,4 +1,5 @@
 import { global, save, seededRandom, webWorker, keyMultiplier, keyMap, srSpeak, sizeApproximation, p_on, support_on, int_on, gal_on, spire_on, tmp_vars, setupStats, callback_queue } from './vars';
+import type { StatsState, GenesState } from './types/state';
 import { loc } from './locale';
 import { timeCheck, timeFormat, vBind, popover, clearPopper, flib, tagEvent, clearElement, costMultiplier, darkEffect, genCivName, powerModifier, powerCostMod, calcPrestige, adjustCosts, modRes, messageQueue, buildQueue, format_emblem, shrineBonusActive, calc_mastery, calcPillar, calcGenomeScore, getShrineBonus, eventActive, easterEgg, getHalloween, trickOrTreat, deepClone, hoovedRename, get_qlevel } from './functions';
 import { unlockAchieve, challengeIcon, alevel, universeAffix, checkAdept } from './achieve';
@@ -8982,14 +8983,16 @@ function simulation(){
                 race: deepClone(global.race)
             };
 
+            // Reset skeletons: setupStats() adds the achieve/feat/banana maps
+            // and the lifetime counters immediately after.
             global.stats = {
                 start: Date.now(),
                 days: 0,
                 tdays: 0
-            };
+            } as unknown as StatsState;
             setupStats();
 
-            global.genes = { minor: {}, challenge: 1 };
+            global.genes = { minor: {}, challenge: 1 } as unknown as GenesState;
             global.blood = { aware: 1 };
             global.pillars = {};
             delete global.race['ancient_ruins'];

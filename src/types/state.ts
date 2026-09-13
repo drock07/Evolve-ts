@@ -202,3 +202,149 @@ export interface CivicFixed {
 
 /** See the note on `CityState` for why this is an intersection. */
 export type CivicState = CivicFixed & { [job: string]: CivicJob };
+
+// ── global.resource ──────────────────────────────────────────────────────────
+
+/**
+ * A resource.
+ *
+ * Unlike city and civic, this subtree is a clean uniform map — every one of
+ * the 123 entries across both fixtures has the nine required fields below,
+ * and there are no special keys mixed in. The current species is itself a
+ * resource here (`global.resource[global.race.species]` is the population).
+ */
+export interface GameResource {
+    name: string;
+    display: boolean;
+    amount: number;
+    /** Storage cap; -1 means uncapped. */
+    max: number;
+    /** Per-second change shown in the UI. */
+    diff: number;
+    delta: number;
+    rate: number;
+    crates: number;
+    /** Absent on records built by the pre-1.4 migration paths in vars.ts. */
+    containers?: number;
+
+    /** Whether crates/containers can be assigned. Absent on a few specials. */
+    stackable?: boolean;
+    /**
+     * Show a storage bar in the UI. Written by useResourceData, never
+     * persisted — a view concern living on the model.
+     */
+    bar?: boolean;
+    /**
+     * Read by the magic-universe alchemy code in main.ts and assigned
+     * nowhere, here or upstream, so it is permanently undefined and that
+     * branch is dead. Typed as it is used; whether the distinction should
+     * exist at all is a balance question, not a typing one.
+     */
+    basic?: boolean;
+    /** Market value, on tradeable resources only. */
+    value?: number;
+    /** Net trade-route volume, on tradeable resources only. */
+    trade?: number;
+    /** Generation bookkeeping, used by a couple of special resources. */
+    gen?: number;
+    gen_d?: number;
+}
+
+export type ResourceState = Record<string, GameResource>;
+
+// ── global.tech ──────────────────────────────────────────────────────────────
+
+/**
+ * Researched technologies, keyed by tech id, valued by tier reached.
+ * A tech that has not been researched is absent rather than zero, so most
+ * call sites test `global.tech['x']` for truthiness before reading it.
+ */
+export type TechState = Record<string, number>;
+
+// ── global.genes / global.blood ──────────────────────────────────────────────
+
+/** Minor gene levels, keyed by trait name. */
+export type GenesMinor = Record<string, number>;
+
+/** Genetic upgrade levels, plus the nested minor-gene map. */
+export type GenesState = { minor: GenesMinor } & Record<string, number>;
+
+/** Blood ritual upgrade levels. */
+export type BloodState = Record<string, number>;
+
+// ── global.stats ─────────────────────────────────────────────────────────────
+
+/** An earned achievement. `l` is the level; universe ids carry per-universe levels. */
+export interface StatsAchievement {
+    l: number;
+    [universe: string]: number;
+}
+
+/** Banana-feat progress flags. */
+export interface StatsBanana {
+    l: boolean;
+    h: boolean;
+    a: boolean;
+    e: boolean;
+    m: boolean;
+    mg: boolean;
+}
+
+/** The keys of `global.stats` that are not plain counters. */
+export interface StatsFixed {
+    /** Wall-clock ms at which this run began. */
+    start: number;
+    days: number;
+    tdays: number;
+
+    achieve: Record<string, StatsAchievement>;
+    feat: Record<string, number>;
+    banana: Record<string, StatsBanana>;
+    spire: Record<string, unknown>;
+    /** Only present once the relevant content has been reached. */
+    synth?: Record<string, unknown>;
+    womling?: Record<string, unknown>;
+}
+
+/**
+ * Everything else in `global.stats` is a lifetime counter — days, kills,
+ * resets, resources harvested. See the note on `CityState` for why this is
+ * an intersection.
+ */
+export type StatsState = StatsFixed & Record<string, number>;
+
+// ── the root ─────────────────────────────────────────────────────────────────
+
+/**
+ * Keys that exist on a live `global` but not on the new-game skeleton in
+ * vars.ts — they are added by newGameData(), by the save-migration chain, or
+ * by a loaded save.
+ *
+ * The untyped ones are deliberately `{}` rather than a looser type: that makes
+ * the key itself resolve while member access still reports an error, which
+ * keeps each of these subtrees on the worklist instead of silently passing.
+ */
+export interface GameStateRuntime {
+    version: string;
+    /** True until the first meaningful action of a run. */
+    new: boolean;
+    /** Power grid snapshot, rebuilt each long loop. */
+    power: unknown[];
+
+    /** Prestige currencies. Absent from saves older than 1.3. */
+    prestige?: {};
+
+    // Not yet typed — each is a subtree of its own.
+    arpa: {};
+    custom: {};
+    galaxy: {};
+    govern: {};
+    lastMsg: {};
+    pillars: {};
+    queue: {};
+    r_queue: {};
+    settings: {};
+    special: {};
+    starDock: {};
+    support: {};
+}

@@ -9,6 +9,7 @@ import { govActive, defineGovernor } from './governor';
 import { govEffect } from './civics';
 import { highPopAdjust, production, teamster } from './prod';
 import { astrologySign, astroVal } from './seasons';
+import type { GameResource } from './types/state';
 import { loc } from './locale';
 
 export const resource_values = {
@@ -776,7 +777,9 @@ export function tradeSummery(){
 function loadResource(name,wiki,max,rate,tradable,stackable?,color?){
     color = color || 'info';
     if (!global.resource[name]){
-        global.resource[name] = {};
+        // Built up field by field below, each behind a hasOwnProperty guard,
+        // so the record is genuinely empty for the next few statements.
+        global.resource[name] = {} as GameResource;
     }
 
     setResourceName(name);

@@ -1,4 +1,7 @@
-import type { CityState, CivicState } from './types/state';
+import type {
+    CityState, CivicState, ResourceState, TechState,
+    GenesState, BloodState, StatsState, GameStateRuntime,
+} from './types/state';
 
 export var save = window.localStorage;
 /**
@@ -49,10 +52,20 @@ const initialGlobal = {
  * To type another subtree: describe it in src/types/state.ts from the save
  * fixtures, then add its key here.
  */
-export type GameState = Omit<typeof initialGlobal, 'city' | 'civic'> & {
+type TypedSubtrees = {
     city: CityState;
     civic: CivicState;
+    resource: ResourceState;
+    tech: TechState;
+    genes: GenesState;
+    blood: BloodState;
+    stats: StatsState;
 };
+
+export type GameState =
+    Omit<typeof initialGlobal, keyof TypedSubtrees>
+    & TypedSubtrees
+    & GameStateRuntime;
 
 /**
  * The cast is load-bearing and honest: `initialGlobal` really is an incomplete

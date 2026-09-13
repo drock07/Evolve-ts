@@ -96,6 +96,60 @@ describe.each(FIXTURES)('%s', name => {
         }
     });
 
+    it('every resource has the required GameResource fields', () => {
+        // ResourceState is a plain Record with no special keys — if this
+        // starts failing, something non-uniform moved into global.resource.
+        const offenders: string[] = [];
+        for (const [key, value] of Object.entries(save.resource ?? {})) {
+            if (typeof value !== 'object' || value === null) {
+                offenders.push(`${key}: ${typeof value}`);
+                continue;
+            }
+            const res = value as any;
+            for (const f of ['amount', 'max', 'diff', 'delta', 'rate', 'crates']) {
+                if (typeof res[f] !== 'number') offenders.push(`${key}.${f}: ${typeof res[f]}`);
+            }
+            if (typeof res.name !== 'string') offenders.push(`${key}.name`);
+            if (typeof res.display !== 'boolean') offenders.push(`${key}.display`);
+        }
+        expect(offenders).toEqual([]);
+    });
+
+    it('tech and blood are flat number maps', () => {
+        for (const [k, v] of Object.entries(save.tech ?? {})) {
+            expect(typeof v, `tech.${k}`).toBe('number');
+        }
+        for (const [k, v] of Object.entries(save.blood ?? {})) {
+            expect(typeof v, `blood.${k}`).toBe('number');
+        }
+    });
+
+    it('genes is a number map apart from the nested minor map', () => {
+        for (const [k, v] of Object.entries(save.genes ?? {})) {
+            if (k === 'minor') {
+                for (const [mk, mv] of Object.entries(v as object)) {
+                    expect(typeof mv, `genes.minor.${mk}`).toBe('number');
+                }
+                continue;
+            }
+            expect(typeof v, `genes.${k}`).toBe('number');
+        }
+    });
+
+    it('stats counters are numbers and its nested maps match', () => {
+        const NESTED = new Set(['achieve', 'feat', 'banana', 'spire', 'synth', 'womling']);
+        for (const [k, v] of Object.entries(save.stats ?? {})) {
+            if (NESTED.has(k)) continue;
+            expect(typeof v, `stats.${k}`).toBe('number');
+        }
+        for (const [k, v] of Object.entries(save.stats?.achieve ?? {})) {
+            expect(typeof (v as any).l, `stats.achieve.${k}.l`).toBe('number');
+        }
+        for (const [k, v] of Object.entries(save.stats?.feat ?? {})) {
+            expect(typeof v, `stats.feat.${k}`).toBe('number');
+        }
+    });
+
     it('civic.govern matches CivicGovernment', () => {
         expect(typeof save.civic.govern.type).toBe('string');
         expect(typeof save.civic.govern.rev).toBe('number');
