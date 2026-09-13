@@ -7316,7 +7316,7 @@ export function cleanAddTrait(trait){
             renderSupernatural();
             break;
         case 'ooze':
-            if (!global.tech['high_tech'] && global.race.species !== 'custom' && (global.race.species !== 'sludge' || global.race.species !== 'ultra_sludge')){
+            if (!global.tech['high_tech'] && global.race.species !== 'custom' && (global.race.species !== 'sludge' && global.race.species !== 'ultra_sludge')){
                 global.race['gross_enabled'] = 1;
             }
             calc_mastery(true);

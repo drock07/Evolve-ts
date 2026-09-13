@@ -1984,7 +1984,7 @@ function kindlingAdjust(costs, offset, wiki){
             var newCosts = {};
             let adjustRate = 1 - (0.4 * fathom);
             Object.keys(costs).forEach(function (res){
-                if (res === 'Lumber' && res === 'Plywood'){
+                if (res === 'Lumber' || res === 'Plywood'){
                     newCosts[res] = function(){ return Math.round(costs[res](offset, wiki) * adjustRate) || 0; }
                 }
                 else {
