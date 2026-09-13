@@ -243,6 +243,7 @@ legacy.flib = flib;
 legacy.gameLoop = gameLoop;
 legacy.loopTimers = loopTimers;
 legacy.initMessageQueue = initMessageQueue;
+legacy.loadTab = loadTab;
 legacy.execGameLoops = execGameLoops;
 
 // No-op unless the page URL carries ?e2e=1 (see src/testHooks.ts)

@@ -33,6 +33,10 @@ export const legacy = {
     loopTimers: null as any,
     initMessageQueue: null as any,
 
+    // From index.ts
+    /** Draws a legacy tab's markup into its panel and binds Vue to it. */
+    loadTab: null as any,
+
     // From main.ts
     execGameLoops: null as any,
 };

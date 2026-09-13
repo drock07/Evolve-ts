@@ -23,6 +23,7 @@ import { useMessageQueueData } from './hooks/useMessageQueueData';
 import { SettingsPanel } from './components/SettingsPanel';
 import { MessageQueue } from './components/MessageQueue';
 import { global } from './vars';
+import { legacy } from './hooks/legacyBridge';
 import { loc } from './locale';
 
 function GameTab({ visible, label }: { visible: boolean; label: string }) {
@@ -59,20 +60,43 @@ export function App() {
         notifyAppReady();
     }, []);
 
-    // Sync tab selection from global (for legacy code that changes it)
+    /**
+     * Draw a legacy tab's contents.
+     *
+     * The City, Civics, Research, Resources, ARPA and Stats tabs are still
+     * rendered imperatively: loadTab appends their markup and binds Vue to it.
+     * Upstream drove this from mainVue's swapTab on every outer tab change.
+     * mainVue was replaced by this TabGroup and the call went with it, which
+     * left every one of those tabs blank.
+     *
+     * When tabLoad is on, initTabs() has already drawn them all at startup and
+     * loadTab would only re-tag the page view, so it is skipped.
+     */
+    const drawLegacyTab = useCallback((index: number) => {
+        if (!global.settings.tabLoad) {
+            legacy.loadTab?.(index);
+        }
+    }, []);
+
+    // Legacy code changes the selected tab directly (resets, the governor,
+    // tech unlocks), so the selection is polled as well as handled on click.
+    // Both routes have to redraw: selecting a tab without drawing it is what
+    // produced the blank panels.
     useEffect(() => {
         const interval = setInterval(() => {
             if (global.settings.civTabs !== selectedTab) {
                 setSelectedTab(global.settings.civTabs);
+                drawLegacyTab(global.settings.civTabs);
             }
         }, 250);
         return () => clearInterval(interval);
-    }, [selectedTab]);
+    }, [selectedTab, drawLegacyTab]);
 
     const handleTabChange = useCallback((index: number) => {
         setSelectedTab(index);
         global.settings.civTabs = index;
-    }, []);
+        drawLegacyTab(index);
+    }, [drawLegacyTab]);
 
     // Tab visibility based on game progress
     const showTab = (key: string | null): boolean => {
@@ -125,30 +149,30 @@ export function App() {
                                 </TabList>
                                 <TabPanels className="tab-content">
                                     {/* Evolution — React component */}
-                                    <TabPanel id="evolution" className="tab-item sticky">
+                                    <TabPanel unmount={false} id="evolution" className="tab-item sticky">
                                         <EvolutionTab actions={evolutionActions} />
                                     </TabPanel>
 
                                     {/* City — legacy mounts here */}
-                                    <TabPanel><div id="mTabCivil"></div></TabPanel>
+                                    <TabPanel unmount={false}><div id="mTabCivil"></div></TabPanel>
 
                                     {/* Civics — legacy mounts here */}
-                                    <TabPanel><div id="mTabCivic"></div></TabPanel>
+                                    <TabPanel unmount={false}><div id="mTabCivic"></div></TabPanel>
 
                                     {/* Research — legacy mounts here */}
-                                    <TabPanel><div id="mTabResearch"></div></TabPanel>
+                                    <TabPanel unmount={false}><div id="mTabResearch"></div></TabPanel>
 
                                     {/* Resources — legacy mounts here */}
-                                    <TabPanel><div id="mTabResource"></div></TabPanel>
+                                    <TabPanel unmount={false}><div id="mTabResource"></div></TabPanel>
 
                                     {/* ARPA — legacy mounts here */}
-                                    <TabPanel><div id="mTabArpa"></div></TabPanel>
+                                    <TabPanel unmount={false}><div id="mTabArpa"></div></TabPanel>
 
                                     {/* Stats — legacy mounts here */}
-                                    <TabPanel><div id="mTabStats"></div></TabPanel>
+                                    <TabPanel unmount={false}><div id="mTabStats"></div></TabPanel>
 
                                     {/* Settings — React component */}
-                                    <TabPanel id="mTabSettings" className="settings sticky">
+                                    <TabPanel unmount={false} id="mTabSettings" className="settings sticky">
                                         <SettingsPanel data={settings.data} callbacks={settings.callbacks} />
                                     </TabPanel>
                                 </TabPanels>
