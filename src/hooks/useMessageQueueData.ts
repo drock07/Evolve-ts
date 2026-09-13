@@ -1,9 +1,15 @@
 /**
  * Temporary bridge hook for MessageQueue data.
  * Reads from legacy global state and produces MessageQueueData props.
+ *
+ * Every callback below writes to `global` and then calls notifyStateChange().
+ * Without it these are controlled inputs bound to state React has not been
+ * told changed: a toggled checkbox snaps back until the next game tick
+ * corrects it, and never corrects at all while the game is paused.
  */
 
 import { useGameTick } from './useGameState';
+import { notifyStateChange } from '../state';
 import { global, message_logs, message_filters } from '../vars';
 import { loc } from '../locale';
 import { legacy } from './legacyBridge';
@@ -48,6 +54,7 @@ export function useMessageQueueData(): { data: MessageQueueData; callbacks: Mess
     const callbacks: MessageQueueCallbacks = {
         onFilterChange: (filter: string) => {
             message_logs.view = filter;
+            notifyStateChange();
         },
         onClear: (filter?: string) => {
             if (legacy.initMessageQueue) {
@@ -60,6 +67,7 @@ export function useMessageQueueData(): { data: MessageQueueData; callbacks: Mess
                     global.lastMsg[tag] = [];
                 });
             }
+            notifyStateChange();
         },
         onFilterVisibilityChange: (filter: string, visible: boolean) => {
             global.settings.msgFilters[filter].vis = visible;
@@ -72,12 +80,15 @@ export function useMessageQueueData(): { data: MessageQueueData; callbacks: Mess
                     }
                 }
             }
+            notifyStateChange();
         },
         onMaxChange: (filter: string, max: number) => {
             global.settings.msgFilters[filter].max = Math.max(1, max);
+            notifyStateChange();
         },
         onSaveChange: (filter: string, save: number) => {
             global.settings.msgFilters[filter].save = Math.max(0, Math.min(save, global.settings.msgFilters[filter].max));
+            notifyStateChange();
         },
         onApplyMax: (values: Record<string, number>) => {
             message_filters.forEach((filter: string) => {
@@ -89,6 +100,7 @@ export function useMessageQueueData(): { data: MessageQueueData; callbacks: Mess
                 }
                 message_logs[filter].splice(max);
             });
+            notifyStateChange();
         },
         onApplySave: (values: Record<string, number>) => {
             message_filters.forEach((filter: string) => {
