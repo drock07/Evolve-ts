@@ -1,0 +1,192 @@
+import type { Page } from '@playwright/test';
+
+/**
+ * Shared driver for the golden-master tests.
+ *
+ * Every helper here runs inside the page via `page.evaluate`, talking to the
+ * hooks installed by `src/testHooks.ts`. Keep the serialized payloads small:
+ * a full `global` snapshot for a late-game save is multiple megabytes.
+ */
+
+/** Matches TEST_SEED / TEST_EPOCH in src/testHooks.ts. */
+export const TEST_SEED = 12345;
+
+export interface BootOptions {
+    /** Seed injected into localStorage before the page's scripts run. */
+    save?: string;
+    /** Skip pinning Math.random — only for tests asserting on randomness. */
+    noPinRandom?: boolean;
+}
+
+/**
+ * Load the game, wait for it to finish booting, and put the engine under the
+ * test driver's exclusive control (worker silenced, RNG and clock pinned).
+ */
+export async function bootGame(page: Page, opts: BootOptions = {}): Promise<void> {
+    // A save has to be in localStorage before any module evaluates, because
+    // vars.ts reads it at import time and never re-reads it.
+    //
+    // Clearing is just as load-bearing as seeding: longLoop autosaves, so a
+    // second bootGame on the same page would otherwise resume the *previous*
+    // run's save instead of starting fresh — which silently destroys
+    // determinism and makes every golden master depend on test ordering.
+    await page.addInitScript(saveData => {
+        try {
+            window.localStorage.clear();
+            if (saveData) window.localStorage.setItem('evolved', saveData as string);
+        } catch {
+            // Storage can be unavailable; the game copes, so the harness does too.
+        }
+    }, opts.save ?? null);
+
+    // Keep the run hermetic: the page pulls in Google Analytics, which is both
+    // irrelevant to the engine and unreachable from a sandboxed CI runner.
+    // Aborting these requests removes a whole class of spurious failures.
+    await page.route('**/*', route => {
+        const url = new URL(route.request().url());
+        const isLocal = url.hostname === '127.0.0.1' || url.hostname === 'localhost';
+        return isLocal ? route.continue() : route.abort();
+    });
+
+    const errors: string[] = [];
+    page.on('pageerror', err => errors.push(String(err)));
+
+    await page.goto('/index.html?e2e=1', { waitUntil: 'domcontentloaded' });
+
+    // installTestHooks runs at module-eval time, but legacyInit only runs
+    // after the React root commits. Wait for the later of the two.
+    await page.waitForFunction(() => !!(window as any).__evolveTest__, null, { timeout: 60_000 });
+    await page.waitForSelector('#react-root', { timeout: 60_000 });
+    await page.waitForFunction(() => !document.querySelector('.loading'), null, { timeout: 60_000 });
+
+    if (errors.length) {
+        throw new Error(`Page errors during boot:\n${errors.join('\n')}`);
+    }
+
+    await page.evaluate(pin => {
+        const t = (window as any).__evolveTest__;
+        t.freeze();
+        t.pinClock();
+        if (pin) t.pinRandom();
+    }, !opts.noPinRandom);
+}
+
+/**
+ * Leave the evolution phase and start a civilization.
+ *
+ * Must be called after bootGame and before the ticks you want to measure.
+ */
+export async function startCivilization(page: Page, race = 'human'): Promise<void> {
+    await page.evaluate(r => {
+        (window as any).__evolveTest__.startCivilization(r);
+    }, race);
+}
+
+/** Advance the engine by `periods` fast-loop ticks. */
+export async function runTicks(page: Page, periods: number): Promise<void> {
+    await page.evaluate(n => {
+        (window as any).__evolveTest__.runTicks(n);
+    }, periods);
+}
+
+/**
+ * Snapshot a named subtree of `global`, rather than the whole object.
+ *
+ * Whole-state snapshots are both enormous and brittle — a single new setting
+ * key rewrites the entire golden file and buries any real diff. Slicing keeps
+ * each golden file readable and makes failures point somewhere specific.
+ */
+export async function snapshotSlice(page: Page, path: string): Promise<unknown> {
+    return page.evaluate(p => {
+        const snap = (window as any).__evolveTest__.snapshot();
+        return p.split('.').reduce((node: any, key: string) => node?.[key], snap) ?? null;
+    }, path);
+}
+
+/** Full snapshot — use sparingly, and only for early-game states. */
+export async function snapshotAll(page: Page): Promise<Record<string, unknown>> {
+    return page.evaluate(() => (window as any).__evolveTest__.snapshot());
+}
+
+/**
+ * Round every number in a structure to `digits` significant decimals.
+ *
+ * The engine accumulates floats across thousands of ticks, so the last bits
+ * drift between Chromium builds. Rounding keeps the golden master sensitive
+ * to real balance changes without failing on 1e-13 noise.
+ */
+export function roundNumbers<T>(value: T, digits = 6): T {
+    if (typeof value === 'number') {
+        if (!Number.isFinite(value)) return value;
+        return Number(value.toFixed(digits)) as unknown as T;
+    }
+    if (Array.isArray(value)) {
+        return value.map(v => roundNumbers(v, digits)) as unknown as T;
+    }
+    if (value && typeof value === 'object') {
+        const out: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(value)) {
+            out[k] = roundNumbers(v, digits);
+        }
+        return out as unknown as T;
+    }
+    return value;
+}
+
+/**
+ * Seed a small but genuinely active early-game civilization.
+ *
+ * `startCivilization` leaves the game at day 0, and longLoop's clock only
+ * runs once `calendar.day > 0` — so without this the engine is set up but
+ * idle, and a golden master over it would assert nothing. This grants the
+ * minimum that makes production, population and research actually flow:
+ * a started calendar, housed and employed citizens, and the three basic
+ * production buildings.
+ *
+ * Values are arbitrary but must stay fixed — changing them invalidates
+ * every committed snapshot.
+ */
+export async function seedScenario(page: Page): Promise<void> {
+    await page.evaluate(() => {
+        const g = (window as any).__evolveTest__.global;
+        const species = g.race.species;
+
+        // Start the clock.
+        g.city.calendar.day = 1;
+
+        // Housing and basic production.
+        g.city.basic_housing = { count: 8 };
+        g.city.farm = { count: 5 };
+        g.city.lumber_yard = { count: 4 };
+        g.city.rock_quarry = { count: 2, on: 2 };
+
+        // Population, housed and employed.
+        g.resource[species].display = true;
+        g.resource[species].max = 10;
+        g.resource[species].amount = 8;
+
+        // Jobs default to display:false / max:0 straight out of sentience();
+        // without both of these the engine assigns them no output at all.
+        for (const [job, workers] of Object.entries({
+            farmer: 3, lumberjack: 2, quarry_worker: 1, unemployed: 2,
+        })) {
+            g.civic[job].display = true;
+            g.civic[job].max = -1;
+            g.civic[job].workers = workers;
+        }
+
+        // Minimum tech for the basic production chain to be considered unlocked.
+        Object.assign(g.tech, { primitive: 3, farm: 1, axe: 1, hammer: 1, storage: 1 });
+
+        // Unlock the resources those jobs produce, so the engine tracks them.
+        for (const res of ['Food', 'Lumber', 'Stone', 'Knowledge', 'Money', 'Crates']) {
+            if (g.resource[res]) {
+                g.resource[res].display = true;
+                if (g.resource[res].max === 0) g.resource[res].max = 500;
+            }
+        }
+        g.resource.Food.amount = 100;
+        g.resource.Lumber.amount = 100;
+        g.resource.Stone.amount = 100;
+    });
+}

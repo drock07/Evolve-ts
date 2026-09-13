@@ -8340,7 +8340,9 @@ function evoExtraState(race){
     }
 }
 
-function sentience(){
+// Exported so the e2e harness can bootstrap a civilization without
+// clicking through the full evolution sequence (see src/testHooks.ts).
+export function sentience(){
     if (global.race['simulation']){
         simulation();
     }

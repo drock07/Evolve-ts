@@ -2,6 +2,8 @@
 *#
 .*
 !.gitignore
+# The blanket `.*` above would otherwise swallow the CI workflows.
+!.github/
 update.*.json
 strings/last-strings.json
 node_modules/
@@ -14,3 +16,8 @@ evolve/main.js
 evolve/evolve.css
 wiki/wiki.js
 wiki/wiki.css
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

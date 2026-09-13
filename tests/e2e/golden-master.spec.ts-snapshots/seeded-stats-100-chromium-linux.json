@@ -1,0 +1,209 @@
+{
+  "achieve": {},
+  "aiappoc": 0,
+  "antiplasmid": 0,
+  "apotheosis": 0,
+  "artifact": 0,
+  "ascend": 0,
+  "attacks": 0,
+  "banana": {
+    "b1": {
+      "a": false,
+      "e": false,
+      "h": false,
+      "l": false,
+      "m": false,
+      "mg": false
+    },
+    "b2": {
+      "a": false,
+      "e": false,
+      "h": false,
+      "l": false,
+      "m": false,
+      "mg": false
+    },
+    "b3": {
+      "a": false,
+      "e": false,
+      "h": false,
+      "l": false,
+      "m": false,
+      "mg": false
+    },
+    "b4": {
+      "a": false,
+      "e": false,
+      "h": false,
+      "l": false,
+      "m": false,
+      "mg": false
+    },
+    "b5": {
+      "a": false,
+      "e": false,
+      "h": false,
+      "l": false,
+      "m": false,
+      "mg": false
+    }
+  },
+  "bioseed": 0,
+  "blackhole": 0,
+  "blood": 0,
+  "cataclysm": 0,
+  "cattle": 0,
+  "cfood": 0,
+  "clumber": 0,
+  "cores": 0,
+  "cstone": 0,
+  "dark": 0,
+  "days": 5,
+  "death_tour": {
+    "ai": {
+      "a": 0,
+      "e": 0,
+      "h": 0,
+      "l": 0,
+      "m": 0,
+      "mg": 0
+    },
+    "bh": {
+      "a": 0,
+      "e": 0,
+      "h": 0,
+      "l": 0,
+      "m": 0,
+      "mg": 0
+    },
+    "ct": {
+      "a": 0,
+      "e": 0,
+      "h": 0,
+      "l": 0,
+      "m": 0,
+      "mg": 0
+    },
+    "di": {
+      "a": 0,
+      "e": 0,
+      "h": 0,
+      "l": 0,
+      "m": 0,
+      "mg": 0
+    },
+    "md": {
+      "a": 0,
+      "e": 0,
+      "h": 0,
+      "l": 0,
+      "m": 0,
+      "mg": 0
+    },
+    "vc": {
+      "a": 0,
+      "e": 0,
+      "h": 0,
+      "l": 0,
+      "m": 0,
+      "mg": 0
+    }
+  },
+  "descend": 0,
+  "died": 0,
+  "dkills": 0,
+  "eden": 0,
+  "endless_hunger": {
+    "b1": {
+      "a": false,
+      "e": false,
+      "h": false,
+      "l": false,
+      "m": false,
+      "mg": false
+    },
+    "b2": {
+      "a": false,
+      "e": false,
+      "h": false,
+      "l": false,
+      "m": false,
+      "mg": false
+    },
+    "b3": {
+      "a": false,
+      "e": false,
+      "h": false,
+      "l": false,
+      "m": false,
+      "mg": false
+    },
+    "b4": {
+      "a": false,
+      "e": false,
+      "h": false,
+      "l": false,
+      "m": false,
+      "mg": false
+    },
+    "b5": {
+      "a": false,
+      "e": false,
+      "h": false,
+      "l": false,
+      "m": false,
+      "mg": false
+    }
+  },
+  "feat": {},
+  "geck": 0,
+  "harmony": 0,
+  "know": 0,
+  "mad": 0,
+  "matrix": 0,
+  "murders": 0,
+  "pdebt": 0,
+  "phage": 0,
+  "plasmid": 0,
+  "portals": 0,
+  "psykill": 0,
+  "reset": 0,
+  "retire": 0,
+  "sac": 0,
+  "spire": {},
+  "starved": 0,
+  "supercoiled": 0,
+  "synth": {},
+  "tcattle": 0,
+  "tdays": 0,
+  "tdied": 0,
+  "terraform": 0,
+  "tfood": 0,
+  "tknow": 0,
+  "tlumber": 0,
+  "tmurders": 0,
+  "tpsykill": 0,
+  "tsac": 0,
+  "tstarved": 0,
+  "tstone": 0,
+  "uDead": 0,
+  "universes": 0,
+  "warlord": {
+    "a": false,
+    "g": false,
+    "k": false,
+    "p": false,
+    "r": false
+  },
+  "womling": {
+    "friend": {
+      "l": 0
+    },
+    "god": {
+      "l": 0
+    },
+    "lord": {
+      "l": 0
+    }
+  }
+}

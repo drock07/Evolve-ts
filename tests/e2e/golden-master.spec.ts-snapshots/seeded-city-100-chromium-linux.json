@@ -1,0 +1,71 @@
+{
+  "basic_housing": {
+    "bn": "Money",
+    "count": 8,
+    "time": "Never"
+  },
+  "biome": "grassland",
+  "calendar": {
+    "day": 6,
+    "moon": 5,
+    "orbit": 365,
+    "season": 0,
+    "temp": 0,
+    "weather": 2,
+    "wind": 0,
+    "year": 0
+  },
+  "cold": 2,
+  "farm": {
+    "bn": "Money",
+    "count": 5,
+    "time": "Never"
+  },
+  "geology": {},
+  "hot": 0,
+  "lumber_yard": {
+    "bn": false,
+    "count": 4,
+    "time": "0s"
+  },
+  "market": {
+    "active": false,
+    "mtrade": 0,
+    "qty": 10,
+    "trade": 0
+  },
+  "morale": {
+    "bliss_den": 0,
+    "blood_thirst": 0,
+    "broadcast": 0,
+    "cap": 100,
+    "current": 94.4,
+    "entertain": 0,
+    "leadership": 0,
+    "potential": 94.4,
+    "restaurant": 0,
+    "rev": 0,
+    "season": 0,
+    "shrine": 0,
+    "stress": -0.6,
+    "tavern": 0,
+    "tax": 0,
+    "unemployed": -7,
+    "vr": 0,
+    "warmonger": 0,
+    "weather": 2,
+    "zoo": 0
+  },
+  "power": 0,
+  "power_total": 0,
+  "powered": false,
+  "ptrait": [],
+  "rock_quarry": {
+    "bn": "Money",
+    "cnvay": 0,
+    "count": 2,
+    "on": 2,
+    "time": "Never"
+  },
+  "sun": 5
+}

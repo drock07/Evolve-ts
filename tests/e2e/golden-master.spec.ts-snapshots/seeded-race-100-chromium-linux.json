@@ -1,0 +1,24 @@
+{
+  "adaptable": 0.5,
+  "creative": 1,
+  "deterioration": 0,
+  "diverse": 1,
+  "gene_fortify": 0,
+  "gods": "none",
+  "inactiveTraits": {},
+  "minor": {},
+  "mutation": 0,
+  "old_gods": "none",
+  "p_mutation": 0,
+  "purgatory": {
+    "city": {},
+    "eden": {},
+    "portal": {},
+    "space": {},
+    "tech": {}
+  },
+  "seeded": false,
+  "species": "human",
+  "universe": "standard",
+  "wasteful": 0.5
+}

@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [master, 'claude/**']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Unit tests
+        run: pnpm run test
+
+      - name: Typecheck ratchet
+        run: pnpm run typecheck:ratchet
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Golden-master / e2e tests
+        run: pnpm exec playwright test
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
