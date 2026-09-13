@@ -4,7 +4,7 @@ import { clearElement, vBind, adjustCosts } from './../functions';
 import { actions } from './../actions';
 import { planetName } from './../space';
 
-export function headerBoxBuilder(parent,args,box){
+export function headerBoxBuilder(parent,args,box?){
     if (!args.hasOwnProperty('h_level')){
         args['h_level'] = 2;
     }
@@ -12,7 +12,7 @@ export function headerBoxBuilder(parent,args,box){
     return infoBoxBuilder(parent,args,box);
 }
 
-export function infoBoxBuilder(parent,args,box){
+export function infoBoxBuilder(parent,args,box?){
     if (!args.hasOwnProperty('name')){ return; }
     if (!args.hasOwnProperty('template')){ return; }
     if (!args.hasOwnProperty('paragraphs')){ args['paragraphs'] = 0; }
@@ -102,7 +102,7 @@ export function infoBoxBuilder(parent,args,box){
     return info;
 }
 
-export function actionDesc(info, c_action, extended, isStruct){
+export function actionDesc(info, c_action, extended?, isStruct?){
     let title = typeof c_action.title === 'string' ? c_action.title : c_action.title();
     if (extended){
         info.append(`<div class="type"><h2 class="has-text-warning">${title}</h2><span class="has-text-caution">${extended}</span></div>`);
@@ -154,7 +154,7 @@ export function actionDesc(info, c_action, extended, isStruct){
         }
         let render = false;
 
-        let addCost = function(res,res_cost,label,color,structBypass){
+        let addCost = function(res,res_cost,label,color,structBypass?){
             if (isStruct){
                 cost.append($(`<div class="${color}" v-show="r.${res}.vis">${label}{{ r.${res}.cost }}</div>`));
                 costCreep.append($(`<div class="${color}" v-show="r.${res}.vis">{{ r.${res}.creep }}</div>`));
@@ -234,7 +234,7 @@ export function bindScroll(elm, target){
     });
 }
 
-export function sideMenu(action,arg1,arg2,arg3){
+export function sideMenu(action,arg1?,arg2?,arg3?){
     if (action === 'create'){
         let content = arg1 ? (typeof arg1 === 'string' ? $(`#${arg1}`) : arg1) : $(`#content`);
         clearElement(content);
@@ -311,7 +311,7 @@ export function createRevealSection(info,id,type,insert){
     return section;
 }
 
-export function createCalcSection(info,id,type,insert){
+export function createCalcSection(info,id,type,insert?){
     insert = insert || loc(`wiki_calc_insert_` + type);
     let calc = $(`<div></div>`);
     info.append(calc);

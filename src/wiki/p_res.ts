@@ -169,7 +169,7 @@ const calcVars = {
     supercoiled: ['genes', 'micro'],
 }
 
-export function prestigeCalc(info,resource,extraType,resetType){
+export function prestigeCalc(info,resource,extraType?,resetType?){
     let prestigeType = extraType || resource;
     let prefix = resource + (resetType || "") + (extraType || "");
     let calc = $(`<div class="calc" id="${prefix}Calc"></div>`);

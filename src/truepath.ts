@@ -3172,7 +3172,7 @@ const tauCetiModules = {
     },
     tau_gas: {
         info: {
-            name(n,k){
+            name(n?,k?){
                 let key = k || 'gas_name';
                 let ns = key === 'gas_name' ? 0 : 1;
                 if (n || global.race[key]){
@@ -3650,7 +3650,7 @@ const tauCetiModules = {
     },
     tau_gas2: {
         info: {
-            name(n){
+            name(n?){
                 return tauCetiModules.tau_gas.info.name(n || global.race['gas_name2'] || false, 'gas_name2');
             },
             desc(){
@@ -4381,7 +4381,7 @@ export function TPShipDesc(parent,obj){
     return desc;
 }
 
-function buildTPShip(ship, queue){
+function buildTPShip(ship, queue?){
     ship['location'] = 'spc_dwarf';
     ship['xy'] = genXYcoord('spc_dwarf');
     ship['origin'] = deepClone(ship['xy']);
@@ -4481,7 +4481,7 @@ export function shipCrewSize(ship){
     }
 }
 
-export function shipPower(ship, wiki){
+export function shipPower(ship, wiki?){
     let watts = 0;
 
     let out_inflate = 1;
@@ -5236,7 +5236,7 @@ function calcLandingPoint(ship, planet) {
     return genXYcoord(planet);
 }
 
-export function syndicate(region,extra){
+export function syndicate(region,extra?){
     if (!global.tech['isolation'] && global.tech['syndicate'] && global.race['truepath'] && global.space['syndicate'] && global.space.syndicate.hasOwnProperty(region)){
         let divisor = 1000;
 
@@ -5493,7 +5493,7 @@ function transferWindow(p1,p2){
     return Math.ceil(Math.sqrt(((p2.x - p1.x) ** 2) + ((p2.y - p1.y) ** 2)) * 225);
 }
 
-export function tpStorageMultiplier(type,heavy,wiki){
+export function tpStorageMultiplier(type,heavy?,wiki?){
     let multiplier = 1;
     if (global.race['pack_rat']){
         multiplier *= 1 + (traits.pack_rat.vars()[1] / 100);
@@ -6151,7 +6151,7 @@ export function loneSurvivor(){
     }
 }
 
-export function calcAIDrift(wiki){
+export function calcAIDrift(wiki?){
     let drift = 0;
     let ai_colonist_on = wiki ? global.space.ai_colonist.on : p_on['ai_colonist'];
     let decoder_on = wiki ? global.space.decoder.on : support_on['decoder'];

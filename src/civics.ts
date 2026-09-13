@@ -12,7 +12,7 @@ import { astrologySign, astroVal } from './seasons';
 import { warhead } from './resets';
 
 // Sets up government in civics tab
-export function defineGovernment(define){
+export function defineGovernment(define?){
     if (!global.civic['taxes']){
         global.civic['taxes'] = {
             tax_rate: 20,
@@ -793,7 +793,7 @@ function govPrice(gov){
     return +price.toFixed(0);
 }
     
-export function checkControlling(gov){
+export function checkControlling(gov?){
     if (gov){
         return global.tech['world_control'] || global.civic.foreign[gov].occ || global.civic.foreign[gov].anx || global.civic.foreign[gov].buy;
     }
@@ -1016,7 +1016,7 @@ function taxCap(min){
     }
 }
 
-function adjustTax(a,n){
+function adjustTax(a,n?){
     switch (a){
         case 'add':
             {
@@ -1102,7 +1102,7 @@ function taxRates(govern){
     );
 }
 
-export function govCivics(f,v){
+export function govCivics(f,v?){
     switch (f){
         case 'm_cost':
             return mercCost();
@@ -1149,7 +1149,7 @@ export function mercCost(){
     return Math.round(cost);
 }
 
-function hireMerc(num){
+function hireMerc(num?){
     let hired = 0;
     if (global.tech['mercs']){
         let repeats = num || keyMultiplier();
@@ -2137,7 +2137,7 @@ export function soldierDeath(v){
     blubberFill(killed);
 }
 
-export function armyRating(val,type,wound,analysis){
+export function armyRating(val,type,wound?,analysis?){
     if (!global.civic.hasOwnProperty('garrison')){
         return 1;
     }
@@ -2388,7 +2388,7 @@ export function armyRating(val,type,wound,analysis){
     return army;
 }
 
-export function garrisonSize(max, args = {}){
+export function garrisonSize(max?, args = {}){
     if (!global.civic.garrison){
         return 0;
     }

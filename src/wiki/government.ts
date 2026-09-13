@@ -243,7 +243,7 @@ export function govPage(content){
     });
 }
 
-export function govBoost(rank){
+export function govBoost(rank?){
     if (typeof(rank) === 'undefined'){ rank = 3; }
     return global?.genes?.hasOwnProperty('governor') && global?.genes?.governor >= rank ? true : false;
 }

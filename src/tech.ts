@@ -15674,7 +15674,7 @@ function uniteEffect(){
     defineGovernor();
 }
 
-export function swissKnife(cheeseOnly,cheeseList){
+export function swissKnife(cheeseOnly?,cheeseList?){
     let cheeses = [
         'swiss','gouda','cheddar','brie','feta','ricotta','goat','mascarpone','bleu','colby_jack','camembert','gorgonzola',
         'mozzarella','roquefort','provolone','monterey_jack','muenster','cambozola','jarlsberg','bocconcini','cantal',
@@ -15700,7 +15700,7 @@ export const techPath = {
     truepath: ['primitive', 'discovery', 'civilized', 'industrialized', 'globalized', 'early_space', 'deep_space', 'solar', 'tauceti'],
 };
 
-export function techList(path){
+export function techList(path?){
     if (path){
         let techList = {};
         Object.keys(techs).forEach(function(t){

@@ -23,7 +23,7 @@ export function teamster(v){
     return v;
 }
 
-export function production(id,val,wiki){
+export function production(id,val?,wiki?){
     switch (id){
         case 'transmitter':
         {

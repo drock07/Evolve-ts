@@ -1704,7 +1704,7 @@ function checkArpaCosts(costs){
     return test;
 }
 
-export function arpaAdjustCosts(costs,offset,wiki){
+export function arpaAdjustCosts(costs,offset?,wiki?){
     costs = creativeAdjust(costs,offset,wiki);
     return adjustCosts({ 'cost': costs },offset,wiki);
 }
@@ -1730,7 +1730,7 @@ function creativeAdjust(costs,offset,wiki){
     return costs;
 }
 
-function costMultiplier(project,offset,base,multiplier,wiki){
+function costMultiplier(project,offset,base,multiplier,wiki?){
     var rank = global.arpa[project] ? global.arpa[project].rank : 0;
     if (((wiki && wiki.creative) || (!wiki && global.race['creative'])) && project !== 'syphon'){
         multiplier -= traits.creative.vars()[0];
@@ -2556,7 +2556,7 @@ function addProject(parent,project){
     }
 }
 
-export function buildArpa(pro,num,update,queue){
+export function buildArpa(pro,num,update,queue?){
     let completed = false;
     if (num === 100){
         num = 100 - global.arpa[pro].complete;

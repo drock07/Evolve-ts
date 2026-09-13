@@ -201,7 +201,7 @@ const effectInputs ={
     terraformer: ['truepath']
 }
 
-function addCalcInputs(parent,key,section,region,path){
+function addCalcInputs(parent,key,section,region,path?){
     let hasMax = calcInfo.max[section] && calcInfo.max[section][key] ? calcInfo.max[section][key] : false;
     let inputs = {
         owned: 0,

@@ -46,7 +46,7 @@ const achieveDescData = {
     trade: [750,50]
 };
 
-export function achievePage(universe, filter){
+export function achievePage(universe?, filter?){
     let content = $(`#content`);
     clearElement(content);
     

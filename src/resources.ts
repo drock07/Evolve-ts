@@ -209,7 +209,7 @@ export function craftCost(manual=false){
 export const craftingRatio = (function(){
     var crafting = {};
     
-    return function (res,type,recalc){
+    return function (res,type,recalc?){
         if (recalc){
             let noEarth = global.race['cataclysm'] || global.race['orbit_decayed'] ? true : false;
             crafting = {
@@ -558,7 +558,7 @@ export const craftingRatio = (function(){
     }
 })();
 
-export function initResourceTabs(tab){
+export function initResourceTabs(tab?){
     if (tab){
         switch (tab){
             case 'market':
@@ -671,7 +671,7 @@ export function drawResourceTab(tab){
 }
 
 // Sets up resource definitions
-export function defineResources(wiki){
+export function defineResources(wiki?){
     if (global.race.species === 'protoplasm'){
         let base = 100;
         if (global.stats.achieve['mass_extinction'] && global.stats.achieve['mass_extinction'].l > 1){
@@ -772,7 +772,7 @@ export function tradeSummery(){
 // Load resource function
 // This function defines each resource, loads saved values from localStorage
 // And it creates Vue binds for various resource values
-function loadResource(name,wiki,max,rate,tradable,stackable,color){
+function loadResource(name,wiki,max,rate,tradable,stackable?,color?){
     color = color || 'info';
     if (!global.resource[name]){
         global.resource[name] = {};
@@ -1024,7 +1024,7 @@ export function setResourceName(name){
     }
 }
 
-function loadSpecialResource(name,color) {
+function loadSpecialResource(name,color?) {
     // UI rendering is now handled by React ResourcePanel.
     // Prestige data already lives in global.prestige[name].
     // No state init needed — prestige resources are managed elsewhere.
@@ -1369,7 +1369,7 @@ export function galaxyOffers(){
     return offers;
 }
 
-export function galacticTrade(modal){
+export function galacticTrade(modal?){
     let galaxyTrade = modal ? modal : $(`#galaxyTrade`);
     if (!modal){
         clearElement($(`#galaxyTrade`));
@@ -2102,7 +2102,7 @@ export function crateGovHook(type,num){
     }
 }
 
-function buildCrate(num){
+function buildCrate(num?){
     let keyMutipler = num || keyMultiplier();
     let material = global.race['kindling_kindred'] || global.race['smoldering'] ? (global.race['smoldering'] ? 'Chrysotile' : 'Stone') : 'Plywood';
     if (global.race['iron_wood']){ material = 'Lumber'; }
@@ -2119,7 +2119,7 @@ function buildCrate(num){
     }
 }
 
-function buildContainer(num){
+function buildContainer(num?){
     let keyMutipler = num || keyMultiplier();
     if (keyMutipler + global.resource.Containers.amount > global.resource.Containers.max){
         keyMutipler = global.resource.Containers.max - global.resource.Containers.amount;
@@ -2694,7 +2694,7 @@ export function loadAlchemy(name,color,basic){
 
 export const spatialReasoning = (function(){
     var spatial = {};
-    return function (value,type,recalc){
+    return function (value,type?,recalc?){
         let tkey = type ? type : 'a';
         let key = [
             global.race.universe,
@@ -2871,7 +2871,7 @@ export function templePlasmidBonus(num_temples = -1){
 
 export const plasmidBonus = (function (){
     var plasma = {};
-    return function(type){
+    return function(type?){
         let key = [
             global.race.universe,
             global.prestige.Plasmid.count,

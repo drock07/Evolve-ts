@@ -733,7 +733,7 @@ const fortressModules = {
                 Neutronium(offset){ return spaceCostMultiplier('incinerator', offset, 5000, 1.3, 'portal'); },
                 Infernite(offset){ return spaceCostMultiplier('incinerator', offset, 4000, 1.3, 'portal'); },
             },
-            powered(wiki){
+            powered(wiki?){
                 let power = 22.5 + (global.portal?.incinerator?.rank || 1) * 2.5;
                 if (global.race['forge']){
                     power += traits.forge.vars()[0] * 5;
@@ -2195,7 +2195,7 @@ const fortressModules = {
                 Stanene(offset){ return spaceCostMultiplier('inferno_power', offset, 12000000, 1.18, 'portal'); },
                 Bolognium(offset){ return spaceCostMultiplier('inferno_power', offset, 8000000, 1.18, 'portal'); },
             },
-            powered(wiki){
+            powered(wiki?){
                 let power = 20;
                 let infernal_forges_on = wiki ? (global.portal?.hell_forge?.on ?? 0) : p_on['hell_forge'];
                 if (infernal_forges_on){
@@ -2924,7 +2924,7 @@ const fortressModules = {
             },
             queue_complete(){ return 0; },
             cost: {},
-            effect(wiki){
+            effect(wiki?){
                 let fuel = $(this)[0].p_fuel();
                 return `<div>${loc(`portal_oven_desc`)}</div>${global.tech['dish'] === 4 ? `<div class="has-text-special">${loc('portal_oven_desc2')}</div>` : ``}<div class="has-text-caution">${loc('minus_power',[$(this)[0].powered()])}, ${loc('spend', [fuel.a, fuel.r])}</div>`;
             },
@@ -3631,7 +3631,7 @@ function spireCreep(base){
 
 export const towerSize = (function(){
     var size;
-    return function(recalc){
+    return function(recalc?){
         if (size && !recalc){
             return size;
         }
@@ -3653,7 +3653,7 @@ function towerPrice(cost, wiki){
     return Math.round(cost / (sup.supress > 0.01 ? sup.supress : 0.01));
 }
 
-export function soulForgeSoldiers(wiki){
+export function soulForgeSoldiers(wiki?){
     let base = global.race['warlord'] ? 400 : 650;
     let num_gun_emplacement = wiki ? (global.portal?.gun_emplacement?.on ?? 0) : p_on['gun_emplacement'];
     let num_soldiers_saved = num_gun_emplacement * (global.tech.hell_gun >= 2 ? jobScale(2) : jobScale(1));
@@ -5059,7 +5059,7 @@ function soulCapacitor(souls){
     }
 }
 
-export function hellSupression(area, val, wiki){
+export function hellSupression(area, val?, wiki?){
     // It might be nice to set suppression to 100% in the wiki before unlocking the ruins
     switch (area){
         case 'ruins':
@@ -6261,7 +6261,7 @@ export const monsters = {
     }
 };
 
-export function mechCost(size,infernal,standardize){
+export function mechCost(size,infernal?,standardize?){
     let soul = 9999;
     let cost = 10000000;
     switch (size){
@@ -6800,7 +6800,7 @@ export function buildMechQueue(action){
     return false;
 }
 
-function buildMech(bp, queue){
+function buildMech(bp, queue?){
     let mech = deepClone(bp);
     global.portal.mechbay.mechs.push(mech);
     global.portal.mechbay.bay += mechSize(mech.size);
@@ -6939,7 +6939,7 @@ export function validWeapons(size,type,point){
     return weaponList;
 }
 
-export function validEquipment(size,type,point){
+export function validEquipment(size,type,point?){
     let equipList = ['special','shields','sonar','grapple','infrared','flare','radiator','coolant','ablative','stabilizer','seals'];
     if (global.race['warlord']){
         switch (size){
@@ -7386,7 +7386,7 @@ function statusEffect(mech,effect){
     return rating;
 }
 
-export function terrainEffect(mech,type){
+export function terrainEffect(mech,type?){
     let terrain = type || global.portal.spire.type;
     let terrainFactor = 1;
     switch (mech.chassis){
@@ -7701,7 +7701,7 @@ export function mechRating(mech,boss){
 }
 
 
-export function drawHellObservations(startup){
+export function drawHellObservations(startup?){
     if (!global.settings.tabLoad && global.settings.civTabs !== ($(`#mainTabs > nav ul li`).length - 1) && !startup){
         return;
     }
@@ -8493,7 +8493,7 @@ function drawHellReports(){
     );
 }
 
-function purgeReports(refresh){
+function purgeReports(refresh?){
     if (!(!!document.getElementById(`hellReportList`)) || refresh){
         let removed = false;
         let threshold = 2500;

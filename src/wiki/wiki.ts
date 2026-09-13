@@ -189,7 +189,7 @@ function initPage(){
     }
 }
 
-async function menuDispatch(main,sub,frag){
+async function menuDispatch(main,sub?,frag?){
     if(window.location.hash === "#search" && main !== "search"){
         const until = (condition) => {
             const poll = resolve => condition() ? resolve() : setTimeout(_ => poll(resolve), 16);

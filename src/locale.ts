@@ -3,7 +3,7 @@ import { global, save } from './vars';
 let strings;
 getString(global.settings.locale);
 
-export function loc(key, variables) {
+export function loc(key, variables?) {
     let string = strings[key];
     if (!string) {
         if (global.settings.expose){

@@ -1009,7 +1009,7 @@ export const events = {
     },
 };
 
-function basicEvent(title,tech,func,cond){
+function basicEvent(title,tech,func?,cond?){
     return {
         reqs: {
             tech: tech,
@@ -1054,7 +1054,7 @@ function slaveLoss(type,string){
     };
 }
 
-function pillaged(gov,serious){
+function pillaged(gov,serious?){
     let army = armyRating(garrisonSize(),'army',global.civic.garrison.wounded);
     let eAdv = global.tech['high_tech'] ? global.tech['high_tech'] + 1 : 1;
     let enemy = (gov === 'witchhunt' ? 1000 : global.civic.foreign[gov].mil) * (1 + Math.floor(seededRandom(0,10) - 5) / 10) * eAdv;

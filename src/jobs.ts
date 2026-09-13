@@ -366,7 +366,7 @@ export const job_desc = {
 }
 
 // Sets up jobs in civics tab
-export function defineJobs(define){
+export function defineJobs(define?){
     if (!define){
         $('#civics').append($(`<h2 class="is-sr-only">${loc('civics_jobs')}</h2><div class="tile is-child jobList"><div id="sshifter" class="tile sshifter"></div><div id="jobs" class="tile is-child"></div><div id="foundry" class="tile is-child"></div><div id="servants" class="tile is-child"></div><div id="skilledServants" class="tile is-child"></div></div>`));
     }
@@ -476,7 +476,7 @@ export function jobName(job){
     return name;
 }
 
-function loadJob(job, define, impact, stress, color){
+function loadJob(job, define, impact?, stress?, color?){
     let servant = false;
     if (define === 'servant'){
         servant = true;
@@ -794,7 +794,7 @@ export function limitCraftsmen(res, allow_redraw = true){
     }
 }
 
-export function farmerValue(farm,servant){
+export function farmerValue(farm,servant?){
     let farming = global.civic.farmer.impact;
     if (farm){
         farming += global.tech['agriculture'] && global.tech.agriculture >= 2 ? 1.15 : 0.65;
@@ -822,7 +822,7 @@ export function farmerValue(farm,servant){
     return farming;
 }
 
-export function loadFoundry(servants){
+export function loadFoundry(servants?){
     clearElement($(servants ? '#skilledServants' : '#foundry'));
     if ((global.city['foundry'] && global.city['foundry'].count > 0) || global.race['cataclysm'] || global.race['orbit_decayed'] || global.tech['isolation'] || global.race['warlord']){
         let element = $(servants ? '#skilledServants' : '#foundry');

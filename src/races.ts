@@ -21,7 +21,7 @@ const hallowed = getHalloween();
 
 export const neg_roll_traits = ['angry','arrogant','atrophy','diverse','dumb','fragrant','frail','freespirit','gluttony','gnawer','greedy','hard_of_hearing','heavy','hooved','invertebrate','lazy','mistrustful','nearsighted','nyctophilia','paranoid','pathetic','pessimistic','puny','pyrophobia','skittish','slow','slow_regen','snowy','solitary','unorganized','unfavored'];
 
-export function altRace(race,set){
+export function altRace(race,set?){
     if (global.settings.boring){
         if (global.race['hrt']){
             delete global.race['hrt'];
@@ -245,7 +245,7 @@ export const traits = {
         origin: 'humanoid',
         taxonomy: 'utility',
         val: 3,
-        vars(r){ 
+        vars(r?){ 
             switch (r || traitRank('adaptable') || 1){
                 case 0.1:
                     return [2];
@@ -271,7 +271,7 @@ export const traits = {
         origin: 'humanoid',
         taxonomy: 'resource',
         val: -3,
-        vars(r){ 
+        vars(r?){ 
             switch (r || traitRank('wasteful') || 1){
                 case 0.1:
                     return [16];
@@ -305,7 +305,7 @@ export const traits = {
         origin: 'carnivore',
         taxonomy: 'resource',
         val: 3,
-        vars(r){ 
+        vars(r?){ 
             // [Rot Percent]
             switch (r || traitRank('carnivore') || 1){
                 case 0.1:
@@ -332,7 +332,7 @@ export const traits = {
         origin: 'carnivore',
         taxonomy: 'resource',
         val: 2,
-        vars(r){
+        vars(r?){
             // [Hunting, Windy Hunting, Training Speed]
             switch (r || traitRank('beast') || 1){
                 case 0.1:
@@ -359,7 +359,7 @@ export const traits = {
         origin: 'carnivore',
         taxonomy: 'combat',
         val: -2,
-        vars(r){ 
+        vars(r?){ 
             switch (r || traitRank('cautious') || 1){
                 case 0.1:
                     return [16];
@@ -393,7 +393,7 @@ export const traits = {
         genus: 'herbivore',
         taxonomy: 'utility',
         val: 5,
-        vars(r){
+        vars(r?){
             // [Surveyor Survival Boost, Reduce Combat Deaths %]
             switch (r || traitRank('instinct') || 1){
                 case 0.1:
@@ -420,7 +420,7 @@ export const traits = {
         origin: 'hybrid',
         taxonomy: 'resource',
         val: 4,
-        vars(r){
+        vars(r?){
             // [Foraging Strength]
             switch (r || traitRank('forager') || 1){
                 case 0.1:
@@ -447,7 +447,7 @@ export const traits = {
         origin: 'small',
         taxonomy: 'utility',
         val: 6,
-        vars(r){
+        vars(r?){
             // [Planet Creep, Space Creep]
             switch (r || traitRank('small') || 1){
                 case 0.1:
@@ -474,7 +474,7 @@ export const traits = {
         origin: 'small',
         taxonomy: 'resource',
         val: -3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('weak') || 1){
                 case 0.1:
                     return [16];
@@ -500,7 +500,7 @@ export const traits = {
         origin: 'giant',
         taxonomy: 'utility',
         val: -5,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('large') || 1){
                 case 0.1:
                     return [0.008];
@@ -526,7 +526,7 @@ export const traits = {
         origin: 'giant',
         taxonomy: 'resource',
         val: 5,
-        vars(r){
+        vars(r?){
             // [Manual Gathering, Basic Jobs]
             switch (r || traitRank('strong') || 1){
                 case 0.1:
@@ -553,7 +553,7 @@ export const traits = {
         origin: 'reptilian',
         taxonomy: 'production',
         val: -2,
-        vars(r){
+        vars(r?){
             // [Weather Penalty, Weather Bonus]
             switch (r || traitRank('cold_blooded') || 1){
                 case 0.25:
@@ -578,7 +578,7 @@ export const traits = {
         origin: 'reptilian',
         taxonomy: 'combat',
         val: 5,
-        vars(r){
+        vars(r?){
             // [Win, Loss, Hell]
             switch (r || traitRank('scales') || 1){
                 case 0.1:
@@ -605,7 +605,7 @@ export const traits = {
         origin: 'avian',
         taxonomy: 'resource',
         val: 3,
-        vars(r){
+        vars(r?){
             // [Reduce Stone Costs, Extra Trade Post Route]
             switch (r || traitRank('flier') || 1){
                 case 0.1:
@@ -632,7 +632,7 @@ export const traits = {
         origin: 'avian',
         taxonomy: 'resource',
         val: 2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('hollow_bones') || 1){
                 case 0.1:
                     return [1];
@@ -658,7 +658,7 @@ export const traits = {
         origin: 'avian',
         taxonomy: 'utility',
         val: -2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('sky_lover') || 1){
                 case 0.1:
                     return [50];
@@ -684,7 +684,7 @@ export const traits = {
         origin: 'avian',
         taxonomy: 'resource',
         val: -2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('rigid') || 1){
                 case 0.1:
                     return [4];
@@ -710,7 +710,7 @@ export const traits = {
         origin: 'insectoid',
         taxonomy: 'utility',
         val: 3,
-        vars(r){
+        vars(r?){
             // [Citizen Cap, Worker Effectiveness, Growth Multiplier]
             switch (r || traitRank('high_pop') || 1){
                 case 0.1:
@@ -737,7 +737,7 @@ export const traits = {
         origin: 'insectoid',
         taxonomy: 'utility',
         val: 2,
-        vars(r){
+        vars(r?){
             // [bound multi, bound add]
             switch (r || traitRank('fast_growth') || 1){
                 case 0.1:
@@ -764,7 +764,7 @@ export const traits = {
         origin: 'insectoid',
         taxonomy: 'utility',
         val: -1,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('high_metabolism') || 1){
                 case 0.1:
                     return [12];
@@ -790,7 +790,7 @@ export const traits = {
         origin: 'plant',
         taxonomy: 'utility',
         val: 3,
-        vars(r){
+        vars(r?){
             // [Sunny, Cloudy, Rainy]
             switch (r || traitRank('photosynth') || 1){
                 case 0.1:
@@ -817,7 +817,7 @@ export const traits = {
         origin: 'plant',
         taxonomy: 'resource',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('sappy') || 1){
                 case 0.1:
                     return [0.3];
@@ -843,7 +843,7 @@ export const traits = {
         origin: 'plant',
         taxonomy: 'utility',
         val: -3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('asymmetrical') || 1){
                 case 0.1:
                     return [35];
@@ -869,7 +869,7 @@ export const traits = {
         origin: 'fungi',
         taxonomy: 'utility',
         val: 2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('detritivore') || 1){
                 case 0.1:
                     return [60];
@@ -895,7 +895,7 @@ export const traits = {
         origin: 'fungi',
         taxonomy: 'utility',
         val: 2,
-        vars(r){
+        vars(r?){
             // [Bound Add, Bound Multi, Bound Add Parasite]
             switch (r || traitRank('spores') || 1){
                 case 0.1:
@@ -938,7 +938,7 @@ export const traits = {
         origin: 'aquatic',
         taxonomy: 'resource',
         val: -2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('low_light') || 1){
                 case 0.1:
                     return [16];
@@ -964,7 +964,7 @@ export const traits = {
         origin: 'fey',
         taxonomy: 'utility',
         val: 7,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('elusive') || 1){
                 case 0.1:
                     return [5];
@@ -990,7 +990,7 @@ export const traits = {
         origin: 'fey',
         taxonomy: 'resource',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('iron_allergy') || 1){
                 case 0.1:
                     return [45];
@@ -1016,7 +1016,7 @@ export const traits = {
         origin: 'heat',
         taxonomy: 'production',
         val: 7,
-        vars(r){
+        vars(r?){
             // [Seasonal Morale, Hot Bonus, High Hot Bonus]
             switch (r || traitRank('smoldering') || 1){
                 case 0.1:
@@ -1043,7 +1043,7 @@ export const traits = {
         origin: 'heat',
         taxonomy: 'production',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('cold_intolerance') || 1){
                 case 0.1:
                     return [0.4];
@@ -1069,7 +1069,7 @@ export const traits = {
         origin: 'polar',
         taxonomy: 'production',
         val: 7,
-        vars(r){
+        vars(r?){
             // [Seasonal Morale, Cold Bonus, High Cold Bonus, Snow Food Bonus, Cold Food Bonus, Sun Food Penalty]
             switch (r || traitRank('chilled') || 1){
                 case 0.1:
@@ -1096,7 +1096,7 @@ export const traits = {
         origin: 'polar',
         taxonomy: 'production',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('heat_intolerance') || 1){
                 case 0.1:
                     return [0.4];
@@ -1122,7 +1122,7 @@ export const traits = {
         origin: 'sand',
         taxonomy: 'production',
         val: 3,
-        vars(r){
+        vars(r?){
             // [impact, duel bonus]
             switch (r || traitRank('scavenger') || 1){
                 case 0.1:
@@ -1157,7 +1157,7 @@ export const traits = {
         origin: 'demonic',
         taxonomy: 'utility',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('immoral') || 1){
                 case 0.1:
                     return [-40];
@@ -1191,7 +1191,7 @@ export const traits = {
         origin: 'angelic',
         taxonomy: 'utility',
         val: 3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('blissful') || 1){
                 case 0.1:
                     return [75];
@@ -1217,7 +1217,7 @@ export const traits = {
         origin: 'angelic',
         taxonomy: 'utility',
         val: -6,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('pompous') || 1){
                 case 0.1:
                     return [90];
@@ -1243,7 +1243,7 @@ export const traits = {
         origin: 'angelic',
         taxonomy: 'combat',
         val: 4,
-        vars(r){
+        vars(r?){
             // [Hell Army Bonus, Hell Suppression Bonus]
             switch (r || traitRank('holy') || 1){
                 case 0.1:
@@ -1270,7 +1270,7 @@ export const traits = {
         origin: 'synthetic',
         taxonomy: 'utility',
         val: 5,
-        vars(r){
+        vars(r?){
             // [Science Bonus]
             switch (r || traitRank('artifical') || 1){
                 case 0.1:
@@ -1297,7 +1297,7 @@ export const traits = {
         origin: 'synthetic',
         taxonomy: 'utility',
         val: -6,
-        vars(r){
+        vars(r?){
             // [Power Req, Labor Boost]
             switch (r || traitRank('powered') || 1){
                 case 0.1:
@@ -1324,7 +1324,7 @@ export const traits = {
         origin: 'eldritch',
         taxonomy: 'utility',
         val: 10,
-        vars(r){
+        vars(r?){
             // [Mind Break Modifer, Thrall Modifer, Recharge Rate, Effect Strength]
             switch (r || traitRank('psychic') || 1){
                 case 0.1:
@@ -1351,7 +1351,7 @@ export const traits = {
         origin: 'eldritch',
         taxonomy: 'utility',
         val: -25,
-        vars(r){
+        vars(r?){
             // [Morale above 100% is greatly reduced]
             switch (r || traitRank('tormented') || 1){
                 case 0.1:
@@ -1378,7 +1378,7 @@ export const traits = {
         origin: 'eldritch',
         taxonomy: 'utility',
         val: 1,
-        vars(r){
+        vars(r?){
             // [Sunny Days less frequent]
             switch (r || traitRank('darkness') || 1){
                 case 0.1:
@@ -1405,7 +1405,7 @@ export const traits = {
         origin: 'eldritch',
         taxonomy: 'utility',
         val: 15,
-        vars(r){
+        vars(r?){
             // [Thrall Races, Catch Modifer, Thrall Effectiveness]
             switch (r || traitRank('unfathomable') || 1){
                 case 0.1:
@@ -1432,7 +1432,7 @@ export const traits = {
         origin: 'human',
         taxonomy: 'resource',
         val: 8,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('creative') || 1){
                 case 0.1:
                     return [0.001,3];
@@ -1458,7 +1458,7 @@ export const traits = {
         origin: 'human',
         taxonomy: 'combat',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('diverse') || 1){
                 case 0.1:
                     return [40];
@@ -1484,7 +1484,7 @@ export const traits = {
         origin: 'elven',
         taxonomy: 'utility',
         val: 2,
-        vars(r){
+        vars(r?){
             // [Prof Bonus, Library Bonus]
             switch (r || traitRank('studious') || 1){
                 case 0.1:
@@ -1511,7 +1511,7 @@ export const traits = {
         origin: 'elven',
         taxonomy: 'resource',
         val: -2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('arrogant') || 1){
                 case 0.1:
                     return [16]
@@ -1537,7 +1537,7 @@ export const traits = {
         origin: 'orc',
         taxonomy: 'combat',
         val: 7,
-        vars(r){
+        vars(r?){
             // [Merc Discount, Training Bonus]
             switch (r || traitRank('brute') || 1){
                 case 0.1:
@@ -1564,7 +1564,7 @@ export const traits = {
         origin: 'orc',
         taxonomy: 'production',
         val: -1,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('angry') || 1){
                 case 0.1:
                     return [40];
@@ -1590,7 +1590,7 @@ export const traits = {
         origin: 'cath',
         taxonomy: 'production',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('lazy') || 1){
                 case 0.1:
                     return [16];
@@ -1616,7 +1616,7 @@ export const traits = {
         origin: 'cath',
         taxonomy: 'utility',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('curious') || 1){
                 case 0.1:
                     return [0.02];
@@ -1642,7 +1642,7 @@ export const traits = {
         origin: 'wolven',
         taxonomy: 'utility',
         val: 4,
-        vars(r){
+        vars(r?){
             // [Cabin Creep penatly, Cottage Creep bonus]
             switch (r || traitRank('pack_mentality') || 1){
                 case 0.1:
@@ -1669,7 +1669,7 @@ export const traits = {
         origin: 'wolven',
         taxonomy: 'resource',
         val: 2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('tracker') || 1){
                 case 0.1:
                     return [5];
@@ -1695,7 +1695,7 @@ export const traits = {
         origin: 'vulpine',
         taxonomy: 'production',
         val: 5,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('playful') || 1){
                 case 0.1:
                     return [0.2];
@@ -1721,7 +1721,7 @@ export const traits = {
         origin: 'vulpine',
         taxonomy: 'production',
         val: -3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('freespirit') || 1){
                 case 0.1:
                     return [70];
@@ -1755,7 +1755,7 @@ export const traits = {
         origin: 'centaur',
         taxonomy: 'combat',
         val: 6,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('sniper') || 1){
                 case 0.1:
                     return [3];
@@ -1781,7 +1781,7 @@ export const traits = {
         origin: 'centaur',
         taxonomy: 'utility',
         val: -4,
-        vars(r){
+        vars(r?){
             // [Cost Adjustment]
             switch (r || traitRank('hooved') || 1){
                 case 0.1:
@@ -1808,7 +1808,7 @@ export const traits = {
         origin: 'rhinotaur',
         taxonomy: 'combat',
         val: 4,
-        vars(r){
+        vars(r?){
             // [Rage Bonus, Wounded Bonus]
             switch (r || traitRank('rage') || 1){
                 case 0.1:
@@ -1835,7 +1835,7 @@ export const traits = {
         origin: 'rhinotaur',
         taxonomy: 'utility',
         val: -4,
-        vars(r){
+        vars(r?){
             // [Fuel Costs, Stone Cement and Wrought Iron Costs]
             switch (r || traitRank('heavy') || 1){
                 case 0.1:
@@ -1862,7 +1862,7 @@ export const traits = {
         origin: 'capybara',
         taxonomy: 'resource',
         val: -1,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('gnawer') || 1){
                 case 0.1:
                     return [0.6];
@@ -1888,7 +1888,7 @@ export const traits = {
         origin: 'capybara',
         taxonomy: 'production',
         val: 6,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('calm') || 1){
                 case 0.1:
                     return [6];
@@ -1914,7 +1914,7 @@ export const traits = {
         origin: 'kobold',
         taxonomy: 'resource',
         val: 3,
-        vars(r){
+        vars(r?){
             // [Crate Bonus, Storage Bonus]
             switch (r || traitRank('pack_rat') || 1){
                 case 0.1:
@@ -1941,7 +1941,7 @@ export const traits = {
         origin: 'kobold',
         taxonomy: 'resource',
         val: -3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('paranoid') || 1){
                 case 0.1:
                     return [16];
@@ -1967,7 +1967,7 @@ export const traits = {
         origin: 'goblin',
         taxonomy: 'resource',
         val: -5,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('greedy') || 1){
                 case 0.1:
                     return [20];
@@ -1993,7 +1993,7 @@ export const traits = {
         origin: 'goblin',
         taxonomy: 'resource',
         val: 3,
-        vars(r){
+        vars(r?){
             // [Sell Price, Galactic Buy Volume]
             switch (r || traitRank('merchant') || 1){
                 case 0.1:
@@ -2020,7 +2020,7 @@ export const traits = {
         origin: 'gnome',
         taxonomy: 'utility',
         val: 6,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('smart') || 1){
                 case 0.1:
                     return [2];
@@ -2046,7 +2046,7 @@ export const traits = {
         origin: 'gnome',
         taxonomy: 'combat',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('puny') || 1){
                 case 0.1:
                     return [20];
@@ -2072,7 +2072,7 @@ export const traits = {
         origin: 'ogre',
         taxonomy: 'utility',
         val: -5,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('dumb') || 1){
                 case 0.1:
                     return [8];
@@ -2098,7 +2098,7 @@ export const traits = {
         origin: 'ogre',
         taxonomy: 'resource',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('tough') || 1){
                 case 0.1:
                     return [5];
@@ -2124,7 +2124,7 @@ export const traits = {
         origin: 'cyclops',
         taxonomy: 'utility',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('nearsighted') || 1){
                 case 0.1:
                     return [20];
@@ -2150,7 +2150,7 @@ export const traits = {
         origin: 'cyclops',
         taxonomy: 'production',
         val: 7,
-        vars(r){
+        vars(r?){
             // [Prof Bonus, Scientist Bonus]
             switch (r || traitRank('intelligent') || 1){
                 case 0.1:
@@ -2177,7 +2177,7 @@ export const traits = {
         origin: 'troll',
         taxonomy: 'combat',
         val: 8,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('regenerative') || 1){
                 case 0.1:
                     return [1];
@@ -2203,7 +2203,7 @@ export const traits = {
         origin: 'troll',
         taxonomy: 'resource',
         val: -2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('gluttony') || 1){
                 case 0.1:
                     return [25];
@@ -2229,7 +2229,7 @@ export const traits = {
         origin: 'tortoisan',
         taxonomy: 'utility',
         val: -6,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('slow') || 1){
                 case 0.1:
                     return [14];
@@ -2255,7 +2255,7 @@ export const traits = {
         origin: 'tortoisan',
         taxonomy: 'combat',
         val: 4,
-        vars(r){
+        vars(r?){
             // [Solder % death prevention, Hell Armor Bonus]
             switch (r || traitRank('armored') || 1){
                 case 0.1:
@@ -2282,7 +2282,7 @@ export const traits = {
         origin: 'gecko',
         taxonomy: 'production',
         val: 3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('optimistic') || 1){
                 case 0.1:
                     return [3,4];
@@ -2308,7 +2308,7 @@ export const traits = {
         origin: 'gecko',
         taxonomy: 'combat',
         val: 6,
-        vars(r){
+        vars(r?){
             // [Combat Rating Bonus, Ambush Avoid]
             switch (r || traitRank('chameleon') || 1){
                 case 0.1:
@@ -2335,7 +2335,7 @@ export const traits = {
         origin: 'slitheryn',
         taxonomy: 'production',
         val: 1,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('slow_digestion') || 1){
                 case 0.1:
                     return [0.2];
@@ -2361,7 +2361,7 @@ export const traits = {
         origin: 'slitheryn',
         taxonomy: 'utility',
         val: 3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('astrologer') || 1){
                 case 0.1:
                     return [10];
@@ -2387,7 +2387,7 @@ export const traits = {
         origin: 'slitheryn',
         taxonomy: 'utility',
         val: -3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('hard_of_hearing') || 1){
                 case 0.1:
                     return [8];
@@ -2413,7 +2413,7 @@ export const traits = {
         origin: 'arraak',
         taxonomy: 'resource',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('resourceful') || 1){
                 case 0.1:
                     return [4];
@@ -2439,7 +2439,7 @@ export const traits = {
         origin: 'arraak',
         taxonomy: 'production',
         val: -6,
-        vars(r){
+        vars(r?){
             // [Max bonus]
             switch (r || traitRank('selenophobia') || 1){
                 case 0.1:
@@ -2466,7 +2466,7 @@ export const traits = {
         origin: 'pterodacti',
         taxonomy: 'production',
         val: 2,
-        vars(r){
+        vars(r?){
             // Morale loss (Base value is 5)
             switch (r || traitRank('leathery') || 1){
                 case 0.1:
@@ -2493,7 +2493,7 @@ export const traits = {
         origin: 'pterodacti',
         taxonomy: 'production',
         val: -1,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('pessimistic') || 1){
                 case 0.1:
                     return [5];
@@ -2519,7 +2519,7 @@ export const traits = {
         origin: 'dracnid',
         taxonomy: 'resource',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('hoarder') || 1){
                 case 0.1:
                     return [3];
@@ -2545,7 +2545,7 @@ export const traits = {
         origin: 'dracnid',
         taxonomy: 'utility',
         val: -1,
-        vars(r){
+        vars(r?){
             // [Cabin Creep bonus, Cottage Creep malus]
             switch (r || traitRank('solitary') || 1){
                 case 0.1:
@@ -2572,7 +2572,7 @@ export const traits = {
         origin: 'entish',
         taxonomy: 'resource',
         val: 8,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('kindling_kindred') || 1){
                 case 0.1:
                     return [12];
@@ -2598,7 +2598,7 @@ export const traits = {
         origin: 'entish',
         taxonomy: 'resource',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('iron_wood') || 1){
                 case 0.1:
                     return [3];
@@ -2624,7 +2624,7 @@ export const traits = {
         origin: 'entish',
         taxonomy: 'resource',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('pyrophobia') || 1){
                 case 0.1:
                     return [16];
@@ -2650,7 +2650,7 @@ export const traits = {
         origin: 'entish',
         taxonomy: 'production',
         val: 1,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('catnip') || 1){
                 case 0.1:
                     return [1,2];
@@ -2676,7 +2676,7 @@ export const traits = {
         origin: 'cacti',
         taxonomy: 'utility',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('hyper') || 1){
                 case 0.1:
                     return [1];
@@ -2702,7 +2702,7 @@ export const traits = {
         origin: 'cacti',
         taxonomy: 'production',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('skittish') || 1){
                 case 0.1:
                     return [20];
@@ -2728,7 +2728,7 @@ export const traits = {
         origin: 'pinguicula',
         taxonomy: 'resource',
         val: -3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('fragrant') || 1){
                 case 0.1:
                     return [40];
@@ -2754,7 +2754,7 @@ export const traits = {
         origin: 'pinguicula',
         taxonomy: 'combat',
         val: 3,
-        vars(r){
+        vars(r?){
             // [Food Consumption, Army Bonus]
             switch (r || traitRank('sticky') || 1){
                 case 0.1:
@@ -2781,7 +2781,7 @@ export const traits = {
         origin: 'pinguicula',
         taxonomy: 'production',
         val: 1,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('anise') || 1){
                 case 0.1:
                     return [1,1];
@@ -2807,7 +2807,7 @@ export const traits = {
         origin: 'sporgar',
         taxonomy: 'combat',
         val: 4,
-        vars(r){
+        vars(r?){
             // [Ambush, Raid, Pillage, Assault, Siege]
             switch (r || traitRank('infectious') || 1){
                 case 0.1:
@@ -2834,7 +2834,7 @@ export const traits = {
         origin: 'sporgar',
         taxonomy: 'combat',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('parasite') || 1){
                 case 0.1:
                     return [0,12];
@@ -2860,7 +2860,7 @@ export const traits = {
         origin: 'shroomi',
         taxonomy: 'resource',
         val: 5,
-        vars(r){
+        vars(r?){
             // [Lux Fur Alloy Polymer, Nano Stanene, Cement]
             switch (r || traitRank('toxic') || 1){
                 case 0.1:
@@ -2887,7 +2887,7 @@ export const traits = {
         origin: 'shroomi',
         taxonomy: 'production',
         val: -3,
-        vars(r){
+        vars(r?){
             // [Sunny, Cloudy]
             switch (r || traitRank('nyctophilia') || 1){
                 case 0.1:
@@ -2914,7 +2914,7 @@ export const traits = {
         origin: 'moldling',
         taxonomy: 'utility',
         val: 4,
-        vars(r){ // [Steal Cap]
+        vars(r?){ // [Steal Cap]
             switch (r || traitRank('infiltrator') || 1){
                 case 0.1:
                     return [120];
@@ -2940,7 +2940,7 @@ export const traits = {
         origin: 'moldling',
         taxonomy: 'production',
         val: -3,
-        vars(r){
+        vars(r?){
             // [Food Consumption, Production]
             switch (r || traitRank('hibernator') || 1){
                 case 0.1:
@@ -2967,7 +2967,7 @@ export const traits = {
         origin: 'mantis',
         taxonomy: 'utility',
         val: 5,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('cannibalize') || 1){
                 case 0.1:
                     return [6];
@@ -2993,7 +2993,7 @@ export const traits = {
         origin: 'mantis',
         taxonomy: 'combat',
         val: -2,
-        vars(r){
+        vars(r?){
             // [Win Deaths, Loss Deaths]
             switch (r || traitRank('frail') || 1){
                 case 0.1:
@@ -3020,7 +3020,7 @@ export const traits = {
         origin: 'mantis',
         taxonomy: 'production',
         val: 1,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('malnutrition') || 1){
                 case 0.1:
                     return [8];
@@ -3046,7 +3046,7 @@ export const traits = {
         origin: 'scorpid',
         taxonomy: 'combat',
         val: 5,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('claws') || 1){
                 case 0.1:
                     return [5];
@@ -3072,7 +3072,7 @@ export const traits = {
         origin: 'scorpid',
         taxonomy: 'production',
         val: -1,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('atrophy') || 1){
                 case 0.1:
                     return [0.4];
@@ -3098,7 +3098,7 @@ export const traits = {
         origin: 'antid',
         taxonomy: 'production',
         val: 9,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('hivemind') || 1){
                 case 0.1:
                     return [13];
@@ -3124,7 +3124,7 @@ export const traits = {
         origin: 'antid',
         taxonomy: 'utility',
         val: 2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('tunneler') || 1){
                 case 0.1:
                     return [0.001];
@@ -3150,7 +3150,7 @@ export const traits = {
         origin: 'sharkin',
         taxonomy: 'combat',
         val: 5,
-        vars(r){
+        vars(r?){
             // [Cap]
             switch (r || traitRank('blood_thirst') || 1){
                 case 0.1:
@@ -3177,7 +3177,7 @@ export const traits = {
         origin: 'sharkin',
         taxonomy: 'combat',
         val: 6,
-        vars(r){
+        vars(r?){
             // [Combat, Hunting]
             switch (r || traitRank('apex_predator') || 1){
                 case 0.1:
@@ -3204,7 +3204,7 @@ export const traits = {
         origin: 'octigoran',
         taxonomy: 'combat',
         val: -2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('invertebrate') || 1){
                 case 0.1:
                     return [30];
@@ -3230,7 +3230,7 @@ export const traits = {
         origin: 'octigoran',
         taxonomy: 'production',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('suction_grip') || 1){
                 case 0.1:
                     return [3];
@@ -3256,7 +3256,7 @@ export const traits = {
         origin: 'dryad',
         taxonomy: 'utility',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('befuddle') || 1){
                 case 0.1:
                     return [10];
@@ -3282,7 +3282,7 @@ export const traits = {
         origin: 'dryad',
         taxonomy: 'utility',
         val: -5,
-        vars(r){
+        vars(r?){
             // [power adjustment, windmill power]
             switch (r || traitRank('environmentalist') || 1){
                 case 0.1:
@@ -3309,7 +3309,7 @@ export const traits = {
         origin: 'satyr',
         taxonomy: 'utility',
         val: -2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('unorganized') || 1){
                 case 0.1:
                     return [100];
@@ -3335,7 +3335,7 @@ export const traits = {
         origin: 'satyr',
         taxonomy: 'production',
         val: 5,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('musical') || 1){
                 case 0.1:
                     return [0.15];
@@ -3361,7 +3361,7 @@ export const traits = {
         origin: 'phoenix',
         taxonomy: 'combat',
         val: 4,
-        vars(r){
+        vars(r?){
             // [cold win, normal win, hot win, cold loss, normal loss, hot loss, hell]
             switch (r || traitRank('revive') || 1){
                 case 0.1:
@@ -3388,7 +3388,7 @@ export const traits = {
         origin: 'phoenix',
         taxonomy: 'combat',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('slow_regen') || 1){
                 case 0.1:
                     return [45];
@@ -3414,7 +3414,7 @@ export const traits = {
         origin: 'salamander',
         taxonomy: 'utility',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('forge') || 1){
                 case 0.1:
                     return [0.25];
@@ -3440,7 +3440,7 @@ export const traits = {
         origin: 'salamander',
         taxonomy: 'utility',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('autoignition') || 1){
                 case 0.1:
                     return [5];
@@ -3466,7 +3466,7 @@ export const traits = {
         origin: 'yeti',
         taxonomy: 'utility',
         val: 5,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('blurry') || 1){
                 case 0.1:
                     return [5];
@@ -3492,7 +3492,7 @@ export const traits = {
         origin: 'yeti',
         taxonomy: 'production',
         val: -3,
-        vars(r){
+        vars(r?){
             // [Not Hot, Hot]
             switch (r || traitRank('snowy') || 1){
                 case 0.1:
@@ -3519,7 +3519,7 @@ export const traits = {
         origin: 'wendigo',
         taxonomy: 'resource',
         val: -5,
-        vars(r){
+        vars(r?){
             // [Extra Food Consumed, Stockpile Divisor]
             switch (r || traitRank('ravenous') || 1){
                 case 0.1:
@@ -3546,7 +3546,7 @@ export const traits = {
         origin: 'wendigo',
         taxonomy: 'utility',
         val: 5,
-        vars(r){
+        vars(r?){
             // [Hunting Food, Soul Well Food, Soul Gem Adjust]
             switch (r || traitRank('ghostly') || 1){
                 case 0.1:
@@ -3573,7 +3573,7 @@ export const traits = {
         origin: 'tuskin',
         taxonomy: 'utility',
         val: 3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('lawless') || 1){
                 case 0.1:
                     return [20];
@@ -3599,7 +3599,7 @@ export const traits = {
         origin: 'tuskin',
         taxonomy: 'utility',
         val: -1,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('mistrustful') || 1){
                 case 0.1:
                     return [5];
@@ -3625,7 +3625,7 @@ export const traits = {
         origin: 'kamel',
         taxonomy: 'resource',
         val: 4,
-        vars(r){
+        vars(r?){
             // [Starve Resist, Miner/Lumber boost]
             switch (r || traitRank('humpback') || 1){
                 case 0.1:
@@ -3660,7 +3660,7 @@ export const traits = {
         origin: 'kamel',
         taxonomy: 'utility',
         val: -4,
-        vars(r){
+        vars(r?){
             // [Negative Sign Intensity]
             switch (r || traitRank('unfavored') || 1){
                 case 0.1:
@@ -3687,7 +3687,7 @@ export const traits = {
         origin: 'balorg',
         taxonomy: 'combat',
         val: 10,
-        vars(r){
+        vars(r?){
             // [Combat Bonus, Hunting Bonus]
             switch (r || traitRank('fiery') || 1){
                 case 0.1:
@@ -3714,7 +3714,7 @@ export const traits = {
         origin: 'balorg',
         taxonomy: 'resource',
         val: 6,
-        vars(r){
+        vars(r?){
             // [Titanium Low Roll, Titanium High Roll]
             switch (r || traitRank('terrifying') || 1){
                 case 0.1:
@@ -3741,7 +3741,7 @@ export const traits = {
         origin: 'balorg',
         taxonomy: 'production',
         val: 12,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('slaver') || 1){
                 case 0.1:
                     return [0.05];
@@ -3767,7 +3767,7 @@ export const traits = {
         origin: 'imp',
         taxonomy: 'utility',
         val: 10,
-        vars(r){
+        vars(r?){
             // [Planet Creep, Space Creep]
             switch (r || traitRank('compact') || 1){
                 case 0.1:
@@ -3794,7 +3794,7 @@ export const traits = {
         origin: 'imp',
         taxonomy: 'resource',
         val: 4,
-        vars(r){
+        vars(r?){
             // [Buy Price, Sell Price]
             switch (r || traitRank('conniving') || 1){
                 case 0.1:
@@ -3821,7 +3821,7 @@ export const traits = {
         origin: 'imp',
         taxonomy: 'combat',
         val: -5,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('pathetic') || 1){
                 case 0.1:
                     return [40];
@@ -3847,7 +3847,7 @@ export const traits = {
         origin: 'seraph',
         taxonomy: 'production',
         val: 4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('spiritual') || 1){
                 case 0.1:
                     return [6];
@@ -3873,7 +3873,7 @@ export const traits = {
         origin: 'seraph',
         taxonomy: 'resource',
         val: -7,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('truthful') || 1){
                 case 0.1:
                     return [85];
@@ -3899,7 +3899,7 @@ export const traits = {
         origin: 'seraph',
         taxonomy: 'production',
         val: 4,
-        vars(r){
+        vars(r?){
             // [Bonus to unification]
             switch (r || traitRank('unified') || 1){
                 case 0.1:
@@ -3926,7 +3926,7 @@ export const traits = {
         origin: 'unicorn',
         taxonomy: 'production',
         val: 3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('rainbow') || 1){
                 case 0.1:
                     return [10];
@@ -3952,7 +3952,7 @@ export const traits = {
         origin: 'unicorn',
         taxonomy: 'production',
         val: 3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('gloomy') || 1){
                 case 0.1:
                     return [3];
@@ -3978,7 +3978,7 @@ export const traits = {
         origin: 'unicorn',
         taxonomy: 'utility',
         val: 6,
-        vars(r){
+        vars(r?){
             // [Knowledge Base, Knowledge Scale, Tax Bonus, Metal Bonus, Morale Bonus]
             switch (r || traitRank('magnificent') || 1){
                 case 0.1:
@@ -4005,7 +4005,7 @@ export const traits = {
         origin: 'unicorn',
         taxonomy: 'resource',
         val: -3,
-        vars(r){
+        vars(r?){
             // [min tax, max tax]
             switch (r || traitRank('noble') || 1){
                 case 0.1:
@@ -4032,7 +4032,7 @@ export const traits = {
         origin: 'synth',
         taxonomy: 'utility',
         val: 6,
-        vars(r){
+        vars(r?){
             // [Postitive Trait Rank, Negative Trait Rank]
             switch (r || traitRank('imitation') || 1){
                 case 0.1:
@@ -4059,7 +4059,7 @@ export const traits = {
         origin: 'synth',
         taxonomy: 'production',
         val: -4,
-        vars(r){
+        vars(r?){
             // [Entertainer Reduction, Stress Reduction]
             switch (r || traitRank('emotionless') || 1){
                 case 0.1:
@@ -4086,7 +4086,7 @@ export const traits = {
         origin: 'synth',
         taxonomy: 'utility',
         val: 6,
-        vars(r){
+        vars(r?){
             // [Reduce Wardenclyffe Knowledge Cost, Knowledge per Citizen]
             switch (r || traitRank('logical') || 1){
                 case 0.1:
@@ -4113,7 +4113,7 @@ export const traits = {
         origin: 'nano',
         taxonomy: 'utility',
         val: 10,
-        vars(r){
+        vars(r?){
             // [Postitive Trait Rank, Negative Trait Rank]
             switch (r || traitRank('shapeshifter') || 1){
                 case 0.1:
@@ -4140,7 +4140,7 @@ export const traits = {
         origin: 'nano',
         taxonomy: 'utility',
         val: -4,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('deconstructor') || 1){
                 case 0.1:
                     return [25]
@@ -4166,7 +4166,7 @@ export const traits = {
         origin: 'nano',
         taxonomy: 'utility',
         val: 4,
-        vars(r){
+        vars(r?){
             // [Quantum Bonus per Citizen, Softcap]
             switch (r || traitRank('linked') || 1){
                 case 0.1:
@@ -4193,7 +4193,7 @@ export const traits = {
         origin: 'ghast',
         taxonomy: 'resource',
         val: -3,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('dark_dweller') || 1){
                 case 0.1:
                     return [99];
@@ -4219,7 +4219,7 @@ export const traits = {
         origin: 'ghast',
         taxonomy: 'combat',
         val: 10,
-        vars(r){
+        vars(r?){
             // [Combat Bonus, Thrall Catch Bonus]
             switch (r || traitRank('swift') || 1){
                 case 0.1:
@@ -4246,7 +4246,7 @@ export const traits = {
         origin: 'ghast',
         taxonomy: 'utility',
         val: -2,
-        vars(r){
+        vars(r?){
             switch (r || traitRank('anthropophagite') || 1){
                 case 0.1:
                     return [0.25];
@@ -4272,7 +4272,7 @@ export const traits = {
         origin: 'shoggoth',
         taxonomy: 'resource',
         val: 12,
-        vars(r){
+        vars(r?){
             // [Tool Factor, Crafting Factor]
             switch (r || traitRank('living_tool') || 1){
                 case 0.1:
@@ -4299,7 +4299,7 @@ export const traits = {
         origin: 'shoggoth',
         taxonomy: 'utility',
         val: -10,
-        vars(r){
+        vars(r?){
             // [Costs are higher]
             switch (r || traitRank('bloated') || 1){
                 case 0.1:
@@ -4326,7 +4326,7 @@ export const traits = {
         origin: 'dwarf',
         taxonomy: 'resource',
         val: 9,
-        vars(r){
+        vars(r?){
             // [Auto Crafting Boost, Manufacturing Boost, Improved Morale]
             switch (r || traitRank('artisan') || 1){
                 case 0.1:
@@ -4353,7 +4353,7 @@ export const traits = {
         origin: 'dwarf',
         taxonomy: 'utility',
         val: -5,
-        vars(r){
+        vars(r?){
             // Raises Knowledge cost of scientific advancements
             switch (r || traitRank('stubborn') || 1){
                 case 0.1:
@@ -4380,7 +4380,7 @@ export const traits = {
         origin: 'raccoon',
         taxonomy: 'resource',
         val: 6,
-        vars(r){
+        vars(r?){
             // [Randomly Steal Things]
             switch (r || traitRank('rogue') || 1){
                 case 0.1:
@@ -4407,7 +4407,7 @@ export const traits = {
         origin: 'raccoon',
         taxonomy: 'utility',
         val: -4,
-        vars(r){
+        vars(r?){
             // [Financial Institutions Cost Extra]
             switch (r || traitRank('untrustworthy') || 1){
                 case 0.1:
@@ -4434,7 +4434,7 @@ export const traits = {
         origin: 'lichen',
         taxonomy: 'resource',
         val: 6,
-        vars(r){
+        vars(r?){
             // [Some building materials self replicate reducing cost of the next building]
             // [Lumber/Bone, Plywood/Boneweave, Furs/Flesh, Amber (not Stone/Clay)]
             switch (r || traitRank('living_materials') || 1){
@@ -4462,7 +4462,7 @@ export const traits = {
         origin: 'lichen',
         taxonomy: 'utility',
         val: -5,
-        vars(r){
+        vars(r?){
             // [Randomly Die]
             switch (r || traitRank('unstable') || 1){
                 case 0.1:
@@ -4489,7 +4489,7 @@ export const traits = {
         origin: 'wyvern',
         taxonomy: 'utility',
         val: 5,
-        vars(r){
+        vars(r?){
             let element = 'fire';
             switch (global.city.biome || 'grassland'){
                 case 'savanna':
@@ -4541,7 +4541,7 @@ export const traits = {
         origin: 'wyvern',
         taxonomy: 'combat',
         val: -8,
-        vars(r){
+        vars(r?){
             // [Hell Worse, Piracy Worse, Events Worse]
             switch (r || traitRank('chicken') || 1){
                 case 0.1:
@@ -4568,7 +4568,7 @@ export const traits = {
         origin: 'narwhal',
         taxonomy: 'resource',
         val: 6,
-        vars(r){
+        vars(r?){
             let moisture = 0;
             switch (global.city.biome || 'grassland'){
                 case 'oceanic':
@@ -4623,7 +4623,7 @@ export const traits = {
         origin: 'narwhal',
         taxonomy: 'resource',
         val: -3,
-        vars(r){
+        vars(r?){
             // [Refine your dead to make Oil]
             switch (r || traitRank('blubber') || 1){
                 case 0.1:
@@ -4650,7 +4650,7 @@ export const traits = {
         origin: 'beholder',
         taxonomy: 'utility',
         val: 9,
-        vars(r){
+        vars(r?){
             // [Powers Active, Power Scaling]
             switch (r || traitRank('ocular_power') || 1){
                 case 0.1:
@@ -4677,7 +4677,7 @@ export const traits = {
         origin: 'beholder',
         taxonomy: 'production',
         val: -3,
-        vars(r){
+        vars(r?){
             // [Wind lowers production]
             switch (r || traitRank('floating') || 1){
                 case 0.1:
@@ -4704,7 +4704,7 @@ export const traits = {
         origin: 'djinn',
         taxonomy: 'utility',
         val: 13,
-        vars(r){
+        vars(r?){
             // [Wish Cooldown Period]
             switch (r || traitRank('wish') || 1){
                 case 0.1:
@@ -4731,7 +4731,7 @@ export const traits = {
         origin: 'djinn',
         taxonomy: 'resource',
         val: -4,
-        vars(r){
+        vars(r?){
             // [Trade Less Productive]
             switch (r || traitRank('devious') || 1){
                 case 0.1:
@@ -4758,7 +4758,7 @@ export const traits = {
         origin: 'bombardier',
         taxonomy: 'combat',
         val: 6,
-        vars(r){
+        vars(r?){
             // [More Powerful Soldiers but less of them]
             switch (r || traitRank('grenadier') || 1){
                 case 0.1:
@@ -4785,7 +4785,7 @@ export const traits = {
         origin: 'bombardier',
         taxonomy: 'combat',
         val: -2,
-        vars(r){
+        vars(r?){
             // [Major Death, Minor Death]
             switch (r || traitRank('aggressive') || 1){
                 case 0.1:
@@ -4812,7 +4812,7 @@ export const traits = {
         origin: 'nephilim',
         taxonomy: 'utility',
         val: 8,
-        vars(r){
+        vars(r?){
             // [Boosts Other Traits]
             switch (r || traitRank('empowered') || 1){
                 case 0.1:
@@ -4839,7 +4839,7 @@ export const traits = {
         origin: 'nephilim',
         taxonomy: 'production',
         val: -5,
-        vars(r){
+        vars(r?){
             // [Temples less effective]
             switch (r || traitRank('blasphemous') || 1){
                 case 0.1:
@@ -4866,7 +4866,7 @@ export const traits = {
         origin: 'sludge',
         taxonomy: 'production',
         val: -50,
-        vars(r){
+        vars(r?){
             // [All jobs worse, Theology weaker, Mastery weaker]
             switch (r || traitRank('ooze') || 1){
                 case 0.1:
@@ -4908,49 +4908,49 @@ export const traits = {
         name: loc('trait_tactical_name'),
         desc: loc('trait_tactical'),
         type: 'minor',
-        vars(r){ return [5]; },
+        vars(r?){ return [5]; },
     },
     analytical: { // Science Bonus
         name: loc('trait_analytical_name'),
         desc: loc('trait_analytical'),
         type: 'minor',
-        vars(r){ return [1]; },
+        vars(r?){ return [1]; },
     },
     promiscuous: { // Organics Growth Bonus, Synths Population Discount
         name: loc('trait_promiscuous_name'),
         desc: loc('trait_promiscuous'),
         type: 'minor',
-        vars(r){ return [1,0.02]; },
+        vars(r?){ return [1,0.02]; },
     },
     resilient: { // Coal Mining Bonus
         name: loc('trait_resilient_name'),
         desc: loc('trait_resilient'),
         type: 'minor',
-        vars(r){ return [2]; },
+        vars(r?){ return [2]; },
     },
     cunning: { // Hunting Bonus
         name: loc('trait_cunning_name'),
         desc: loc('trait_cunning'),
         type: 'minor',
-        vars(r){ return [5]; },
+        vars(r?){ return [5]; },
     },
     hardy: { // Factory Woker Bonus
         name: loc('trait_hardy_name'),
         desc: loc('trait_hardy'),
         type: 'minor',
-        vars(r){ return [1]; },
+        vars(r?){ return [1]; },
     },
     ambidextrous: { // Crafting Bonus
         name: loc('trait_ambidextrous_name'),
         desc: loc('trait_ambidextrous'),
         type: 'minor',
-        vars(r){ return [3,2]; },
+        vars(r?){ return [3,2]; },
     },
     industrious: { // Miner Bonus
         name: loc('trait_industrious_name'),
         desc: loc('trait_industrious'),
         type: 'minor',
-        vars(r){ return [2]; },
+        vars(r?){ return [2]; },
     },
     content: { // Morale Bonus
         name: loc('trait_content_name'),
@@ -4961,25 +4961,25 @@ export const traits = {
         name: loc('trait_fibroblast_name'),
         desc: loc('trait_fibroblast'),
         type: 'minor',
-        vars(r){ return [2]; },
+        vars(r?){ return [2]; },
     },
     metallurgist: { // Alloy bonus
         name: loc('trait_metallurgist_name'),
         desc: loc('trait_metallurgist'),
         type: 'minor',
-        vars(r){ return [4]; },
+        vars(r?){ return [4]; },
     },
     gambler: { // Casino bonus
         name: loc('trait_gambler_name'),
         desc: loc('trait_gambler'),
         type: 'minor',
-        vars(r){ return [4]; },
+        vars(r?){ return [4]; },
     },
     persuasive: { // Trade bonus
         name: loc('trait_persuasive_name'),
         desc: loc('trait_persuasive'),
         type: 'minor',
-        vars(r){ return [1]; },
+        vars(r?){ return [1]; },
     },
     fortify: { // gene fortification
         name: loc('trait_fortify_name'),
@@ -4990,7 +4990,7 @@ export const traits = {
         name: loc('trait_mastery_name'),
         desc: loc('trait_mastery'),
         type: 'special',
-        vars(r){ return [1]; },
+        vars(r?){ return [1]; },
     }
 };
 
@@ -6457,7 +6457,7 @@ export function setJType(){
     races.ultra_sludge.type = global.race.hasOwnProperty('jtype') ? global.race.jtype : 'humanoid';
 }
 
-function customRace(hybrid){
+function customRace(hybrid?){
     let slot = hybrid ? 'race1' : 'race0';
     if (global.hasOwnProperty('custom') && global.custom.hasOwnProperty(slot)){
         let trait = {};
@@ -6789,7 +6789,7 @@ export function randomMinorTrait(ranks){
     return trait;
 }
 
-function checkPurgatory(s,t,dv){
+function checkPurgatory(s,t,dv?){
     if (global.race.purgatory[s].hasOwnProperty(t)){
         global[s][t] = global.race.purgatory[s][t];
         delete global.race.purgatory[s][t];
@@ -7326,7 +7326,7 @@ export function cleanAddTrait(trait){
     }
 }
 
-export function cleanRemoveTrait(trait,rank){
+export function cleanRemoveTrait(trait,rank?){
     switch (trait){
         case 'high_pop':
             global.resource[global.race.species].amount = Math.round(global.resource[global.race.species].amount / traits.high_pop.vars(rank)[0]);
@@ -7621,7 +7621,7 @@ export function setImitation(mod){
     }
 }
 
-export function shapeShift(genus,setup,forceClean){
+export function shapeShift(genus?,setup?,forceClean?){
     let shifted = global.race.hasOwnProperty('ss_traits') ? global.race.ss_traits : [];
 
     Object.keys(global.race.inactiveTraits).forEach(function (trait){
@@ -7756,7 +7756,7 @@ export function traitRank(trait){
     return global.race[trait];
 }
 
-export function setTraitRank(trait,opts){
+export function setTraitRank(trait,opts?){
     opts = opts || {};
     if (global.race[trait] && !opts['force']){
         switch (global.race[trait]){
@@ -7805,7 +7805,7 @@ export function fathomCheck(race){
     return 0;
 }
 
-export function traitSkin(type, trait, species){
+export function traitSkin(type, trait?, species?){
     let artificial = species ? genus_def[races[species].type].traits.artifical : global.race['artifical'];
     switch (type){
         case 'name':

@@ -3,7 +3,7 @@ import { loc } from './../locale';
 import { planetTraits, biomes } from './../races';
 import { headerBoxBuilder, infoBoxBuilder } from './functions';
 
-export function planetsPage(content) {
+export function planetsPage(content?) {
     let info = $('<div class="duelList"/>');
 
     let intro = headerBoxBuilder(content,{ name: 'planet', template: 'planet', paragraphs: 4, full: true,

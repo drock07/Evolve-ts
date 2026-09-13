@@ -2520,7 +2520,7 @@ const spaceProjects = {
             },
             queue_complete(){ return 0; },
             cost: {},
-            effect(wiki){
+            effect(wiki?){
                 let boost = 25;
                 if (global.interstellar['far_reach']){
                     let num_farpoint_on = wiki ? global.interstellar.far_reach.on : p_on['far_reach'];
@@ -4937,7 +4937,7 @@ const galaxyProjects = {
                 }
                 return `<div>${loc('galaxy_ship_dock_effect',[0.25])}</div><div class="has-text-caution">${loc('minus_power',[$(this)[0].powered(wiki)])}</div>`;
             },
-            support(wiki){
+            support(wiki?){
                 if(global.race['fasting']){
                     let num_gateways_on = wiki ? global.galaxy.gateway_station.on : p_on['gateway_station'];
                     return num_gateways_on ? 0.1 * num_gateways_on : 0;
@@ -6469,7 +6469,7 @@ export function convertSpaceSector(part){
     return space;
 }
 
-export function piracy(region,rating,raw,wiki){
+export function piracy(region,rating?,raw?,wiki?){
     if (global.tech['piracy'] && !global.race['truepath']){
         let armada = 0;
         for (let i = gatewayArmada.length - 1; i >= 0; i--){
@@ -6700,7 +6700,7 @@ const structDefinitions = {
     attractor: { count: 0, on: 0 },
 };
 
-export function incrementStruct(c_action,sector){
+export function incrementStruct(c_action,sector?){
     let struct = c_action;
     if (typeof c_action === 'object'){
         struct = c_action.struct().p[0];
@@ -6718,7 +6718,7 @@ export function incrementStruct(c_action,sector){
     global[sector][struct].count++;
 }
 
-export function spaceTech(r,k){
+export function spaceTech(r?,k?){
     if (r && k){
         return spaceProjects[r][k];
     }
@@ -7281,7 +7281,7 @@ export function swarm_adjust(res,wiki){
     return res;
 }
 
-export function fuel_adjust(fuel,drain,wiki){
+export function fuel_adjust(fuel,drain,wiki?){
     if (global.race.universe === 'heavy'){
         fuel *= 1.25 + (0.5 * darkEffect('heavy'));
     }
@@ -7492,7 +7492,7 @@ export function setUniverse(){
     }
 }
 
-export function ascendLab(hybrid,wiki){
+export function ascendLab(hybrid?,wiki?){
     let isWiki = !!wiki;
     if (!isWiki && !global.race['noexport']){
         if (webWorker.w){
@@ -8422,7 +8422,7 @@ function geneCost(genome,trait,tRanks){
     return gene_cost;
 }
 
-export function terraformLab(wiki){
+export function terraformLab(wiki?){
     if (!wiki && !global.race['noexport']){
         if (webWorker.w){
             webWorker.w.terminate();
@@ -8625,7 +8625,7 @@ export function terraformLab(wiki){
     });
 }
 
-function terraformScore(planet,wiki){
+function terraformScore(planet,wiki?){
     let pts = (planet.biome === 'eden' ? 0 : 10) + (global.stats.achieve['lamentis'] ? global.stats.achieve.lamentis.l * 10 : 0);
     if (global.race['truepath']){ pts *= 2; }
     pts -= planet.traitlist.length ** 3;

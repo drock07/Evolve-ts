@@ -68,7 +68,7 @@ Math.rand = function(min, max) {
 
 global['seed'] = 2;
 global['warseed'] = 2;
-export function seededRandom(min, max, alt, useSeed) {
+export function seededRandom(min, max?, alt?, useSeed?) {
     max = max || 1;
     min = min || 0;
 
@@ -2162,7 +2162,7 @@ $(window).resize(function(){
     resizeGame();
 });
 
-export function srSpeak(text, priority) {
+export function srSpeak(text, priority?) {
     var el = document.createElement("div");
     var id = "speak-" + Date.now();
     el.setAttribute("id", id);

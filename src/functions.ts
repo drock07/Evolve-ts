@@ -15,7 +15,7 @@ import { shipCosts, TPShipDesc } from './truepath';
 import { mechCost, mechDesc } from './portal';
 
 var popperRef = false;
-export function popover(id,content,opts){
+export function popover(id,content,opts?){
     if (!opts){ opts = {}; }
     if (!opts.hasOwnProperty('elm')){ opts['elm'] = '#'+id; }
     if (!opts.hasOwnProperty('bind')){ opts['bind'] = true; }
@@ -97,7 +97,7 @@ if ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mob
     });
 }
 
-export function clearPopper(id){
+export function clearPopper(id?){
     if (id && $(`#popper`).data('id') !== id){
         return;
     }
@@ -256,7 +256,7 @@ window.importGame = function importGame(data,utf16){
     }
 }
 
-export function powerGrid(type,reset){
+export function powerGrid(type,reset?){
     let grids = gridDefs();
 
     let power_structs = [];
@@ -349,7 +349,7 @@ export function powerGrid(type,reset){
     }
 }
 
-export function initMessageQueue(filters){
+export function initMessageQueue(filters?){
     filters = filters || message_filters;
     filters.forEach(function (filter){
         message_logs[filter] = [];
@@ -361,7 +361,7 @@ export function initMessageQueue(filters){
     });
 }
 
-export function messageQueue(msg,color,dnr,tags,reload){
+export function messageQueue(msg,color,dnr?,tags?,reload?){
     tags = tags || [];
     if (!reload && !tags.includes('all')){
         tags.push('all');
@@ -677,7 +677,7 @@ export function resetResBuffer(){
     });
 }
 
-export function modRes(res,val,notrack){
+export function modRes(res,val,notrack?){
     if(res === 'Food' && global.race['fasting']){
         global.resource[res].amount = 0;
         return false;
@@ -707,7 +707,7 @@ export function modRes(res,val,notrack){
     return success;
 }
 
-export function genCivName(alt){
+export function genCivName(alt?){
     let genus = global.race.maintype || races[global.race.species].type;
     switch (genus){
         case 'animal':
@@ -773,7 +773,7 @@ export function genCivName(alt){
     };
 }
 
-export function costMultiplier(structure,offset,base,multiplier,cat){
+export function costMultiplier(structure,offset,base,multiplier,cat?){
     if (!cat){
         cat = 'city';
     }
@@ -832,7 +832,7 @@ export function costMultiplier(structure,offset,base,multiplier,cat){
     return Math.round((multiplier ** count) * base);
 }
 
-export function spaceCostMultiplier(action,offset,base,multiplier,sector,c_min){
+export function spaceCostMultiplier(action,offset,base,multiplier,sector?,c_min?){
     if (!sector){
         sector = 'space';
     }
@@ -908,7 +908,7 @@ export function harmonyEffect(){
     return 0;
 }
 
-export function timeCheck(c_action,track,detailed,reqMet){
+export function timeCheck(c_action,track?,detailed?,reqMet?){
     reqMet = typeof reqMet === 'undefined' ? true : reqMet;
     if (c_action.cost){
         let time = 0;
@@ -1013,7 +1013,7 @@ export function timeCheck(c_action,track,detailed,reqMet){
 // This function returns the time to complete all remaining Arpa segments.
 // Note: remain is a fraction between 0 and 1 representing the fraction of
 // remaining arpa segments to be completed
-export function arpaTimeCheck(project, remain, track, detailed){
+export function arpaTimeCheck(project, remain, track?, detailed?){
     let offset = track && track.id[project.id] ? track.id[project.id] : false;
     let costs = arpaAdjustCosts(project.cost,offset);
     let allRemainingSegmentsTime = 0;
@@ -1109,7 +1109,7 @@ export function arpaTimeCheck(project, remain, track, detailed){
     return detailed ? { t: allRemainingSegmentsTime, r: bottleneck, s: shorted } : allRemainingSegmentsTime;
 }
 
-export function clearElement(elm,remove){
+export function clearElement(elm,remove?){
     elm.find('.vb').each(function(){
         try {
             $(this)[0].__vue__.$destroy();
@@ -1128,7 +1128,7 @@ export function clearElement(elm,remove){
     }
 }
 
-export function vBind(bind,action){
+export function vBind(bind,action?){
     action = action || 'create';
     if ($(bind.el).length > 0 && typeof $(bind.el)[0].__vue__ !== "undefined"){
         try {
@@ -1256,7 +1256,7 @@ export function get_qlevel(wiki){
     return wiki ? calcQuantumLevel(wiki) : quantum_level;
 }
 
-export function darkEffect(universe, flag, info, inputs){
+export function darkEffect(universe, flag?, info?, inputs?){
     if (!inputs) { inputs = {}; }
     let dark = inputs.dark !== undefined ? inputs.dark : global.prestige.Dark.count;
     let harmony = inputs.harmony !== undefined ? inputs.harmony : global.prestige.Harmony.count;
@@ -1360,7 +1360,7 @@ export function darkEffect(universe, flag, info, inputs){
 
 export const calc_mastery = (function(){
     var mastery;
-    return function(recalc){
+    return function(recalc?){
         if (mastery && !recalc){
             return mastery;
         }
@@ -1372,7 +1372,7 @@ export const calc_mastery = (function(){
     }
 })();
 
-export function masteryType(universe,detailed,unmodified){
+export function masteryType(universe,detailed?,unmodified?){
     if (global.genes['challenge'] && global.genes.challenge >= 2){
         universe = universe || global.race.universe;
         let ua_level = universeLevel(universe);
@@ -1420,7 +1420,7 @@ export function masteryType(universe,detailed,unmodified){
 
 export const calcPillar = (function(){
     var bonus;
-    return function(recalc){
+    return function(recalc?){
         if (!bonus || recalc){
             let active = 0;
             Object.keys(global.pillars).forEach(function(race){
@@ -1572,7 +1572,7 @@ export function getResetConstants(type, inputs){
     return rc;
 }
 
-export function calcPrestige(type,inputs){
+export function calcPrestige(type,inputs?){
     let gains = {
         plasmid: 0,
         phage: 0,
@@ -1756,7 +1756,7 @@ export function calcPrestige(type,inputs){
     return gains;
 }
 
-export function adjustCosts(c_action, offset, wiki){
+export function adjustCosts(c_action, offset?, wiki?){
     let costs = c_action.cost || {};
     if ((costs['RNA'] || costs['DNA']) && global.genes['evolve']){
         var newCosts = {};
@@ -2491,7 +2491,7 @@ export function drawPet(){
     }
 }
 
-export function easterEgg(num,size){
+export function easterEgg(num,size?){
     let easter = getEaster();
     const date = new Date();
     if (easter.active && !global.special.egg[date.getFullYear()][`egg${num}`] && $(`#egg${num}`).length === 0){
@@ -2579,7 +2579,7 @@ function single_emblem(achieve,size,icon,iconName,fool,uAffix){
     return global.stats.achieve[achieve] && (fool ? global.stats.achieve[achieve][uAffix] - 1 : global.stats.achieve[achieve][uAffix]) > 0 ? `<p class="flair" title="${sLevel(global.stats.achieve[achieve][uAffix])} ${iconName}"><svg class="star${fool ? global.stats.achieve[achieve][uAffix] - 1 : global.stats.achieve[achieve][uAffix]}" version="1.1" x="0px" y="0px" width="${size}px" height="${size}px" viewBox="${svgViewBox(icon)}" xml:space="preserve">${svgIcons(icon)}</svg><span class="is-sr-only">${sLevel(global.stats.achieve[achieve][uAffix])} ${iconName}</span></p>` : '';
 }
 
-export function format_emblem(achieve,size,baseIcon,fool,universe){
+export function format_emblem(achieve,size?,baseIcon?,fool?,universe?){
     if (!size){
         size = 10;
     }
@@ -2645,7 +2645,7 @@ export function binary_limit_test(f, start=1, startIsMin=true){
     return num;
 }
 
-export function fibonacci(num, memo){
+export function fibonacci(num, memo?){
     memo = memo || {};
     if (memo[num]) return memo[num];
     if (num <= 1) return 1;
@@ -2674,7 +2674,7 @@ export function sLevel(level){
     }
 }
 
-export function calcGenomeScore(genome,wiki,tRanks){
+export function calcGenomeScore(genome,wiki?,tRanks?){
     if (!tRanks){ tRanks = genome.ranks || {}; }
     let genes = 0;
 
@@ -2838,7 +2838,7 @@ export function deepClone(obj){
 }
 
 // function library
-export function flib(func,val,val2){
+export function flib(func,val?,val2?){
     switch (func){
         case 'reverse':
         {
@@ -2861,7 +2861,7 @@ export function flib(func,val,val2){
     return false;
 }
 
-export function eventActive(event,val){
+export function eventActive(event,val?){
     switch(event){
         case 'easter':
             return getEaster();
@@ -3245,7 +3245,7 @@ function getTraitVals(trait, rank, species){
     return vals;
 }
 
-export function hoovedRename(style, species=global.race.species){
+export function hoovedRename(style?, species=global.race.species){
     let type = species === global.race.species ? global.race.maintype || races[species].type : races[species].type;
     if (species === 'sludge'){
         return style ? 'craft' : loc('resource_Beaker_name');

@@ -779,7 +779,7 @@ export function challengesPage(content){
     }
 }
 
-function addAchievements(content,feat,achievements,nolink){
+function addAchievements(content,feat,achievements,nolink?){
     nolink = nolink || {};
     let achieves = $(`
         <div class="reqs">

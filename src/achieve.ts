@@ -291,7 +291,7 @@ export const feats = {
     set_ulevel(al.uLvl);
 }
 
-export function universeLevel(universe){
+export function universeLevel(universe?){
     universe = universe || global.race.universe;
     let affix = universeAffix(universe);
     let lvl = 0;
@@ -307,7 +307,7 @@ export function universeLevel(universe){
     return { aLvl: lvl, uLvl: ulvl };
 }
 
-export function universeAffix(universe){
+export function universeAffix(universe?){
     universe = universe || global.race.universe;
     switch (universe){
         case 'evil':
@@ -325,7 +325,7 @@ export function universeAffix(universe){
     }
 }
 
-export function unlockAchieve(achievement,small,rank,universe){
+export function unlockAchieve(achievement,small?,rank?,universe?){
     if (global.race.universe !== 'micro' && small === true){
         return false;
     }
@@ -372,7 +372,7 @@ export function unlockAchieve(achievement,small,rank,universe){
     return unlock;
 }
 
-export function unlockFeat(feat,small,rank){
+export function unlockFeat(feat,small?,rank?){
     if ((global.race.universe === 'micro' && small !== true) || (global.race.universe !== 'micro' && small === true)){
         return false;
     }
@@ -415,7 +415,7 @@ export function setupStats(){
     }
 }
 
-export function drawAchieve(args){
+export function drawAchieve(args?){
     clearElement($('#achievePanel'));
     let achieve = $('#achievePanel');
     let earned = 0;

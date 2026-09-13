@@ -10,7 +10,7 @@ import { edenicTech } from './edenic';
 import { checkPathRequirements } from './truepath';
 import { highPopAdjust, production } from './prod';
 
-export function loadIndustry(industry,parent,bind){
+export function loadIndustry(industry,parent,bind?){
     switch (industry){
         case 'smelter':
             loadSmelter(parent,bind);
@@ -1652,7 +1652,7 @@ export function maxRitualNum(mana, time_multiplier=0.25, rate=0.0025){
     });
 }
 
-function colorRange(num,max,invert){
+function colorRange(num,max,invert?){
     if (num <= 0){
         return invert ? 'has-text-success' : 'has-text-danger';
     }
@@ -1889,7 +1889,7 @@ export function gridDefs(){
     };
 }
 
-export function clearGrids(grids){
+export function clearGrids(grids?){
     grids = grids || gridDefs();
     Object.keys(grids).forEach(function(grid_type){
         let el = $(`#grid${grid_type}`)[0];

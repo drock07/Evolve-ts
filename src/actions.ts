@@ -1360,7 +1360,7 @@ export const actions = {
                 Money(){ return 25000; },
             },
             queue_complete(){ return global.city['slave_pen'] ? global.city.slave_pen.count * 4 - global.resource.Slave.amount : 0; },
-            action(args){
+            action(args?){
                 if (global.city['slave_pen'] && global.city.slave_pen.count * 4 > global.resource.Slave.amount){
                     if (payCosts($(this)[0])){
                         global.resource.Slave.amount++;
@@ -3657,11 +3657,11 @@ export const actions = {
                 Crystal(offset){ return global.race.universe === 'magic' ? costMultiplier('university', offset, 5, 1.36) : 0; },
                 Iron(offset){ return ((global.city['university'] ? global.city.university.count : 0) + (offset || 0)) >= 3 && global.city.ptrait.includes('unstable') ? costMultiplier('university', offset, 25, 1.36) : 0; }
             },
-            effect(wiki){
+            effect(wiki?){
                 let gain = +($(this)[0].knowVal(wiki)).toFixed(0);
                 return `<div>${loc('city_university_effect',[jobScale(1)])}</div><div>${loc('city_max_knowledge',[gain.toLocaleString()])}</div>`;
             },
-            knowVal(wiki){
+            knowVal(wiki?){
                 let multiplier = 1;
                 let base = global.tech['science'] && global.tech['science'] >= 8 ? 700 : 500;
                 if (global.city.ptrait.includes('permafrost')){
@@ -5127,7 +5127,7 @@ export function buildTemplate(key, region){
     }
 }
 
-function genus_condition(r,t){
+function genus_condition(r,t?){
     t = t || 'evo';
     let f = global.evolution['final'] || 0;
     return ((global.tech[t] && global.tech[t] === r) || (global.evolution['gselect'])) && f < 100;
@@ -5906,7 +5906,7 @@ export function checkTechRequirements(tech,predList){
     return false;
 }
 
-export function checkTechQualifications(c_action,type){
+export function checkTechQualifications(c_action,type?){
     if (c_action['condition'] && !c_action.condition()){
         return false;
     }
@@ -6199,12 +6199,12 @@ export function drawTech(){
     });
 }
 
-export function addAction(action,type,old,prediction){
+export function addAction(action,type,old?,prediction?){
     let c_action = actions[action][type];
     setAction(c_action,action,type,old,prediction)
 }
 
-export function setAction(c_action,action,type,old,prediction){
+export function setAction(c_action,action,type,old?,prediction?){
     if (checkTechQualifications(c_action,type) === false) {
         return;
     }
@@ -6852,7 +6852,7 @@ function planetDesc(obj,title,biome,orbit,trait,geology,gecked){
     return undefined;
 }
 
-function buildPlanet(aspect,opt,args){
+function buildPlanet(aspect,opt,args?){
     args = args || {};
     if (aspect === 'biome'){
         let biome = 'grassland';
@@ -7037,7 +7037,7 @@ export function powerOnNewStruct(c_action){
 // Return the powered/supported/enabled quantity of a struct.
 // When called from the wiki, assume that "enough" support is available, because this information is not in the save.
 // For structs that cannot be enabled, powered, or supported, always return 0.
-export function getStructNumActive(c_action,wiki){
+export function getStructNumActive(c_action,wiki?){
     let parts = c_action.id.split('-');
     if (!global.hasOwnProperty(parts[0]) || !global[parts[0]].hasOwnProperty(parts[1])){
         return 0;
@@ -7249,7 +7249,7 @@ function srDesc(c_action,old){
     return desc.replace("..",".");
 }
 
-export function actionDesc(parent,c_action,obj,old,action,a_type,bres){
+export function actionDesc(parent,c_action,obj,old?,action?,a_type?,bres?){
     clearElement(parent);
     var desc = typeof c_action.desc === 'string' ? c_action.desc : c_action.desc();
     bres = bres || false;
@@ -7529,7 +7529,7 @@ export function updateDesc(c_action,category,action){
     }
 }
 
-export function payCosts(c_action, costs){
+export function payCosts(c_action, costs?){
     costs = costs || adjustCosts(c_action);
     if (checkCosts(costs)){
         Object.keys(costs).forEach(function (res){
@@ -7563,7 +7563,7 @@ export function payCosts(c_action, costs){
     return false;
 }
 
-export function checkAffordable(c_action,max,raw){
+export function checkAffordable(c_action,max?,raw?){
     if (c_action.cost){
         let cost = raw ? c_action.cost : adjustCosts(c_action);
         if (max){
@@ -7576,7 +7576,7 @@ export function checkAffordable(c_action,max,raw){
     return true;
 }
 
-export function templeCount(zig){
+export function templeCount(zig?){
     if (!zig && global.city['temple']){
         let count = global.city.temple.count;
         if (!global.race['cataclysm'] && !global.race['orbit_decayed'] && !global.race['lone_survivor'] && !global.race['warlord']){
@@ -8219,7 +8219,7 @@ function largeHousingLabel(basic){
     return loc('city_apartment_title1');
 }
 
-export function housingLabel(type,flag){
+export function housingLabel(type,flag?){
     switch (type){
         case 'small':
             return basicHousingLabel();
@@ -8285,7 +8285,7 @@ export function structName(type){
     }
 }
 
-export function updateQueueNames(both, items){
+export function updateQueueNames(both, items?){
     if (global.tech['queue'] && global.queue.display){
         let deepScan = ['space','interstellar','galaxy','portal','tauceti'];
         for (let i=0; i<global.queue.queue.length; i++){
@@ -9529,7 +9529,7 @@ export function absorbRace(race){
     }
 }
 
-function fanaticTrait(trait,rank){
+function fanaticTrait(trait,rank?){
     if (global.race['warlord'] && trait === 'kindling_kindred'){ trait = 'iron_wood'; }
     else if (global.race['warlord'] && trait === 'spiritual'){ trait = 'unified'; }
     else if (global.race['warlord'] && trait === 'blood_thirst'){ trait = 'apex_predator'; }
