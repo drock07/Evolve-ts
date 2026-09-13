@@ -113,6 +113,10 @@ import {
   workerScale,
   limitCraftsmen,
   loadServants,
+  getJobRows,
+  adjustJob,
+  adjustServantJob,
+  setDefaultJob,
 } from "./jobs";
 import {
   defineIndustry,
@@ -242,6 +246,11 @@ legacy.flib = flib;
 legacy.gameLoop = gameLoop;
 legacy.loopTimers = loopTimers;
 legacy.initMessageQueue = initMessageQueue;
+legacy.getJobRows = getJobRows;
+legacy.adjustJob = adjustJob;
+legacy.adjustServantJob = adjustServantJob;
+legacy.setDefaultJob = setDefaultJob;
+legacy.jobScale = jobScale;
 legacy.adjustTax = adjustTax;
 legacy.madArm = madArm;
 legacy.madLaunch = madLaunch;

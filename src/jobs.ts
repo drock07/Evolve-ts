@@ -1,3 +1,4 @@
+import { mountJobs } from './components/mountJobs';
 import { global, keyMultiplier, p_on, support_on, tmp_vars } from './vars';
 import { vBind, clearElement, popover, darkEffect, eventActive, easterEgg, getHalloween } from './functions';
 import { loc } from './locale';
@@ -366,6 +367,27 @@ export const job_desc = {
 }
 
 // Sets up jobs in civics tab
+export interface JobRowSpec {
+    job: string;
+    servant: boolean;
+    /** Buefy colour class suffix; absent means the settable-default variant. */
+    color?: string;
+}
+
+/** Rows to render, in the order defineJobs() loads them. */
+const jobRows: JobRowSpec[] = [];
+
+function registerJobRow(spec: JobRowSpec){
+    const at = jobRows.findIndex(r => r.job === spec.job && r.servant === spec.servant);
+    if (at === -1){ jobRows.push(spec); }
+    else { jobRows[at] = spec; }
+}
+
+/** The registered rows, for the React list. */
+export function getJobRows(): JobRowSpec[] {
+    return jobRows;
+}
+
 export function defineJobs(define?){
     if (!define){
         $('#civics').append($(`<h2 class="is-sr-only">${loc('civics_jobs')}</h2><div class="tile is-child jobList"><div id="sshifter" class="tile sshifter"></div><div id="jobs" class="tile is-child"></div><div id="foundry" class="tile is-child"></div><div id="servants" class="tile is-child"></div><div id="skilledServants" class="tile is-child"></div></div>`));
@@ -407,6 +429,9 @@ export function defineJobs(define?){
         if (global.race['servants']){
             loadServants();
         }
+        // Every row is registered by now, and loadServants() has rebuilt
+        // #servants, so this is the first safe point to render the list.
+        mountJobs();
     }
 }
 
@@ -512,163 +537,67 @@ function loadJob(job, define, impact?, stress?, color?){
         return;
     }
 
-    var id = servant ? 'servant-' + job : 'civ-' + job;
+    // The row itself is rendered by the React job list (see components/JobList).
+    // loadJob keeps doing the state setup above and records what to draw; the
+    // whole list is then mounted as one island rather than one Vue instance
+    // per job, which is what the ~30 vBind mounts here used to cost.
+    registerJobRow({ job, servant, color });
+}
 
-    var civ_container = $(`<div id="${id}" v-show="showJob('${job}')" class="job"></div>`);
-    var controls = servant ? $(`<div class="controls"></div>`) : $(`<div v-show="!isDefault('${job}')" class="controls"></div>`);
-    if (!color || job === 'unemployed'){
-        color = color || 'info';
-        let job_label = servant
-         ? $(`<div class="job_label"><h3 class="has-text-${color}">{{ civic.${job}.name }}</h3><span class="count">{{ sjob.${job} }}</span></div>`)
-         : $(`<div class="job_label"><h3><a class="has-text-${color}" @click="setDefault('${job}')">{{ civic.${job}.name }}{{ '${job}' | d_state }}</a></h3><span class="count" v-html="$options.filters.event(civic.${job}.workers)">{{ civic.${job}.workers }}</span></div>`);
-        civ_container.append(job_label);
-    }
-    else {
-        let job_label = $(`<div class="job_label"><h3 class="has-text-${color}">{{ civic.${job}.name }}</h3><span :class="level('${job}')">{{ civic.${job}.workers | adjust('${job}') }} / {{ civic.${job}.max | adjust('${job}') }}</span></div>`);
-        civ_container.append(job_label);
-    }
-    civ_container.append(controls);
-    $(servant ? '#servants' : '#jobs').append(civ_container);
-
-    if (job !== 'crew' && !noControl[job]){
-        var sub = $(`<span role="button" aria-label="${loc('remove')} ${global['civic'][job].name}" class="sub has-text-danger" @click="sub"><span>&laquo;</span></span>`);
-        var add = $(`<span role="button" aria-label="${loc('add')} ${global['civic'][job].name}" class="add has-text-success" @click="add"><span>&raquo;</span></span>`);
-        controls.append(sub);
-        controls.append(add);
-    }
-
-    if (servant){
-        vBind({
-            el: `#${id}`,
-            data: {
-                civic: global.civic,
-                sjob: global.race.servants.jobs
-            },
-            methods: {
-                showJob(j){
-                    return global.civic[j].display || (j === 'scavenger' && global.race.servants.force_scavenger);
-                },
-                add(){
-                    let keyMult = keyMultiplier();
-                    for (let i=0; i<keyMult; i++){
-                        if (global.race.servants.max > global.race.servants.used){
-                            global.race.servants.jobs[job]++;
-                            global.race.servants.used++;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                },
-                sub(){
-                    let keyMult = keyMultiplier();
-                    for (let i=0; i<keyMult; i++){
-                        if (global.race.servants.jobs[job] > 0){
-                            global.race.servants.jobs[job]--;
-                            global.race.servants.used--;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
+/**
+ * Move workers between a job and the current default job.
+ *
+ * Lifted verbatim from the per-job Vue instances. Both directions step
+ * keyMultiplier() times and stop early the moment a move is not possible —
+ * at the job's max, or when the default job has nobody left to give.
+ */
+export function adjustJob(job: string, dir: 'add' | 'sub'){
+    const keyMult = keyMultiplier();
+    for (let i = 0; i < keyMult; i++){
+        if (dir === 'add'){
+            if ((global['civic'][job].max === -1 || global.civic[job].workers < global['civic'][job].max)
+                && (global.civic[global.civic.d_job] && global.civic[global.civic.d_job].workers > 0)){
+                global.civic[job].workers++;
+                global.civic[global.civic.d_job].workers--;
+                global.civic[job].assigned = global.civic[job].workers;
             }
-        });
-    }
-    else {
-        vBind({
-            el: `#${id}`,
-            data: {
-                civic: global.civic
-            },
-            methods: {
-                showJob(j){
-                    return global.civic[j].display;
-                },
-                add(){
-                    let keyMult = keyMultiplier();
-                    for (let i=0; i<keyMult; i++){
-                        if ((global['civic'][job].max === -1 || global.civic[job].workers < global['civic'][job].max) && (global.civic[global.civic.d_job] && global.civic[global.civic.d_job].workers > 0)){
-                            global.civic[job].workers++;
-                            global.civic[global.civic.d_job].workers--;
-                            global.civic[job].assigned = global.civic[job].workers;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                },
-                sub(){
-                    let keyMult = keyMultiplier();
-                    for (let i=0; i<keyMult; i++){
-                        if (global.civic[job].workers > 0){
-                            global.civic[job].workers--;
-                            global.civic[global.civic.d_job].workers++;
-                            global.civic[job].assigned = global.civic[job].workers;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                },
-                level(job){
-                    if (global.civic[job].workers === 0){
-                        return 'count has-text-danger';
-                    }
-                    else if (global.civic[job].workers === global.civic[job].max){
-                        return 'count has-text-success';
-                    }
-                    else if (global.civic[job].workers <= global.civic[job].max / 3){
-                        return 'count has-text-caution';
-                    }
-                    else if (global.civic[job].workers <= global.civic[job].max * 0.66){
-                        return 'count has-text-warning';
-                    }
-                    else if (global.civic[job].workers < global.civic[job].max){
-                        return 'count has-text-info';
-                    }
-                    else {
-                        return 'count';
-                    }
-                },
-                setDefault(j){
-                    global.civic.d_job = j;
-                },
-                isDefault(j){
-                    return global.civic.d_job === j;
-                }
-            },
-            filters: {
-                d_state(j){
-                    return global.civic.d_job === j ? '*' : '';
-                },
-                event(c){
-                    if ((job === 'unemployed' && global.civic.unemployed.display) || (job === 'hunter' && !global.civic.unemployed.display)){
-                        let egg = easterEgg(3,14);
-                        if (c === 0 && egg.length > 0){
-                            return egg;
-                        }
-                    }
-                    return c;
-                },
-                adjust(v,j){
-                    if (j === 'titan_colonist' && p_on['ai_colonist']){
-                        return v + jobScale(p_on['ai_colonist']);
-                    }
-                    return v;
-                }
-            }
-        });
-    }
-
-    popover(id, function(){
-            return job_desc[job](servant);
-        },
-        {
-            elm: `#${id} .job_label`,
-            classes: `has-background-light has-text-dark`
+            else { break; }
         }
-    );
+        else {
+            if (global.civic[job].workers > 0){
+                global.civic[job].workers--;
+                global.civic[global.civic.d_job].workers++;
+                global.civic[job].assigned = global.civic[job].workers;
+            }
+            else { break; }
+        }
+    }
+}
+
+/** The servant equivalent, drawing on the shared servant pool instead. */
+export function adjustServantJob(job: string, dir: 'add' | 'sub'){
+    const keyMult = keyMultiplier();
+    for (let i = 0; i < keyMult; i++){
+        if (dir === 'add'){
+            if (global.race.servants.max > global.race.servants.used){
+                global.race.servants.jobs[job]++;
+                global.race.servants.used++;
+            }
+            else { break; }
+        }
+        else {
+            if (global.race.servants.jobs[job] > 0){
+                global.race.servants.jobs[job]--;
+                global.race.servants.used--;
+            }
+            else { break; }
+        }
+    }
+}
+
+/** Citizens freed from other jobs are assigned here. */
+export function setDefaultJob(job: string){
+    global.civic.d_job = job;
 }
 
 export function loadServants(){

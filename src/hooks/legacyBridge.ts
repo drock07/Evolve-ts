@@ -41,6 +41,14 @@ export const legacy = {
     /** Fire the missiles: detonation animation, then a game reset. */
     madLaunch: null as any,
 
+    // From jobs.ts
+    /** Ordered row specs for the job list. */
+    getJobRows: null as any,
+    adjustJob: null as any,
+    adjustServantJob: null as any,
+    setDefaultJob: null as any,
+    jobScale: null as any,
+
     // From index.ts
     /** Draws a legacy tab's markup into its panel and binds Vue to it. */
     loadTab: null as any,
