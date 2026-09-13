@@ -33,6 +33,10 @@ export const legacy = {
     loopTimers: null as any,
     initMessageQueue: null as any,
 
+    // From civics.ts
+    /** Raise or lower the tax rate; honours keyMultiplier when n is omitted. */
+    adjustTax: null as any,
+
     // From index.ts
     /** Draws a legacy tab's markup into its panel and binds Vue to it. */
     loadTab: null as any,

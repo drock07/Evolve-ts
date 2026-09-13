@@ -1,3 +1,4 @@
+import { mountTaxRates } from './components/mountTaxRates';
 import { global, seededRandom, keyMultiplier, sizeApproximation, p_on } from './vars';
 import { loc } from './locale';
 import { calcPrestige, clearElement, popover, clearPopper, vBind, timeFormat, modRes, messageQueue, genCivName, darkEffect, eventActive, easterEgg, trickOrTreat } from './functions';
@@ -1016,7 +1017,9 @@ function taxCap(min){
     }
 }
 
-function adjustTax(a,n?){
+// Exported so the React tax control can drive it. govCivics('adj_tax') is
+// not a substitute: it passes n=1 and so ignores keyMultiplier.
+export function adjustTax(a,n?){
     switch (a){
         case 'add':
             {
@@ -1058,41 +1061,10 @@ function taxRates(govern){
     var label = $(`<h3 id="taxRateLabel">${loc('civics_tax_rates')}</h3>`);
     tax_rates.append(label);
     
-    var tax_level = $('<span class="current" v-html="$options.filters.tax_level(tax_rate)"></span>');
-    var sub = $(`<span role="button" aria-label="decrease taxes" class="sub has-text-success" @click="sub">&laquo;</span>`);
-    var add = $(`<span role="button" aria-label="increase taxes" class="add has-text-danger" @click="add">&raquo;</span>`);
-    tax_rates.append(sub);
-    tax_rates.append(tax_level);
-    tax_rates.append(add);
-    
-    vBind({
-        el: '#tax_rates',
-        data: global.civic['taxes'],
-        filters: {
-            tax_level(rate){
-                let egg = easterEgg(11,14);
-                let trick = trickOrTreat(2,14,false);
-                if (egg.length > 0 && ((rate === 0 && !global.race['noble']) || (rate === 10 && global.race['noble']))){
-                    return egg;
-                }
-                else if (rate === 13 && trick.length > 0){
-                    return trick;
-                }
-                else {
-                    return `${rate}%`;
-                }
-            }
-        },
-        methods: {
-            add(){
-                adjustTax('add');
-            },
-            sub(){
-                adjustTax('sub');
-            }
-        }
-    });
-    
+    // Contents are rendered by the React TaxRates island; civics.ts still owns
+    // the container so the surrounding legacy layout is untouched.
+    mountTaxRates();
+
     popover('taxRateLabel', function(){
             return loc('civics_tax_rates_desc');
         },

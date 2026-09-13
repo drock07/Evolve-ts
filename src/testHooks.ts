@@ -16,6 +16,7 @@
 
 import { global, webWorker, seededRandom, setGlobal } from './vars';
 import { sentience, actions } from './actions';
+import { islandCount } from './engine/islands';
 
 /** Seed used for every deterministic run. Arbitrary, but must never change. */
 export const TEST_SEED = 12345;
@@ -51,6 +52,8 @@ export interface TestHooks {
      * create the record. Lets the type tests cover regions no save reaches.
      */
     structDefaults(): Array<{ region: string; key: string; shape: Record<string, unknown> }>;
+    /** Live React islands mounted inside legacy DOM (see engine/islands.ts). */
+    islandCount(): number;
     /** Deep clone of `global` with volatile fields stripped. */
     snapshot(): Record<string, unknown>;
 }
@@ -201,6 +204,8 @@ export function installTestHooks(execGameLoops: (periods?: number) => void): voi
             walk(actions, 0);
             return out;
         },
+
+        islandCount,
 
         snapshot() {
             const clone = stableClone(global) as Record<string, unknown>;
