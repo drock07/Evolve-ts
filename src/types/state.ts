@@ -399,6 +399,20 @@ export type SpaceState = SpaceFixed & Record<string, GameStructure>;
 
 // ── global.race ──────────────────────────────────────────────────────────────
 
+/** Servant pools, used by loadServants() and the skilled-servant foundry. */
+export interface ServantState {
+    /** Plain servants assigned per job. */
+    jobs: Record<string, number>;
+    used: number;
+    max: number;
+    /** Skilled servants assigned per craftable. */
+    sjobs: Record<string, number>;
+    sused: number;
+    smax: number;
+    /** Forces the scavenger job visible regardless of its own display flag. */
+    force_scavenger?: boolean;
+}
+
 /** A prestige currency as stored on pre-1.3 saves, before global.prestige existed. */
 export interface RacePrestige {
     count: number;
@@ -416,6 +430,16 @@ export interface RaceFixed {
     chose?: string;
     ascended?: boolean;
     seeded?: boolean;
+
+    /**
+     * Servant pools, for species that have them. Two independent pools: plain
+     * servants doing ordinary jobs, and skilled servants crafting.
+     *
+     * Absent from both save fixtures — neither species has servants — so this
+     * is derived from how jobs.ts reads and writes it rather than from data.
+     */
+    servants?: ServantState;
+
     /**
      * Minor gene levels contributed by the species, and structures/techs held
      * in reserve across a reset. Both are genuinely absent on the race

@@ -117,6 +117,8 @@ import {
   adjustJob,
   adjustServantJob,
   setDefaultJob,
+  adjustCrafter,
+  crafterCap,
 } from "./jobs";
 import {
   defineIndustry,
@@ -251,6 +253,8 @@ legacy.adjustJob = adjustJob;
 legacy.adjustServantJob = adjustServantJob;
 legacy.setDefaultJob = setDefaultJob;
 legacy.jobScale = jobScale;
+legacy.adjustCrafter = adjustCrafter;
+legacy.crafterCap = crafterCap;
 legacy.adjustTax = adjustTax;
 legacy.madArm = madArm;
 legacy.madLaunch = madLaunch;

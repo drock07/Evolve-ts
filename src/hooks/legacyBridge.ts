@@ -48,6 +48,8 @@ export const legacy = {
     adjustServantJob: null as any,
     setDefaultJob: null as any,
     jobScale: null as any,
+    adjustCrafter: null as any,
+    crafterCap: null as any,
 
     // From index.ts
     /** Draws a legacy tab's markup into its panel and binds Vue to it. */
