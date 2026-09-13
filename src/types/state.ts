@@ -476,6 +476,16 @@ export type SupportState = Record<string, string[]>;
 // save data — they come from the struct() declarations in the actions tree,
 // which is the same source initStruct() uses to create each record, plus the
 // explicit initialisers for the handful of special keys.
+//
+// That derivation has since been checked against real late-game saves: 1,406
+// structure entries across twelve saves (v1.2.20 to v1.4.8, covering deep
+// Hell, Elysium, the galaxy and Tau Ceti) validated with zero violations.
+// Those saves are other players' and are not redistributed here; run
+// scripts/validate-external-save.mjs against your own to re-check.
+//
+// One field the struct() sweep does not declare but real saves carry:
+// `blueprint`, an object, on both portal and space structures. It is within
+// StructureField, which is why the check passed.
 
 /** Hell's fortress state. Initialised in portal.ts and tech.ts. */
 export interface PortalFortress {
