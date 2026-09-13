@@ -5559,3 +5559,49 @@ div.bigbang {
         padding-left: .5em;
     }
 }
+
+/*
+    Native <dialog> used by the React Modal component.
+
+    The panel inside is a .modalBox, which already picks up the themed
+    background and padding from the theme blocks above, so the dialog element
+    itself only has to stop being a styled box in its own right. The browser
+    puts it in the top layer, which is why there is no z-index here: it sits
+    above the popovers and nested tab panels by definition.
+*/
+dialog.evolveModal {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    // Escaped: LESS 3 treats min() as its own function and rejects mixed units.
+    max-width: ~"min(90vw, 40rem)";
+    max-height: 85vh;
+    overflow: visible;
+
+    &::backdrop {
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .modalBox {
+        position: relative;
+        overflow-y: auto;
+        max-height: 85vh;
+    }
+
+    .modalTitle {
+        margin-bottom: .5rem;
+    }
+
+    .modalClose {
+        position: absolute;
+        top: .25rem;
+        right: .5rem;
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+}

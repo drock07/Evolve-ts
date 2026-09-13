@@ -1,5 +1,6 @@
 import { mountTaxRates } from './components/mountTaxRates';
 import { mountMad } from './components/mountMad';
+import { mountGovernment } from './components/mountGovernment';
 import { global, seededRandom, keyMultiplier, sizeApproximation, p_on } from './vars';
 import { loc } from './locale';
 import { calcPrestige, clearElement, popover, clearPopper, vBind, timeFormat, modRes, messageQueue, genCivName, darkEffect, eventActive, easterEgg, trickOrTreat } from './functions';
@@ -295,51 +296,10 @@ function government(govern){
     var setgov = $(`<div></div>`);
     gov.append(setgov);
 
-    var change = $(`<span class="change inline"><button class="button" @click="trigModal" :disabled="rev > 0">{{ type | set }}</button></span>`);
-    setgov.append(change);
-
-    var modal = {
-        template: '<div id="modalBox" class="modalBox"></div>'
-    };
-
-    vBind({
-        el: '#govType',
-        data: global.civic['govern'],
-        filters: {
-            govern(type){
-                if (global.race.universe === 'evil' && type === 'democracy'){ return loc(`govern_managed_democracy`); } 
-                return loc(`govern_${type}`);
-            },
-            set(g){
-                return g === 'anarchy' ? loc('civics_set_gov') : loc('civics_revolution');
-            }
-        },
-        methods: {
-            trigModal(){
-                this.$buefy.modal.open({
-                    parent: this,
-                    component: modal
-                });
-
-                var checkExist = setInterval(function() {
-                   if ($('#modalBox').length > 0) {
-                      clearInterval(checkExist);
-                      drawGovModal();
-                   }
-                }, 50);
-            },
-            startrev(){
-                global.civic.govern.fr = global.civic.govern.rev;
-                global.civic.govern.rev = 0;
-            },
-            force(){                
-                return global.civic.govern.rev > 0 ? loc('civics_force_rev_desc') : loc('civics_force_rev_desc2');
-            },
-            vis(){
-                return global.tech['govern'] ? true : false;
-            }
-        }
-    });
+    // Selector and its modal are rendered by the React GovernmentSelector
+    // island. The Buefy modal is gone with it, and so is the setInterval that
+    // polled every 50ms waiting for that modal's DOM to appear.
+    mountGovernment();
 
     popover('govLabel', function(){
             let effect_type = global.tech['unify'] && global.tech['unify'] >= 2 && global.civic.govern.type === 'federation' ? 'federation_alt' : global.civic.govern.type;
@@ -370,6 +330,81 @@ function govDescription(type){
         }
     }
     return loc(`govern_${type}_desc`);
+}
+
+/**
+ * Switch government, starting the revolution cooldown.
+ *
+ * Lifted from the modal's Vue instance. The cooldown is assembled from tech,
+ * traits, achievements and governor perks, so it is kept verbatim rather than
+ * paraphrased. Returns whether the change actually happened — it is refused
+ * while a revolution is already running.
+ */
+export function setGovernment(g: string): boolean {
+    if (global.civic.govern.rev !== 0){ return false; }
+
+    let drawTechs = global.genes['governor'] && global.civic.govern.type === 'anarchy';
+    global.civic.govern.type = g;
+    let time = 1000;
+    if (global.tech['high_tech']){
+        time += 250;
+        if (global.tech['high_tech'] >= 3){
+            time += 250;
+        }
+        if (global.tech['high_tech'] >= 6){
+            time += 250;
+        }
+    }
+    if (global.tech['space_explore'] && global.tech['space_explore'] >= 3){
+        time += 250;
+    }
+    if (global.race['unorganized']){
+        time = Math.round(time * (1 + traits.unorganized.vars()[0] / 100));
+    }
+    if (global.stats.achieve['anarchist']){
+        time = Math.round(time * (1 - (global.stats.achieve['anarchist'].l / 10)));
+    }
+    if (global.race['lawless']){
+        time = Math.round(time * ((100 - traits.lawless.vars()[0]) / 100));
+    }
+    let fathom = fathomCheck('tuskin');
+    if (fathom > 0){
+        time = Math.round(time * ((100 - traits.lawless.vars(1)[0] * fathom) / 100));
+    }
+    let aristoVal = govActive('aristocrat',0);
+    if (aristoVal){
+        time = Math.round(time * (1 - (aristoVal / 100)));
+    }
+    global.civic.govern.rev = time + global.civic.govern.fr;
+    if (drawTechs){
+        drawTech();
+    }
+    clearPopper();
+    return true;
+}
+
+/**
+ * Attach the per-government description popovers.
+ *
+ * Called by the React modal once its buttons are on the page. popover() binds
+ * to the elements matching `elm` at call time, which is why the Vue original
+ * had to poll with setInterval until the modal's DOM existed.
+ */
+export function registerGovPopovers(){
+    popover('GovPop', function(obj){
+            let govType = $(obj.this).data('gov');
+            let effectType = global.tech['unify'] && global.tech['unify'] >= 2 && govType === 'federation' ? 'federation_alt' : govType;
+            if (effectType === 'theocracy' && global.genes['ancients'] && global.genes['ancients'] >= 2 && global.civic.priest.display){
+                effectType = 'theocracy_alt';
+            }
+            return $(`<div>${govDescription(govType)}</div><div class="has-text-advanced">${government_desc(effectType)}</div>`);
+        },
+        {
+            elm: `#govModal button`,
+            self: true,
+            classes: `has-background-light has-text-dark`
+        }
+    );
 }
 
 function drawGovModal(){

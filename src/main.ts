@@ -143,7 +143,7 @@ import {
   govTitle,
   govCivics,
   govEffect,
-  weaponTechModifer, adjustTax, madArm, madLaunch } from "./civics";
+  weaponTechModifer, adjustTax, madArm, madLaunch, setGovernment, registerGovPopovers } from "./civics";
 import {
   actions,
   updateDesc,
@@ -258,6 +258,8 @@ legacy.crafterCap = crafterCap;
 legacy.adjustTax = adjustTax;
 legacy.madArm = madArm;
 legacy.madLaunch = madLaunch;
+legacy.setGovernment = setGovernment;
+legacy.registerGovPopovers = registerGovPopovers;
 legacy.loadTab = loadTab;
 legacy.execGameLoops = execGameLoops;
 

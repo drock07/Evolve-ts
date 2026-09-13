@@ -40,6 +40,9 @@ export const legacy = {
     madArm: null as any,
     /** Fire the missiles: detonation animation, then a game reset. */
     madLaunch: null as any,
+    /** Switch government; refused while a revolution is running. */
+    setGovernment: null as any,
+    registerGovPopovers: null as any,
 
     // From jobs.ts
     /** Ordered row specs for the job list. */
