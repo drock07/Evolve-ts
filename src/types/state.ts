@@ -24,8 +24,20 @@
 
 // ── Shared ───────────────────────────────────────────────────────────────────
 
-/** Values the engine stores directly on a structure or job record. */
+/** Values the engine stores directly on a job or config record. */
 export type StateScalar = number | string | boolean | undefined;
+
+/**
+ * Values a structure record can hold.
+ *
+ * Wider than StateScalar: of the 320 struct() defaults declared in the actions
+ * tree, seven fields are arrays or nested objects rather than scalars. Those
+ * seven are also named individually on GameStructureNamed below, which is what
+ * keeps the common ones precise — this union only governs keys read
+ * dynamically, where the engine could legitimately hold any of these.
+ */
+export type StructureField =
+    number | string | boolean | unknown[] | Record<string, unknown> | undefined;
 
 // ── global.city ──────────────────────────────────────────────────────────────
 
@@ -52,7 +64,15 @@ export interface GameStructure {
      * revised.
      */
     bn?: string | boolean;
-    [extra: string]: StateScalar;
+
+    // Non-scalar fields do occur — `hearts`, `ships`, `spawned` and `mechs`
+    // are lists, `cargo` and `status` are maps, and `mechs` and `enemy` are
+    // declared as either a list or a count depending on the structure. They
+    // are covered by the index signature rather than named here: naming them
+    // pins a union onto every structure and costs about a hundred errors at
+    // call sites that already know which shape they are holding.
+
+    [extra: string]: StructureField;
 }
 
 export interface CityCalendar {
@@ -340,7 +360,7 @@ export interface GameStateRuntime {
     // Not yet typed — each is a subtree of its own.
     arpa: {};
     custom: {};
-    galaxy: {};
+    galaxy: GalaxyState;
     govern: {};
     lastMsg: {};
     pillars: {};
@@ -348,7 +368,7 @@ export interface GameStateRuntime {
     r_queue: {};
     settings: {};
     special: {};
-    starDock: {};
+    starDock: StarDockState;
 }
 
 // ── global.space ─────────────────────────────────────────────────────────────
@@ -447,3 +467,105 @@ export type EvolutionState = EvolutionFixed & Record<string, EvolutionAction>;
  * a list of structure ids drawing on that region's support pool.
  */
 export type SupportState = Record<string, string[]>;
+
+// ── the region subtrees ──────────────────────────────────────────────────────
+//
+// portal, interstellar, tauceti, eden, galaxy and starDock are all structure
+// maps in the same shape as city and space. None of them appears in either
+// save fixture, so unlike every other type here these were not derived from
+// save data — they come from the struct() declarations in the actions tree,
+// which is the same source initStruct() uses to create each record, plus the
+// explicit initialisers for the handful of special keys.
+
+/** Hell's fortress state. Initialised in portal.ts and tech.ts. */
+export interface PortalFortress {
+    threat: number;
+    garrison: number;
+    walls: number;
+    repair: number;
+    patrols: number;
+    patrol_size: number;
+    siege: number;
+    /** 'Yes' / 'No' rather than a boolean. */
+    notify: string;
+    s_ntfy: string;
+    nocrew: boolean;
+    [extra: string]: StateScalar;
+}
+
+/**
+ * The Demon Lord throne.
+ *
+ * Declared through struct() like a building, but it is not one — it has no
+ * `count`. Typed as a special key so that GameStructure can keep `count`
+ * required for the 319 structures that genuinely have it.
+ */
+export interface PortalThrone {
+    /** Demon lords currently in the fight. */
+    enemy: unknown[];
+    /** Collected heart tokens. */
+    hearts: unknown[];
+    spawned: unknown[];
+    points: number;
+    skill: boolean;
+    [extra: string]: StructureField;
+}
+
+export interface PortalFixed {
+    fortress: PortalFortress;
+    throne?: PortalThrone;
+    /** Hell observation log: display settings plus accumulated statistics. */
+    observe: {
+        settings: Record<string, unknown>;
+        stats: Record<string, unknown>;
+    };
+}
+
+export type PortalState = PortalFixed & { [structure: string]: GameStructure };
+
+/** Interstellar has no special keys — every entry is a structure. */
+export type InterstellarState = Record<string, GameStructure>;
+
+/** Tau Ceti likewise; alien_space_station is an ordinary { count, on } record. */
+export type TauCetiState = Record<string, GameStructure>;
+
+export interface EdenFixed {
+    /** Elysium's fortress, a different shape from Hell's. */
+    fortress?: {
+        fortress: number;
+        patrols: number;
+        armory: number;
+        detector: number;
+        [extra: string]: StateScalar;
+    };
+    /** Rival isle strengths. */
+    enemy_isle?: { wt: number; et: number; g: number };
+    palace?: { energy: number; rate: number; [extra: string]: StateScalar };
+}
+
+export type EdenState = EdenFixed & { [structure: string]: GameStructure };
+
+/** Ships stationed at one galactic sector, by class. */
+export interface GalaxyDefense {
+    scout_ship: number;
+    corvette_ship: number;
+    frigate_ship: number;
+    cruiser_ship: number;
+    dreadnought: number;
+    [extra: string]: number;
+}
+
+export interface GalaxyFixed {
+    /** Fleet assignments, keyed by sector id. */
+    defense?: Record<string, GalaxyDefense>;
+    /** Trade route allocation; f0..f8 are the per-good splits. */
+    trade?: { max: number; cur: number; [freight: string]: number };
+    /** The two randomly chosen alien species, by race id. */
+    alien1?: { id: string };
+    alien2?: { id: string };
+}
+
+export type GalaxyState = GalaxyFixed & { [structure: string]: GameStructure };
+
+/** The bioseed launch facility. Three structures, no special keys. */
+export type StarDockState = Record<string, GameStructure>;

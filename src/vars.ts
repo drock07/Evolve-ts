@@ -2,6 +2,7 @@ import type {
     CityState, CivicState, ResourceState, TechState,
     GenesState, BloodState, StatsState, GameStateRuntime,
     RaceState, SpaceState, EvolutionState, SupportState, PrestigeState,
+    PortalState, InterstellarState, TauCetiState, EdenState, GalaxyState, StarDockState,
 } from './types/state';
 
 export var save = window.localStorage;
@@ -64,6 +65,10 @@ type TypedSubtrees = {
     race: RaceState;
     space: SpaceState;
     evolution: EvolutionState;
+    portal: PortalState;
+    interstellar: InterstellarState;
+    tauceti: TauCetiState;
+    eden: EdenState;
 };
 
 export type GameState =

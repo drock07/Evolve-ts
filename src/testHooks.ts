@@ -15,7 +15,7 @@
  */
 
 import { global, webWorker, seededRandom, setGlobal } from './vars';
-import { sentience } from './actions';
+import { sentience, actions } from './actions';
 
 /** Seed used for every deterministic run. Arbitrary, but must never change. */
 export const TEST_SEED = 12345;
@@ -45,6 +45,12 @@ export interface TestHooks {
      * straight to the state where the engine actually does work.
      */
     startCivilization(race?: string): void;
+    /**
+     * Every structure's canonical default shape, read from its own struct()
+     * declaration in the actions tree — the same source initStruct() uses to
+     * create the record. Lets the type tests cover regions no save reaches.
+     */
+    structDefaults(): Array<{ region: string; key: string; shape: Record<string, unknown> }>;
     /** Deep clone of `global` with volatile fields stripped. */
     snapshot(): Record<string, unknown>;
 }
@@ -162,6 +168,38 @@ export function installTestHooks(execGameLoops: (periods?: number) => void): voi
         startCivilization(race = 'human') {
             global.race.species = race;
             sentience();
+        },
+
+        structDefaults() {
+            const out: Array<{ region: string; key: string; shape: Record<string, unknown> }> = [];
+            const seen = new Set<string>();
+
+            const walk = (node: any, depth: number) => {
+                if (!node || typeof node !== 'object' || depth > 4) return;
+                for (const value of Object.values<any>(node)) {
+                    if (!value || typeof value !== 'object') continue;
+                    if (typeof value.struct === 'function') {
+                        try {
+                            const st = value.struct();
+                            if (st && st.p && st.d) {
+                                const [key, region] = st.p;
+                                const id = `${region}.${key}`;
+                                if (!seen.has(id)) {
+                                    seen.add(id);
+                                    out.push({ region, key, shape: st.d });
+                                }
+                            }
+                        } catch {
+                            // struct() can depend on game state that does not
+                            // exist yet; skip rather than fail the sweep.
+                        }
+                    }
+                    walk(value, depth + 1);
+                }
+            };
+
+            walk(actions, 0);
+            return out;
         },
 
         snapshot() {
