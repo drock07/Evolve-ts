@@ -1,3 +1,5 @@
+import { mountStructure } from './components/mountStructure';
+import { openStructureModal } from './components/mountStructureModal';
 import { notifyStateChange } from './state';
 import { global, save, seededRandom, webWorker, keyMultiplier, keyMap, srSpeak, sizeApproximation, p_on, support_on, int_on, gal_on, spire_on, tmp_vars, setupStats, callback_queue } from './vars';
 import type { StatsState, GenesState } from './types/state';
@@ -6231,6 +6233,10 @@ export function setAction(c_action,action,type,old?,prediction?){
         });
     }
 
+    // The container stays here rather than moving into React. It carries the
+    // highlight and affordability classes, which the loop's render passes
+    // toggle from jQuery by selector, and the prediction attributes the build
+    // queue reads. React takes its contents; see components/mountStructure.
     let parent = c_action['highlight'] && c_action.highlight() ? $(`<div id="${id}" class="action hl"${reqs}></div>`) : $(`<div id="${id}" class="action"${reqs}></div>`);
     if (!checkAffordable(c_action,false,(['genes','blood'].includes(action)))){
         parent.addClass('cna');
@@ -6238,238 +6244,54 @@ export function setAction(c_action,action,type,old?,prediction?){
     if (!checkAffordable(c_action,true,(['genes','blood'].includes(action)))){
         parent.addClass('cnam');
     }
-    let element;
-    if (old){
-        element = $('<span class="oldTech is-dark"><span class="aTitle">{{ title }}</span></span>');
-    }
-    else {
-        let cst = '';
-        let data = '';
-        if (c_action['cost']){
-            let costs = action !== 'genes' && action !== 'blood' ? adjustCosts(c_action) : c_action.cost;
-            Object.keys(costs).forEach(function (res){
-                let cost = costs[res]();
-                if (cost > 0){
-                    cst = cst + ` res-${res}`;
-                    data = data + ` data-${res}="${cost}"`;
-                }
-            });
-        }
-        let clss = ``;
-        if (c_action['class']){
-            clss = typeof c_action['class'] === 'function' ? ` ${c_action.class()}`: ` ${c_action['class']}`;
-        }
-        if (prediction){ clss = ' precog'; }
-        else if (c_action['aura'] && c_action.aura()){ clss = ` ${c_action.aura()}`; }
-        let active = c_action['highlight'] ? (c_action.highlight() ? `<span class="is-sr-only">${loc('active')}</span>` : `<span class="is-sr-only">${loc('not_active')}</span>`) : '';
-        element = $(`<a class="button is-dark${cst}${clss}"${data} v-on:click="action" role="link"><span class="aTitle" v-html="$options.filters.title(title)"></span>${active}</a><a role="button" v-on:click="describe" class="is-sr-only">{{ title }} description</a>`);
-    }
-    parent.append(element);
 
-    if (c_action.hasOwnProperty('special') && ((typeof c_action['special'] === 'function' && c_action.special()) || c_action['special'] === true) ){
-        let special = $(`<div class="special" role="button" v-bind:title="title | options" @click="trigModal"><svg version="1.1" x="0px" y="0px" width="12px" height="12px" viewBox="340 140 280 279.416" enable-background="new 340 140 280 279.416" xml:space="preserve">
-            <path class="gear" d="M620,305.666v-51.333l-31.5-5.25c-2.333-8.75-5.833-16.917-9.917-23.917L597.25,199.5l-36.167-36.75l-26.25,18.083
-                c-7.583-4.083-15.75-7.583-23.916-9.917L505.667,140h-51.334l-5.25,31.5c-8.75,2.333-16.333,5.833-23.916,9.916L399.5,163.333
-                L362.75,199.5l18.667,25.666c-4.083,7.584-7.583,15.75-9.917,24.5l-31.5,4.667v51.333l31.5,5.25
-                c2.333,8.75,5.833,16.334,9.917,23.917l-18.667,26.25l36.167,36.167l26.25-18.667c7.583,4.083,15.75,7.583,24.5,9.917l5.25,30.916
-                h51.333l5.25-31.5c8.167-2.333,16.333-5.833,23.917-9.916l26.25,18.666l36.166-36.166l-18.666-26.25
-                c4.083-7.584,7.583-15.167,9.916-23.917L620,305.666z M480,333.666c-29.75,0-53.667-23.916-53.667-53.666s24.5-53.667,53.667-53.667
-                S533.667,250.25,533.667,280S509.75,333.666,480,333.666z"/>
-            </svg></div>`);
-        parent.append(special);
-    }
-    if (c_action['on'] || c_action['off']){
-        if (c_action['on']){
-            let powerOn = $(`<span class="on" title="ON" v-html="$options.filters.val('on')"></span>`);
-            parent.append(powerOn);
-        }
-        if (c_action['off']){
-            let powerOff = $(`<span class="off" title="OFF" v-html="$options.filters.val('off')"></span>`);
-            parent.append(powerOff);
-        }
-    }
-    else {
-        let switchable = c_action['switchable'] ? c_action.switchable() : (c_action['powered'] && global.tech['high_tech'] && global.tech['high_tech'] >= 2 && checkPowerRequirements(c_action));
-        if (switchable){
-            let powerOn = $(`<span role="button" :aria-label="on_label()" class="on" @click="power_on" title="ON" v-html="$options.filters.p_on(act.on,'${c_action.id}')"></span>`);
-            let powerOff = $(`<span role="button" :aria-label="off_label()" class="off" @click="power_off" title="OFF" v-html="$options.filters.p_off(act.on,'${c_action.id}')"></span>`);
-            parent.append(powerOn);
-            parent.append(powerOff);
-        }
-    }
-    if (c_action['count']){
-        let count = c_action.count();
-        if (count > 0 && (id !== 'city-gift' || count > 1)){
-            element.append($(`<span class="count">${count}</span>`));
-        }
-    }
-    else if (action !== 'tech' && global[action] && global[action][type] && global[action][type].count >= 0){
-        element.append($(`<span class="count" v-html="$options.filters.count(act.count,'${type}')"></span>`));
-    }
-    else if (action === 'blood' && global[action] && global[action][c_action.grant[0]] && global[action][c_action.grant[0]] > 0 && c_action.grant[1] === '*'){
-        element.append($(`<span class="count"> ${global[action][c_action.grant[0]]} </span>`));
-    }
-    if (action !== 'tech' && global[action] && global[action][type] && typeof(global[action][type]['repair']) !== 'undefined'){
-        element.append($(`<div class="repair"><progress class="progress" :value="repair()" :max="repairMax()"></progress></div>`));
-    }
     if (old){
         $('#oldTech').append(parent);
     }
     else {
         $('#'+tab).append(parent);
     }
-    if (action !== 'tech' && global[action] && global[action][type] && global[action][type].count === 0){
-        $(`#${id} .count`).css('display','none');
-        $(`#${id} .special`).css('display','none');
-        $(`#${id} .on`).css('display','none');
-        $(`#${id} .off`).css('display','none');
+
+    if (old){
+        // Old tech is a label, not a control: no costs, no count, no power.
+        parent.append($(`<span class="oldTech is-dark"><span class="aTitle">${typeof c_action.title === 'string' ? c_action.title : c_action.title()}</span></span>`));
     }
-
-    if (c_action['emblem']){
-        let emblem = c_action.emblem();
-        parent.append($(emblem));
-    }
-
-    let modal = {
-        template: '<div id="modalBox" class="modalBox"></div>'
-    };
-
-    vBind({
-        el: '#'+id,
-        data: {
-            title: typeof c_action.title === 'string' ? c_action.title : c_action.title(),
-            act: global[action][type]
-        },
-        methods: {
-            action(args){
-                if ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/ && global.settings.touch) ? true : false){
-                    return;
-                }
-                else {
+    else {
+        mountStructure(parent[0], {
+            c_action, action, type,
+            old: false,
+            prediction: prediction ? true : false,
+            engine: {
+                adjustCosts,
+                checkPowerRequirements,
+                easterEgg,
+                trickOrTreat,
+                templeCount,
+                runAction(){
+                    // Touch devices act on their own handler; a click here is
+                    // always a real click.
                     runAction(c_action,action,type);
-                }
-            },
-            describe(){
-                srSpeak(srDesc(c_action,old));
-            },
-            trigModal(){
-                if (c_action['sAction'] && typeof c_action['sAction'] === 'function'){
-                    c_action.sAction()
-                }
-                else {
-                    this.$buefy.modal.open({
-                        parent: this,
-                        component: modal
+                },
+                describe(){
+                    srSpeak(srDesc(c_action,old));
+                },
+                openSpecial(){
+                    if (c_action['sAction'] && typeof c_action['sAction'] === 'function'){
+                        c_action.sAction();
+                        return;
+                    }
+                    openStructureModal({
+                        title: typeof c_action.title === 'string' ? c_action.title : c_action.title(),
+                        draw: () => drawModal(c_action,type),
+                        cleanup: () => clearElement($('#modalBox')),
                     });
-
-                    let checkExist = setInterval(function(){
-                        if ($('#modalBox').length > 0) {
-                            clearInterval(checkExist);
-                            drawModal(c_action,type);
-                        }
-                    }, 50);
-                }
+                },
+                postPower(on){
+                    callback_queue.set([c_action, 'postPower'], [on]);
+                },
             },
-            on_label(){
-                return `on: ${global[action][type].on}`;
-            },
-            off_label(){
-                return `off: ${global[action][type].count - global[action][type].on}`;
-            },
-            power_on(){
-                let keyMult = keyMultiplier();
-                for (let i=0; i<keyMult; i++){
-                    if (global[action][type].on < global[action][type].count){
-                        global[action][type].on++;
-                    }
-                    else {
-                        break;
-                    }
-                }
-                if (c_action['postPower']){
-                    callback_queue.set([c_action, 'postPower'], [true]);
-                }
-            },
-            power_off(){
-                let keyMult = keyMultiplier();
-                for (let i=0; i<keyMult; i++){
-                    if (global[action][type].on > 0){
-                        global[action][type].on--;
-                    }
-                    else {
-                        break;
-                    }
-                }
-                if (c_action['postPower']){
-                    callback_queue.set([c_action, 'postPower'], [false]);
-                }
-            },
-            repair(){
-                return global[action][type].repair;
-            },
-            repairMax(){
-                return c_action.repair();
-            }
-        },
-        filters: {
-            val(v){
-                switch(v){
-                    case 'on':
-                        return c_action.on();
-                    case 'off':
-                        return c_action.off();
-                }
-            },
-            p_off(p,id){
-                let value = global[action][type].count - p;
-                if (
-                    (id === 'city-casino' && !global.race['cataclysm'] && !global.race['orbit_decayed']) || 
-                    (id === 'space-spc_casino' && (global.race['cataclysm'] || global.race['orbit_decayed'])) || 
-                    (id === 'tauceti-tauceti_casino' && global.tech['isolation']) ||
-                    (id === 'portal-hell_casino' && global.race['warlord'])
-                ){
-                    let egg = easterEgg(5,12);
-                    if (value === 0 && egg.length > 0){
-                        return egg;
-                    }
-                }
-                return value;
-            },
-            p_on(p,id){
-                if (
-                    (id === 'city-biolab' && !global.race['cataclysm'] && !global.race['orbit_decayed']) || 
-                    ((global.race['cataclysm'] || global.race['orbit_decayed']) && id === 'space-exotic_lab') ||
-                    (global.tech['isolation'] && id === 'tauceti-infectious_disease_lab') ||
-                    (global.race['warlord'] && id === 'portal-twisted_lab')
-                ){
-                    let egg = easterEgg(12,12);
-                    if (p === 0 && egg.length > 0){
-                        return egg;
-                    }
-                }
-                else if (id === 'city-garrison' || id === 'space-space_barracks' || id === 'portal-brute'){
-                    let trick = trickOrTreat(1,14,true);
-                    let num = id === 'city-garrison' || id === 'portal-brute' ? 13 : 0;
-                    if (p === num && trick.length > 0){
-                        return trick;
-                    }
-                }
-                return p;
-            },
-            title(t){
-                return t;
-            },
-            options(t){
-                return loc(`action_options`,[t]);
-            },
-            count(v,t){
-                if (['temple','ziggurat'].includes(t)){
-                    return templeCount(t === 'temple' ? false : true);
-                }
-                return v;
-            }
-        }
-    });
+        });
+    }
 
     popover(id,function(){ return undefined; },{
         in: function(obj){
@@ -6483,6 +6305,7 @@ export function setAction(c_action,action,type,old?,prediction?){
         classes: c_action.hasOwnProperty('class') ? c_action.class : false,
     });
 }
+
 
 function runAction(c_action,action,type){
     if (c_action.id === 'spcdock-launch_ship'){

@@ -54,6 +54,9 @@ const REACT_OWNED: Owned[] = [
     { selector: '#garrison .hmerc', tab: 2, panel: '#mTabCivic', subTab: 3 },
     { selector: '#tactics .add', tab: 2, panel: '#mTabCivic', subTab: 3 },
     { selector: '#tax_rates .add', tab: 2, panel: '#mTabCivic', subTab: 0 },
+    // The structure button: one renderer, every building in every region.
+    { selector: '#city-basic_housing a.button', tab: 1 },
+    { selector: '#city-factory .on', tab: 1 },
 ];
 
 /** Is this element one React rendered, rather than a copy Vue made of it? */
