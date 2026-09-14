@@ -1,4 +1,5 @@
 import { mountSmelter } from './components/mountSmelter';
+import { mountFactory } from './components/mountFactory';
 import { global, keyMultiplier, sizeApproximation, p_on, support_on, quantum_level, callback_queue, active_rituals } from './vars';
 import { loc } from './locale';
 import { vBind, popover, clearElement, powerGrid, easterEgg, trickOrTreat, binary_limit_test } from './functions';
@@ -281,167 +282,38 @@ export function addSmelter(num=1, product="Iron", fuel="Oil"){
     }
 }
 
+/**
+ * Render the factory panel.
+ *
+ * The markup is React's now (components/FactoryPanel.tsx); this keeps the
+ * container and hands it over, with `bind` still selecting between the
+ * Industry tab row and the options modal.
+ *
+ * tooltip() below stays here — it reads the production rate tables to say what
+ * each product consumes — and is handed to the hook rather than imported,
+ * since it is local to this function. So is the available-factory count, which
+ * sums lines across the city, Mars, interstellar, tau ceti and the portal.
+ */
 function loadFactory(parent,bind){
-    let fuel = $(`<div><span class="has-text-warning">${loc('modal_factory_operate')}:</span> <span :class="level()">{{count | on}}/{{ on | max }}</span></div>`);
-    parent.append(fuel);
+    clearElement(parent);
 
-    let lux = $(`<div class="factory"><span class="Lux" :aria-label="buildLabel('Lux') + ariaProd('Lux')">${loc('modal_factory_lux')}</span></div>`);
-    parent.append(lux);
-
-    let luxCount = $(`<span class="current" v-html="$options.filters.spook(Lux)"></span>`);
-    let subLux = $(`<span class="sub" @click="subItem('Lux')" role="button" aria-label="Decrease Lux production">&laquo;</span>`);
-    let addLux = $(`<span class="add" @click="addItem('Lux')" role="button" aria-label="Increase Lux production">&raquo;</span>`);
-    lux.append(subLux);
-    lux.append(luxCount);
-    lux.append(addLux);
-
-    if (global.tech['synthetic_fur']){
-        let fur = $(`<div class="factory"><span class="Furs" :aria-label="buildLabel('Furs') + ariaProd('Furs')">${global.race['evil'] ? loc('resource_Flesh_name') : global.resource.Furs.name}</span></div>`);
-        parent.append(fur);
-
-        let furCount = $(`<span class="current">{{ Furs }}</span>`);
-        let subFurs= $(`<span class="sub" @click="subItem('Furs')" role="button" aria-label="Decrease Furs production">&laquo;</span>`);
-        let addFurs = $(`<span class="add" @click="addItem('Furs')" role="button" aria-label="Increase Furs production">&raquo;</span>`);
-        fur.append(subFurs);
-        fur.append(furCount);
-        fur.append(addFurs);
-    }
-
-    let alloy = $(`<div class="factory"><span class="Alloy" :aria-label="buildLabel('Alloy') + ariaProd('Alloy')">${global.resource.Alloy.name}</span></div>`);
-    parent.append(alloy);
-
-    let alloyCount = $(`<span class="current">{{ Alloy }}</span>`);
-    let subAlloy = $(`<span class="sub" @click="subItem('Alloy')" role="button" aria-label="Decrease Alloy production">&laquo;</span>`);
-    let addAlloy = $(`<span class="add" @click="addItem('Alloy')" role="button" aria-label="Increase Alloy production">&raquo;</span>`);
-    alloy.append(subAlloy);
-    alloy.append(alloyCount);
-    alloy.append(addAlloy);
-
-    if (global.tech['polymer']){
-        let polymer = $(`<div class="factory"><span class="Polymer" :aria-label="buildLabel('Polymer') + ariaProd('Polymer')">${global.resource.Polymer.name}</span></div>`);
-        parent.append(polymer);
-
-        let polymerCount = $(`<span class="current">{{ Polymer }}</span>`);
-        let subPolymer= $(`<span class="sub" @click="subItem('Polymer')" role="button" aria-label="Decrease Polymer production">&laquo;</span>`);
-        let addPolymer = $(`<span class="add" @click="addItem('Polymer')" role="button" aria-label="Increase Polymer production">&raquo;</span>`);
-        polymer.append(subPolymer);
-        polymer.append(polymerCount);
-        polymer.append(addPolymer);
-    }
-
-    if (global.tech['nano']){
-        let nano = $(`<div class="factory"><span class="Nano" :aria-label="buildLabel('Nano') + ariaProd('Nano')">${global.resource.Nano_Tube.name}</span></div>`);
-        parent.append(nano);
-
-        let nanoCount = $(`<span class="current">{{ Nano }}</span>`);
-        let subNano= $(`<span class="sub" @click="subItem('Nano')" role="button" aria-label="Decrease Nanotube production">&laquo;</span>`);
-        let addNano = $(`<span class="add" @click="addItem('Nano')" role="button" aria-label="Increase Nanotube production">&raquo;</span>`);
-        nano.append(subNano);
-        nano.append(nanoCount);
-        nano.append(addNano);
-    }
-
-    if (global.tech['stanene']){
-        let stanene = $(`<div class="factory"><span class="Stanene" :aria-label="buildLabel('Stanene') + ariaProd('Stanene')">${global.resource.Stanene.name}</span></div>`);
-        parent.append(stanene);
-
-        let staneneCount = $(`<span class="current">{{ Stanene }}</span>`);
-        let subStanene= $(`<span class="sub" @click="subItem('Stanene')" role="button" aria-label="Decrease Stanene production">&laquo;</span>`);
-        let addStanene = $(`<span class="add" @click="addItem('Stanene')" role="button" aria-label="Increase Stanene production">&raquo;</span>`);
-        stanene.append(subStanene);
-        stanene.append(staneneCount);
-        stanene.append(addStanene);
-    }
-
-    vBind({
-        el: bind ? bind : '#specialModal',
-        data: global.city['factory'],
-        methods: {
-            subItem: function(item){
-                let keyMult = keyMultiplier();
-                for (var i=0; i<keyMult; i++){
-                    if (global.city.factory[item] > 0){
-                        global.city.factory[item]--;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            },
-            addItem: function(item){
-                let max = global.space['red_factory'] ? global.space.red_factory.on + global.city.factory.on : global.city.factory.on;
-                if (global.interstellar['int_factory'] && p_on['int_factory']){
-                    max += p_on['int_factory'] * 2;
-                }
-                if (global.tauceti['tau_factory'] && support_on['tau_factory']){
-                    max += support_on['tau_factory'] * (global.tech['isolation'] ? 5 : 3);
-                }
-                if (global.portal['hell_factory'] && p_on['hell_factory']){
-                    max += p_on['hell_factory'] * actions.portal.prtl_wasteland.hell_factory.lines();
-                }
-                let keyMult = keyMultiplier();
-                for (var i=0; i<keyMult; i++){
-                    let used = global.city.factory.Lux + global.city.factory.Furs + global.city.factory.Alloy + global.city.factory.Polymer + global.city.factory.Nano + global.city.factory.Stanene;
-                    if (used < max){
-                        global.city.factory[item]++;
-                    }
-                    else if (used === max && item !== 'Alloy' && global.city.factory['Alloy'] > 0){
-                        global.city.factory['Alloy']--;
-                        global.city.factory[item]++;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            },
-            buildLabel: function(type){
-                return tooltip(type);
-            },
-            ariaProd(prod){
-                return `. ${global.city.factory[prod]} factories producing ${prod}.`;
-            },
-            level(){
-                let on = global.city.factory.Lux + global.city.factory.Furs + global.city.factory.Alloy + global.city.factory.Polymer + global.city.factory.Nano + global.city.factory.Stanene;
-                let max = global.space['red_factory'] ? global.space.red_factory.on + global.city.factory.on : global.city.factory.on;
-                if (global.interstellar['int_factory'] && p_on['int_factory']){
-                    max += p_on['int_factory'] * 2;
-                }
-                if (global.tauceti['tau_factory'] && support_on['tau_factory']){
-                    max += support_on['tau_factory'] * (global.tech['isolation'] ? 5 : 3);
-                }
-                if (global.portal['hell_factory'] && p_on['hell_factory']){
-                    max += p_on['hell_factory'] * actions.portal.prtl_wasteland.hell_factory.lines();
-                }
-                return colorRange(on,max);
-            }
-        },
-        filters: {
-            on(){
-                return global.city.factory.Lux + global.city.factory.Furs + global.city.factory.Alloy + global.city.factory.Polymer + global.city.factory.Nano + global.city.factory.Stanene;
-            },
-            max(){
-                let max = global.space['red_factory'] ? global.space.red_factory.on + global.city.factory.on : global.city.factory.on;
-                if (global.interstellar['int_factory'] && p_on['int_factory']){
-                    max += p_on['int_factory'] * 2;
-                }
-                if (global.tauceti['tau_factory'] && support_on['tau_factory']){
-                    max += support_on['tau_factory'] * (global.tech['isolation'] ? 5 : 3);
-                }
-                if (global.portal['hell_factory'] && p_on['hell_factory']){
-                    max += p_on['hell_factory'] * actions.portal.prtl_wasteland.hell_factory.lines();
-                }
-                return max;
-            },
-            spook(v){
-                if (global.city.factory.Lux === 3 && bind){
-                    let trick = trickOrTreat(6,12,true);
-                    if (trick.length > 0){
-                        return trick;
-                    }
-                }
-                return v;
-            }
+    function maxFactories(){
+        let max = global.space['red_factory'] ? global.space.red_factory.on + global.city.factory.on : global.city.factory.on;
+        if (global.interstellar['int_factory'] && p_on['int_factory']){
+            max += p_on['int_factory'] * 2;
         }
+        if (global.tauceti['tau_factory'] && support_on['tau_factory']){
+            max += support_on['tau_factory'] * (global.tech['isolation'] ? 5 : 3);
+        }
+        if (global.portal['hell_factory'] && p_on['hell_factory']){
+            max += p_on['hell_factory'] * actions.portal.prtl_wasteland.hell_factory.lines();
+        }
+        return max;
+    }
+
+    mountFactory(bind ? $(bind)[0] : parent[0], {
+        isModal: !bind,
+        engine: { tooltip, colorRange, trickOrTreat, maxFactories },
     });
 
     function tooltip(type){
@@ -487,15 +359,9 @@ function loadFactory(parent,bind){
         }
     }
 
-    ['Lux','Furs','Alloy','Polymer','Nano','Stanene'].forEach(function(type){
-        let id = parent.hasClass('modalBody') ? `specialModal` : `iFactory`;
-        popover(`${id}${type}`,function(){
-            return tooltip(type);
-        }, {
-            elm: $(`#${id} .factory > .${type}`),
-            attach: '#main',
-        });
-    });
+    // The product descriptions are React popovers now, attached to the rows
+    // themselves. Registering them here bound them by selector on the line
+    // after the panel was drawn, which React's asynchronous render breaks.
 }
 
 export function luxGoodPrice(demand){
