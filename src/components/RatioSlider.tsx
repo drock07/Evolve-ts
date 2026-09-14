@@ -21,6 +21,8 @@ export interface RatioSliderData {
     addLabel: string;
     /** Accessible name for the slider itself. */
     sliderLabel: string;
+    /** Extra classes on the bar — the stacked panels use `thin`. */
+    barClass?: string;
 }
 
 export interface RatioSliderCallbacks {
@@ -37,7 +39,7 @@ export function RatioSlider({ data, callbacks }: {
     return (
         <>
             <div>{data.description}</div>
-            <div className="sliderbar">
+            <div className={`sliderbar${data.barClass ? ` ${data.barClass}` : ''}`}>
                 <span className="sub" role="button" aria-label={data.subLabel} onClick={callbacks.onSub}>
                     &laquo;
                 </span>

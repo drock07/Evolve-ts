@@ -237,7 +237,12 @@ export function readSaveFixture(name: string): Record<string, any> {
  * What this is and is not: a structure is created from its own struct()
  * declaration in the actions tree, which is the same source initStruct() uses
  * at runtime, so the record shape is the engine's rather than a guess. What it
- * cannot do is reproduce the rest of a game that had actually got there —
+ * A struct() declaration does not always cover every field a record ends up
+ * with: the alien space station declares only its count, and gains its `focus`
+ * when a later tech completes. `fields` supplies those, and needing it is a
+ * reliable sign that a record is built in more than one place.
+ *
+ * What this cannot do is reproduce the rest of a game that had actually got there —
  * the techs, resources and traits that would normally accompany it. A panel
  * seeded this way renders and responds, but it is a world the game does not
  * quite produce, and a test written against one is weaker evidence than a test
@@ -247,9 +252,9 @@ export async function unlockStructure(
     page: Page,
     region: string,
     key: string,
-    opts: { count?: number; on?: number } = {},
+    opts: { count?: number; on?: number; fields?: Record<string, unknown> } = {},
 ): Promise<void> {
-    const { count = 1, on = count } = opts;
+    const { count = 1, on = count, fields = {} } = opts;
     await page.evaluate(args => {
         const hooks = (window as any).__evolveTest__;
         const g = hooks.global;
@@ -263,10 +268,11 @@ export async function unlockStructure(
         g[args.region][args.key] = {
             ...(declared?.shape ?? {}),
             ...(g[args.region][args.key] ?? {}),
+            ...args.fields,
             count: args.count,
             on: args.on,
         };
-    }, { region, key, count, on });
+    }, { region, key, count, on, fields });
 }
 
 /** Set tech levels and race traits together, for gates that need both. */

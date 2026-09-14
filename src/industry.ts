@@ -1002,75 +1002,47 @@ function loadTMine(parent,bind){
     });
 }
 
+/**
+ * Render the mining ship's ore sorting — one ratio per grade.
+ *
+ * Three of the same control the titan mine uses, stacked; the rare grade
+ * appears only once its tech is in.
+ */
 function loadMiningShip(parent,bind){
-    parent.append($(`<div>${loc('tau_roid_mining_ship_ratio',[global.resource.Iron.name,global.resource.Aluminium.name])}</div>`));
-    let common = $(`<div class="sliderbar thin"><span class="sub" role="button" @click="sub('common')" aria-label="Increase Iron Production">&laquo;</span><b-slider v-model="common" format="percent"></b-slider><span class="add" role="button" @click="add('common')" aria-label="Increase Aluminium Production">&raquo;</span></div>`);
-    parent.append(common);
+    clearElement(parent);
 
-    parent.append($(`<div>${loc('tau_roid_mining_ship_ratio',[global.resource.Iridium.name,global.resource.Neutronium.name])}</div>`));
-    let uncommon = $(`<div class="sliderbar thin"><span class="sub" role="button" @click="sub('uncommon')" aria-label="Increase Iridium Production">&laquo;</span><b-slider v-model="uncommon" format="percent"></b-slider><span class="add" role="button" @click="add('uncommon')" aria-label="Increase Neutronium Production">&raquo;</span></div>`);
-    parent.append(uncommon);
+    const grade = (field,keep,shed) => ({
+        path: ['tauceti', 'mining_ship', field],
+        description: loc('tau_roid_mining_ship_ratio',[keep,shed]),
+        subLabel: `Increase ${keep} Production`,
+        addLabel: `Increase ${shed} Production`,
+        sliderLabel: loc('tau_roid_mining_ship_ratio',[keep,shed]),
+        barClass: 'thin',
+    });
 
+    let sliders = [
+        grade('common', global.resource.Iron.name, global.resource.Aluminium.name),
+        grade('uncommon', global.resource.Iridium.name, global.resource.Neutronium.name),
+    ];
     if (global.tech.tau_roid >= 5){
-        parent.append($(`<div>${loc('tau_roid_mining_ship_ratio',[global.resource.Orichalcum.name,global.resource.Elerium.name])}</div>`));
-        let rare = $(`<div class="sliderbar thin"><span class="sub" role="button" @click="sub('rare')" aria-label="Increase Orichalcum Production">&laquo;</span><b-slider v-model="rare" format="percent"></b-slider><span class="add" role="button" @click="add('rare')" aria-label="Increase Elerium Production">&raquo;</span></div>`);
-        parent.append(rare);
+        sliders.push(grade('rare', global.resource.Orichalcum.name, global.resource.Elerium.name));
     }
 
-    vBind({
-        el: bind ? bind : '#specialModal',
-        data: global.tauceti.mining_ship,
-        methods: {
-            sub(r){
-                let keyMult = keyMultiplier();
-                if (global.tauceti.mining_ship[r] > 0){
-                    global.tauceti.mining_ship[r] -= keyMult;
-                    if (global.tauceti.mining_ship[r] < 0){
-                        global.tauceti.mining_ship[r] = 0;
-                    }
-                }
-            },
-            add(r){
-                let keyMult = keyMultiplier();
-                if (global.tauceti.mining_ship[r] < 100){
-                    global.tauceti.mining_ship[r] += keyMult;
-                    if (global.tauceti.mining_ship[r] > 100){
-                        global.tauceti.mining_ship[r] = 100;
-                    }
-                }
-            }
-        }
-    });
+    mountRatioSlider(bind ? $(bind)[0] : parent[0], sliders);
 }
 
+/**
+ * Render the alien space station's knowledge focus.
+ */
 function loadAlienSpaceStation(parent,bind){
-    parent.append($(`<div>${loc('tau_gas2_alien_station_focus',[global.resource.Knowledge.name])}</div>`));
-    let common = $(`<div class="sliderbar thin"><span class="sub" role="button" @click="sub('focus')" aria-label="Decrease Knowledge Focus">&laquo;</span><b-slider v-model="focus" format="percent"></b-slider><span class="add" role="button" @click="add('focus')" aria-label="Increase Knowledge Focus">&raquo;</span></div>`);
-    parent.append(common);
-
-    vBind({
-        el: bind ? bind : '#specialModal',
-        data: global.tauceti.alien_space_station,
-        methods: {
-            sub(r){
-                let keyMult = keyMultiplier();
-                if (global.tauceti.alien_space_station[r] > 0){
-                    global.tauceti.alien_space_station[r] -= keyMult;
-                    if (global.tauceti.alien_space_station[r] < 0){
-                        global.tauceti.alien_space_station[r] = 0;
-                    }
-                }
-            },
-            add(r){
-                let keyMult = keyMultiplier();
-                if (global.tauceti.alien_space_station[r] < 100){
-                    global.tauceti.alien_space_station[r] += keyMult;
-                    if (global.tauceti.alien_space_station[r] > 100){
-                        global.tauceti.alien_space_station[r] = 100;
-                    }
-                }
-            }
-        }
+    clearElement(parent);
+    mountRatioSlider(bind ? $(bind)[0] : parent[0], {
+        path: ['tauceti', 'alien_space_station', 'focus'],
+        description: loc('tau_gas2_alien_station_focus',[global.resource.Knowledge.name]),
+        subLabel: 'Decrease Knowledge Focus',
+        addLabel: 'Increase Knowledge Focus',
+        sliderLabel: loc('tau_gas2_alien_station_focus',[global.resource.Knowledge.name]),
+        barClass: 'thin',
     });
 }
 

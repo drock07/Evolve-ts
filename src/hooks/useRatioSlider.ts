@@ -18,6 +18,7 @@ export interface RatioSliderContext {
     subLabel: string;
     addLabel: string;
     sliderLabel: string;
+    barClass?: string;
 }
 
 const clamp = (n: number) => Math.min(100, Math.max(0, n));
@@ -57,6 +58,7 @@ export function useRatioSlider(ctx: RatioSliderContext): {
             subLabel: ctx.subLabel,
             addLabel: ctx.addLabel,
             sliderLabel: ctx.sliderLabel,
+            barClass: ctx.barClass,
         },
         callbacks: { onSub, onAdd, onSet: set },
     };
