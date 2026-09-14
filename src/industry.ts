@@ -1,6 +1,7 @@
 import { mountSmelter } from './components/mountSmelter';
 import { mountFactory } from './components/mountFactory';
 import { mountRatioSlider } from './components/mountRatioSlider';
+import { mountGraphene } from './components/mountGraphene';
 import { global, keyMultiplier, sizeApproximation, p_on, support_on, quantum_level, callback_queue, active_rituals } from './vars';
 import { loc } from './locale';
 import { vBind, popover, clearElement, powerGrid, easterEgg, trickOrTreat, binary_limit_test } from './functions';
@@ -600,6 +601,16 @@ function loadDroid(parent,bind){
     });
 }
 
+/**
+ * Render the graphene plant's fuel allocation.
+ *
+ * Markup is React's now (components/GraphenePanel.tsx), sharing the smelter's
+ * allocation row. Where the plant lives varies by run — interstellar normally,
+ * space on truepath, the portal for a warlord — so the address is computed
+ * here and passed through.
+ *
+ * tooltip() below stays: it describes what each fuel costs, and is local.
+ */
 function loadGraphene(parent,bind){
     let graph_source = global.race['truepath'] ? 'space' : 'interstellar';
     let graph_struct = 'g_factory';
@@ -608,157 +619,12 @@ function loadGraphene(parent,bind){
         graph_struct = 'twisted_lab';
     }
 
-    let fuel = $(`<div><span class="has-text-warning">${loc('modal_smelter_fuel')}:</span> <span :class="level()">{{count | on}}/{{ on | max }}</span></div>`);
-    parent.append(fuel);
-
-    let fuelTypes = $('<div></div>');
-    parent.append(fuelTypes);
-
-    if (!global.race['kindling_kindred'] && !global.race['smoldering']){
-        let f_label = global.resource.Lumber.name;
-        let wood = $(`<span :aria-label="buildLabel('wood') + ariaCount('Wood')" class="current wood">${f_label} {{ Lumber }}</span>`);
-        let subWood = $(`<span role="button" class="sub" @click="subWood" aria-label="Remove lumber fuel"><span>&laquo;</span></span>`);
-        let addWood = $(`<span role="button" class="add" @click="addWood" aria-label="Add lumber fuel"><span>&raquo;</span></span>`);
-        fuelTypes.append(subWood);
-        fuelTypes.append(wood);
-        fuelTypes.append(addWood);
-    }
-
-    if (global.resource.Coal.display){
-        let coal = $(`<span :aria-label="buildLabel('coal') + ariaCount('Coal')" class="current coal">${global.resource.Coal.name} {{ Coal }}</span>`);
-        let subCoal = $(`<span role="button" class="sub" @click="subCoal" aria-label="Remove coal fuel"><span>&laquo;</span></span>`);
-        let addCoal = $(`<span role="button" class="add" @click="addCoal" aria-label="Add coal fuel"><span>&raquo;</span></span>`);
-        fuelTypes.append(subCoal);
-        fuelTypes.append(coal);
-        fuelTypes.append(addCoal);
-    }
-
-    if (global.resource.Oil.display){
-        let oil = $(`<span :aria-label="buildLabel('oil') + ariaCount('Oil')" class="current oil">${global.resource.Oil.name} {{ Oil }}</span>`);
-        let subOil = $(`<span role="button" class="sub" @click="subOil" aria-label="Remove oil fuel"><span>&laquo;</span></span>`);
-        let addOil = $(`<span role="button" class="add" @click="addOil" aria-label="Add oil fuel"><span>&raquo;</span></span>`);
-        fuelTypes.append(subOil);
-        fuelTypes.append(oil);
-        fuelTypes.append(addOil);
-    }
-
-    vBind({
-        el: bind ? bind : '#specialModal',
-        data: global[graph_source][graph_struct],
-        methods: {
-            subWood(){
-                let keyMult = keyMultiplier();
-                for (let i=0; i<keyMult; i++){
-                    if (global[graph_source][graph_struct].Lumber > 0){
-                        global[graph_source][graph_struct].Lumber--;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            },
-            addWood(){
-                let keyMult = keyMultiplier();
-                for (let i=0; i<keyMult; i++){
-                    if (global[graph_source][graph_struct].Lumber + global[graph_source][graph_struct].Coal + global[graph_source][graph_struct].Oil < global[graph_source][graph_struct].on){
-                        global[graph_source][graph_struct].Lumber++;
-                    }
-                    else if (global[graph_source][graph_struct].Coal + global[graph_source][graph_struct].Oil > 0){
-                        if (global[graph_source][graph_struct].Oil > global[graph_source][graph_struct].Coal){
-                            global[graph_source][graph_struct].Coal > 0 ? global[graph_source][graph_struct].Coal-- : global[graph_source][graph_struct].Oil--;
-                        }
-                        else {
-                            global[graph_source][graph_struct].Oil > 0 ? global[graph_source][graph_struct].Oil-- : global[graph_source][graph_struct].Coal--;
-                        }
-                        global[graph_source][graph_struct].Lumber++;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            },
-            subCoal(){
-                let keyMult = keyMultiplier();
-                for (let i=0; i<keyMult; i++){
-                    if (global[graph_source][graph_struct].Coal > 0){
-                        global[graph_source][graph_struct].Coal--;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            },
-            addCoal(){
-                let keyMult = keyMultiplier();
-                for (let i=0; i<keyMult; i++){
-                    if (global[graph_source][graph_struct].Lumber + global[graph_source][graph_struct].Coal + global[graph_source][graph_struct].Oil < global[graph_source][graph_struct].on){
-                        global[graph_source][graph_struct].Coal++;
-                    }
-                    else if (global[graph_source][graph_struct].Lumber + global[graph_source][graph_struct].Oil > 0){
-                        if (global[graph_source][graph_struct].Lumber > 0){
-                            global[graph_source][graph_struct].Lumber--;
-                        }
-                        else {
-                            global[graph_source][graph_struct].Oil--;
-                        }
-                        global[graph_source][graph_struct].Coal++;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            },
-            subOil(){
-                let keyMult = keyMultiplier();
-                for (let i=0; i<keyMult; i++){
-                    if (global[graph_source][graph_struct].Oil > 0){
-                        global[graph_source][graph_struct].Oil--;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            },
-            addOil(){
-                let keyMult = keyMultiplier();
-                for (let i=0; i<keyMult; i++){
-                    if (global[graph_source][graph_struct].Lumber + global[graph_source][graph_struct].Coal + global[graph_source][graph_struct].Oil < global[graph_source][graph_struct].on){
-                        global[graph_source][graph_struct].Oil++;
-                    }
-                    else if (global[graph_source][graph_struct].Lumber + global[graph_source][graph_struct].Coal > 0){
-                        if (global[graph_source][graph_struct].Lumber > 0){
-                            global[graph_source][graph_struct].Lumber--;
-                        }
-                        else {
-                            global[graph_source][graph_struct].Coal--;
-                        }
-                        global[graph_source][graph_struct].Oil++;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            },
-            buildLabel(type){
-                return tooltip(type);
-            },
-            ariaCount(fuel){
-                return ` ${global[graph_source][graph_struct][fuel]} ${fuel} fueled.`;
-            },
-            ariaProd(res){
-                return `. ${global[graph_source][graph_struct][res]} producing ${res}.`;
-            },
-            level(){
-                let on = global[graph_source][graph_struct].Lumber + global[graph_source][graph_struct].Coal + global[graph_source][graph_struct].Oil;
-                let max = global[graph_source][graph_struct].on;
-                return colorRange(on,max);
-            }
-        },
-        filters: {
-            on: function(c){
-                return global[graph_source][graph_struct].Lumber + global[graph_source][graph_struct].Coal + global[graph_source][graph_struct].Oil;
-            }
-        }
+    clearElement(parent);
+    mountGraphene(bind ? $(bind)[0] : parent[0], {
+        source: graph_source,
+        struct: graph_struct,
+        isModal: !bind,
+        engine: { tooltip, colorRange },
     });
 
     function tooltip(type){
