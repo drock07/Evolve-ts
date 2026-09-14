@@ -1,3 +1,4 @@
+import { notifyStateChange } from './state';
 import { global, save, webWorker, p_on } from './vars';
 import { loc } from './locale';
 import { vBind, clearElement, calcQueueMax, calcRQueueMax, calcPrestige, messageQueue, clearPopper, popCost } from './functions';
@@ -3044,7 +3045,9 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: '#govType'},'update');
+            // #govType is React's and repaints on notify; the other two are
+            // still Vue and need their forced re-render.
+            notifyStateChange();
             vBind({el: '#foreign'},'update');
             vBind({el: '#government .govTabs2'},'update');
             if (global.settings.tabLoad){
@@ -7496,8 +7499,7 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: `#garrison`},'update');
-            vBind({el: `#c_garrison`},'update');
+            notifyStateChange();
         }
     },
     flintlock_rifle: {
@@ -7521,8 +7523,7 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: `#garrison`},'update');
-            vBind({el: `#c_garrison`},'update');
+            notifyStateChange();
         }
     },
     machine_gun: {
@@ -7546,8 +7547,7 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: `#garrison`},'update');
-            vBind({el: `#c_garrison`},'update');
+            notifyStateChange();
         }
     },
     bunk_beds: {
@@ -7592,8 +7592,7 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: `#garrison`},'update');
-            vBind({el: `#c_garrison`},'update');
+            notifyStateChange();
         }
     },
     laser_rifles: {
@@ -7619,8 +7618,7 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: `#garrison`},'update');
-            vBind({el: `#c_garrison`},'update');
+            notifyStateChange();
         }
     },
     plasma_rifles: {
@@ -7644,8 +7642,7 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: `#garrison`},'update');
-            vBind({el: `#c_garrison`},'update');
+            notifyStateChange();
         }
     },
     disruptor_rifles: {
@@ -7668,8 +7665,7 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: `#garrison`},'update');
-            vBind({el: `#c_garrison`},'update');
+            notifyStateChange();
         }
     },
     gauss_rifles: {
@@ -7692,8 +7688,7 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: `#garrison`},'update');
-            vBind({el: `#c_garrison`},'update');
+            notifyStateChange();
         }
     },
     cyborg_soldiers: {
@@ -7718,8 +7713,7 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: `#garrison`},'update');
-            vBind({el: `#c_garrison`},'update');
+            notifyStateChange();
         }
     },
     ethereal_weapons: {
@@ -7743,8 +7737,7 @@ const techs = {
             return false;
         },
         post(){
-            vBind({el: `#garrison`},'update');
-            vBind({el: `#c_garrison`},'update');
+            notifyStateChange();
         }
     },
     space_marines: {

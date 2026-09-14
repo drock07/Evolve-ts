@@ -132,3 +132,4 @@ export function deadPopovers(): DeadPopover[] {
 export function popoverBindingCount(): number {
     return bindings.length;
 }
+

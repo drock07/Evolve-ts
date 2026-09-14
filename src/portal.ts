@@ -1,3 +1,4 @@
+import { notifyStateChange } from './state';
 import { global, seededRandom, keyMultiplier, p_on, support_on, gal_on, spire_on, hell_reports, hell_graphs, sizeApproximation, keyMap } from './vars';
 import { vBind, clearElement, popover, clearPopper, timeFormat, powerCostMod, spaceCostMultiplier, messageQueue, powerModifier, calcPillar, deepClone, popCost, calcPrestige, get_qlevel, shrineBonusActive, getShrineBonus, buildQueue, timeCheck } from './functions';
 import { unlockAchieve, alevel, universeAffix } from './achieve';
@@ -2227,7 +2228,7 @@ const fortressModules = {
                 };
             },
             post(){
-                vBind({el: `#foundry`},'update');
+                notifyStateChange();
             },
         },
         ancient_pillars: {
@@ -3959,7 +3960,7 @@ export function buildFortress(parent,full){
                         global.portal.fortress.garrison = global.civic.garrison.workers;
                     }
                     global.portal.fortress['assigned'] = global.portal.fortress.garrison;
-                    vBind({el: `#garrison`},'update');
+                    notifyStateChange();
                 }
             },
             aLast(){
@@ -3980,7 +3981,7 @@ export function buildFortress(parent,full){
                         global.portal.fortress.patrols = Math.floor(global.portal.fortress.garrison / global.portal.fortress.patrol_size);
                     }
                     global.portal.fortress['assigned'] = global.portal.fortress.garrison;
-                    vBind({el: `#garrison`},'update');
+                    notifyStateChange();
                 }
             },
             patInc(){
@@ -4054,7 +4055,7 @@ export function buildFortress(parent,full){
                         global.civic.garrison.m_use++;
                         global.portal.fortress.garrison++;
                         global.portal.fortress['assigned'] = global.portal.fortress.garrison;
-                        vBind({el: `#garrison`},'update');
+                        notifyStateChange();
                     }
                     else {
                         canBuy = false;

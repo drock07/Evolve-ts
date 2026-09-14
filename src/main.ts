@@ -11309,7 +11309,8 @@ function fastLoopRender() {
   if (dirty.firstRun) {
     if (global.settings.portal.ruins) {
       vBind({ el: `#srprtl_ruins` }, "update");
-      vBind({ el: `#foundry` }, "update");
+      // The foundry is React's; it repaints from this pass's own
+      // notifyStateChange(), so there is nothing to force here.
     }
     if (global.settings.portal.gate) {
       vBind({ el: `#srprtl_gate` }, "update");

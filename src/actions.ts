@@ -1,3 +1,4 @@
+import { notifyStateChange } from './state';
 import { global, save, seededRandom, webWorker, keyMultiplier, keyMap, srSpeak, sizeApproximation, p_on, support_on, int_on, gal_on, spire_on, tmp_vars, setupStats, callback_queue } from './vars';
 import type { StatsState, GenesState } from './types/state';
 import { loc } from './locale';
@@ -1990,8 +1991,7 @@ export const actions = {
                     }
                     if (!global.civic.garrison.display){
                         global.civic.garrison.display = true;
-                        vBind({el: `#garrison`},'update');
-                        vBind({el: `#c_garrison`},'update');
+                        notifyStateChange();
                     }
                     global.civic['garrison'].max += $(this)[0].soldiers();
                     incrementStruct('garrison','city');
