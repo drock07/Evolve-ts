@@ -182,3 +182,54 @@ test.describe('structure buttons — what they do', () => {
         await expect(page.locator('#modalBox, dialog[open]').first()).toBeVisible();
     });
 });
+
+/**
+ * The same renderer draws the tech tree.
+ *
+ * setAction is called with action 'tech' for available research and with the
+ * `old` flag for everything already researched, which renders a plain label
+ * with no costs, count or controls. That is a large surface — 189 old entries
+ * in this save — reached through the same function, so it is covered here
+ * rather than left to the assumption that city coverage implies it.
+ */
+test.describe('the tech tree uses the same renderer', () => {
+    async function openResearch(page: Page): Promise<void> {
+        await bootGame(page, { save: loadSaveFixture(SAVE) });
+        await runTicks(page, 50);
+        await page.locator('.tabs').first().locator('li').nth(3).click();
+        await expect(page.locator('#tech .action').first()).toBeVisible();
+    }
+
+    test('available techs render as buttons with names and costs', async ({ page }) => {
+        await openResearch(page);
+
+        const cards = page.locator('#tech .action');
+        expect(await cards.count()).toBeGreaterThan(0);
+
+        const first = cards.first();
+        await expect(first.locator('.aTitle')).not.toBeEmpty();
+        // Research costs knowledge, so the cost machinery must have run.
+        await expect(first.locator('a.button')).toHaveClass(/res-Knowledge/);
+    });
+
+    test('researched techs render as plain labels', async ({ page }) => {
+        await openResearch(page);
+
+        const old = page.locator('#oldTech .action');
+        expect(await old.count()).toBeGreaterThan(0);
+
+        const first = old.first();
+        await expect(first.locator('.oldTech .aTitle')).not.toBeEmpty();
+        // No controls on something already owned.
+        await expect(first.locator('.count')).toHaveCount(0);
+        await expect(first.locator('.on')).toHaveCount(0);
+    });
+
+    test('a tech describes itself on hover', async ({ page }) => {
+        await openResearch(page);
+
+        await page.locator('#tech .action a.button').first().hover();
+        await expect(page.locator('.popper')).toHaveCount(1);
+        await expect(page.locator('.popper')).not.toBeEmpty();
+    });
+});

@@ -57,6 +57,8 @@ const REACT_OWNED: Owned[] = [
     // The structure button: one renderer, every building in every region.
     { selector: '#city-basic_housing a.button', tab: 1 },
     { selector: '#city-factory .on', tab: 1 },
+    // The tech tree runs through setAction too.
+    { selector: '#tech .action a.button', tab: 3 },
 ];
 
 /** Is this element one React rendered, rather than a copy Vue made of it? */
