@@ -82,10 +82,17 @@ test.describe('market row — what it shows', () => {
     test('the route steppers describe their rates', async ({ page }) => {
         await openMarket(page);
 
-        // Buefy renders the label into a tooltip-content node.
-        const labels = await row(page).locator('.b-tooltip .tooltip-content').allTextContents();
-        expect(labels.join(' ')).toMatch(/Auto-sell/);
-        expect(labels.join(' ')).toMatch(/Auto-buy/);
+        // Asserted on hover rather than on a tooltip-content node. This
+        // originally read Buefy's <b-tooltip>, which rendered its label into
+        // the DOM beside every stepper whether or not anyone looked at it; the
+        // port replaced those with the React popover, so the description now
+        // exists only while it is shown. The behaviour a player sees is the
+        // same, and this is the assertion that survives Buefy's removal.
+        await row(page).locator('.trade .sub').hover();
+        await expect(page.locator('.popper')).toContainText(/Auto-sell/);
+
+        await row(page).locator('.trade .add').hover();
+        await expect(page.locator('.popper')).toContainText(/Auto-buy/);
     });
 });
 

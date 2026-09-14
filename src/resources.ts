@@ -1,3 +1,4 @@
+import { mountMarketRow } from './components/mountMarketRow';
 import { global, tmp_vars, keyMultiplier, breakdown, sizeApproximation, p_on, support_on, active_rituals } from './vars';
 import { vBind, clearElement, modRes, flib, calc_mastery, calcPillar, eventActive, easterEgg, trickOrTreat, popover, harmonyEffect, darkEffect, hoovedRename, messageQueue } from './functions';
 import { traits, fathomCheck } from './races';
@@ -1062,6 +1063,18 @@ function importRouteEnabled(route){
     return true;
 }
 
+/**
+ * Render a market row.
+ *
+ * The markup is React's now (components/MarketRow.tsx); this computes the
+ * numbers and hands them over. All of the pricing arithmetic stays here — it
+ * runs through traits, government perks, astrology and achievement ranks, and
+ * belongs with the rest of the economy rather than in a view.
+ *
+ * The <b-tooltip> wrappers the route steppers used to carry are gone: the
+ * descriptions are React popovers, which is the same text without Buefy and
+ * without a tooltip-content node beside every stepper.
+ */
 export function marketItem(mount,market_item,name,color,full){
     if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 0)){
         return;
@@ -1071,257 +1084,261 @@ export function marketItem(mount,market_item,name,color,full){
         return;
     }
 
-    if (full){
-        market_item.append($(`<h3 class="res has-text-${color}">{{ r.name | namespace }}</h3>`));
-    }
+    const showRoutes = full && ((global.race['banana'] && name === 'Food') || (global.tech['trade'] && !global.race['terrifying'])) ? true : false;
 
-    if (!global.race['no_trade']){
-        market_item.append($(`<span class="buy"><span class="has-text-success">${loc('resource_market_buy')}</span></span>`));
-        market_item.append($(`<span role="button" class="order" @click="purchase('${name}')">\${{ r.value | buy }}</span>`));
-        
-        market_item.append($(`<span class="sell"><span class="has-text-danger">${loc('resource_market_sell')}</span></span>`));
-        market_item.append($(`<span role="button" class="order" @click="sell('${name}')">\${{ r.value | sell }}</span>`));
-    }
+    const api = marketRowApi(name);
+    mountMarketRow($(mount)[0], {
+        res: name,
+        full: full ? true : false,
+        showRoutes,
+        engine: api,
+    });
+}
 
-    if (full && ((global.race['banana'] && name === 'Food') || (global.tech['trade'] && !global.race['terrifying']))){
-        let trade = $(`<span class="trade" v-show="m.active"><span class="has-text-warning">${loc('resource_market_routes')}</span></span>`);
-        market_item.append(trade);
-        trade.append($(`<b-tooltip :label="aSell('${name}')" position="is-bottom" size="is-small" multilined animated><span role="button" aria-label="export ${global.resource[name].name}" class="sub has-text-danger" @click="autoSell('${name}')"><span>-</span></span></b-tooltip>`));
-        trade.append($(`<span class="current" v-html="$options.filters.trade(r.trade)"></span>`));
-        trade.append($(`<b-tooltip :label="aBuy('${name}')" position="is-bottom" size="is-small" multilined animated><span role="button" aria-label="import ${global.resource[name].name}" class="add has-text-success" @click="autoBuy('${name}')"><span>+</span></span></b-tooltip>`));
-        trade.append($(`<span role="button" class="zero has-text-advanced" @click="zero('${name}')">${loc('cancel_routes')}</span>`));
-        tradeRouteColor(name);
-    }
-    
-    vBind({
-        el: mount,
-        data: { 
-            r: global.resource[name],
-            m: global.city.market
-        },
-        methods: {
-            aSell(res){
-                let unit = tradeRatio[res] === 1 ? loc('resource_market_unit') : loc('resource_market_units');
-                let price = tradeSellPrice(res);
-                let rate = tradeRatio[res];
-                if (global.stats.achieve.hasOwnProperty('trade')){
-                    let rank = global.stats.achieve.trade.l;
-                    if (rank > 5){ rank = 5; }
-                    rate *= 1 - (rank / 100);
-                }
-                rate = +(rate).toFixed(3);
-                return loc('resource_market_auto_sell_desc',[rate,unit,price]);
-            },
-            aBuy(res){
-                let rate = tradeRatio[res];
-                let dealVal = govActive('dealmaker',0);
-                if (dealVal){
-                    rate *= 1 + (dealVal / 100);
-                }
-                if (global.race['persuasive']){
-                    rate *= 1 + (global.race['persuasive'] / 100);
-                }
-                if (astrologySign() === 'capricorn'){
-                    rate *= 1 + (astroVal('capricorn')[0] / 100);
-                }
-                if (global.race['ocular_power'] && global.race['ocularPowerConfig'] && global.race.ocularPowerConfig.c){
-                    let trade = 70 * (traits.ocular_power.vars()[1] / 100);
-                    rate *= 1 + (trade / 100);
-                }
-                if (global.race['devious']){
-                    rate *= 1 - (traits.devious.vars()[0] / 100);
-                }
-                if (global.race['merchant']){
-                    rate *= 1 + (traits.merchant.vars()[1] / 100);
-                }
-                let fathom = fathomCheck('goblin');
-                if (fathom > 0){
-                    rate *= 1 + (traits.merchant.vars(1)[1] / 100 * fathom);
-                }
-                if (global.genes['trader']){
-                    let mastery = calc_mastery();
-                    rate *= 1 + (mastery / 100);
-                }
-                if (global.stats.achieve.hasOwnProperty('trade')){
-                    let rank = global.stats.achieve.trade.l;
-                    if (rank > 5){ rank = 5; }
-                    rate *= 1 + (rank / 50);
-                }
-                if (global.race['truepath']){
-                    rate *= 1 - (global.civic.foreign.gov3.hstl / 101);
-                }
-                rate = +(rate).toFixed(3);
-                let unit = rate === 1 ? loc('resource_market_unit') : loc('resource_market_units');
-                let price = tradeBuyPrice(res);
-                return loc('resource_market_auto_buy_desc',[rate,unit,price]);
-            },
-            purchase(res){
-                if (!global.race['no_trade'] && !global.settings.pause){
-                    let qty = global.city.market.qty;
-                    let value = global.resource[res].value;
-                    if (global.race['arrogant']){
-                        value *= 1 + (traits.arrogant.vars()[0] / 100);
-                    }
-                    if (global.race['conniving']){
-                        value *= 1 - (traits.conniving.vars()[0] / 100);
-                    }
-                    let fathom = fathomCheck('imp');
-                    if (fathom > 0){
-                        value *= 1 - (traits.conniving.vars(1)[0] / 100 * fathom);
-                    }
-                    let amount = Math.floor(Math.min(qty, global.resource.Money.amount / value,
-                      global.resource[res].max - global.resource[res].amount));
-                    if (amount > 0){
-                        global.resource[res].amount += amount;
-                        global.resource.Money.amount -= Math.round(value * amount);
-
-                        global.resource[res].value += Number((amount / Math.rand(1000,10000)).toFixed(2));
-                    }
-                }
-            },
-            sell(res){
-                if (!global.race['no_trade'] && !global.settings.pause){
-                    let qty = global.city.market.qty;
-                    let divide = 4;
-                    if (global.race['merchant']){
-                        divide *= 1 - (traits.merchant.vars()[0] / 100);
-                    }
-                    let gobFathom = fathomCheck('goblin');
-                    if (gobFathom > 0){
-                        divide *= 1 - (traits.merchant.vars(1)[0] / 100 * gobFathom);
-                    }
-                    if (global.race['asymmetrical']){
-                        divide *= 1 + (traits.asymmetrical.vars()[0] / 100);
-                    }
-                    if (global.race['conniving']){
-                        divide *= 1 - (traits.conniving.vars()[1] / 100);
-                    }
-                    let impFathom = fathomCheck('imp');
-                    if (impFathom > 0){
-                        divide *= 1 - (traits.conniving.vars(1)[1] / 100 * impFathom);
-                    }
-                    let price = global.resource[res].value / divide;
-                    let amount = Math.floor(Math.min(qty, global.resource[res].amount,
-                      (global.resource.Money.max - global.resource.Money.amount) / price));
-                    if (amount > 0) {
-                        global.resource[res].amount -= amount;
-                        global.resource.Money.amount += Math.round(price * amount);
-
-                        global.resource[res].value -= Number((amount / Math.rand(1000,10000)).toFixed(2));
-                        if (global.resource[res].value < Number(resource_values[res] / 2)){
-                            global.resource[res].value = Number(resource_values[res] / 2);
-                        }
-                    }
-                }
-            },
-            autoBuy(res, keyMult = keyMultiplier()){
-                for (let i=0; i<keyMult; i++){
-                    if (govActive('dealmaker',0)){
-                        let exporting = 0;
-                        let importing = 0;
-                        Object.keys(global.resource).forEach(function(res){
-                            if (global.resource[res].hasOwnProperty('trade') && global.resource[res].trade < 0){
-                                exporting -= global.resource[res].trade;
-                            }
-                            if (global.resource[res].hasOwnProperty('trade') && global.resource[res].trade > 0){
-                                importing += global.resource[res].trade;
-                            }
-                        });
-                        if (exporting <= importing){
-                            break;
-                        }
-                    }
-                    if (global.resource[res].trade >= 0){
-                        if (importRouteEnabled(res) && global.city.market.trade < global.city.market.mtrade){
-                            global.city.market.trade++;
-                            global.resource[res].trade++;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    else {
-                        global.city.market.trade--;
-                        global.resource[res].trade++;
-                    }
-                }
-                tradeRouteColor(res);
-            },
-            autoSell(res, keyMult = keyMultiplier()){
-                for (let i=0; i<keyMult; i++){
-                    if (global.resource[res].trade <= 0){
-                        if (exportRouteEnabled(res) && global.city.market.trade < global.city.market.mtrade){
-                            global.city.market.trade++;
-                            global.resource[res].trade--;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    else {
-                        global.city.market.trade--;
-                        global.resource[res].trade--;
-                    }
-                }
-                tradeRouteColor(res);
-            },
-            zero(res){
-                if (global.resource[res].trade > 0){
-                    this.autoSell(res, global.resource[res].trade);
-                }
-                else if (global.resource[res].trade < 0){
-                    this.autoBuy(res, -global.resource[res].trade);
-                }
+/**
+ * The engine side of a market row: prices, trades and their descriptions.
+ *
+ * Lifted out of the Vue instance's methods and filters unchanged. Split into
+ * its own function so the row's view can call it without the view knowing any
+ * of the economics.
+ */
+function marketRowApi(name){
+    const m = {
+        aSell(res){
+            let unit = tradeRatio[res] === 1 ? loc('resource_market_unit') : loc('resource_market_units');
+            let price = tradeSellPrice(res);
+            let rate = tradeRatio[res];
+            if (global.stats.achieve.hasOwnProperty('trade')){
+                let rank = global.stats.achieve.trade.l;
+                if (rank > 5){ rank = 5; }
+                rate *= 1 - (rank / 100);
             }
+            rate = +(rate).toFixed(3);
+            return loc('resource_market_auto_sell_desc',[rate,unit,price]);
         },
-        filters: {
-            buy(value){
+        aBuy(res){
+            let rate = tradeRatio[res];
+            let dealVal = govActive('dealmaker',0);
+            if (dealVal){
+                rate *= 1 + (dealVal / 100);
+            }
+            if (global.race['persuasive']){
+                rate *= 1 + (global.race['persuasive'] / 100);
+            }
+            if (astrologySign() === 'capricorn'){
+                rate *= 1 + (astroVal('capricorn')[0] / 100);
+            }
+            if (global.race['ocular_power'] && global.race['ocularPowerConfig'] && global.race.ocularPowerConfig.c){
+                let trade = 70 * (traits.ocular_power.vars()[1] / 100);
+                rate *= 1 + (trade / 100);
+            }
+            if (global.race['devious']){
+                rate *= 1 - (traits.devious.vars()[0] / 100);
+            }
+            if (global.race['merchant']){
+                rate *= 1 + (traits.merchant.vars()[1] / 100);
+            }
+            let fathom = fathomCheck('goblin');
+            if (fathom > 0){
+                rate *= 1 + (traits.merchant.vars(1)[1] / 100 * fathom);
+            }
+            if (global.genes['trader']){
+                let mastery = calc_mastery();
+                rate *= 1 + (mastery / 100);
+            }
+            if (global.stats.achieve.hasOwnProperty('trade')){
+                let rank = global.stats.achieve.trade.l;
+                if (rank > 5){ rank = 5; }
+                rate *= 1 + (rank / 50);
+            }
+            if (global.race['truepath']){
+                rate *= 1 - (global.civic.foreign.gov3.hstl / 101);
+            }
+            rate = +(rate).toFixed(3);
+            let unit = rate === 1 ? loc('resource_market_unit') : loc('resource_market_units');
+            let price = tradeBuyPrice(res);
+            return loc('resource_market_auto_buy_desc',[rate,unit,price]);
+        },
+        purchase(res){
+            if (!global.race['no_trade'] && !global.settings.pause){
+                let qty = global.city.market.qty;
+                let value = global.resource[res].value;
                 if (global.race['arrogant']){
                     value *= 1 + (traits.arrogant.vars()[0] / 100);
                 }
-                return sizeApproximation(value * global.city.market.qty,0);
-            },
-            sell(value){
+                if (global.race['conniving']){
+                    value *= 1 - (traits.conniving.vars()[0] / 100);
+                }
+                let fathom = fathomCheck('imp');
+                if (fathom > 0){
+                    value *= 1 - (traits.conniving.vars(1)[0] / 100 * fathom);
+                }
+                let amount = Math.floor(Math.min(qty, global.resource.Money.amount / value,
+                  global.resource[res].max - global.resource[res].amount));
+                if (amount > 0){
+                    global.resource[res].amount += amount;
+                    global.resource.Money.amount -= Math.round(value * amount);
+
+                    global.resource[res].value += Number((amount / Math.rand(1000,10000)).toFixed(2));
+                }
+            }
+        },
+        sell(res){
+            if (!global.race['no_trade'] && !global.settings.pause){
+                let qty = global.city.market.qty;
                 let divide = 4;
                 if (global.race['merchant']){
                     divide *= 1 - (traits.merchant.vars()[0] / 100);
                 }
-                let fathom = fathomCheck('goblin');
-                if (fathom > 0){
-                    divide *= 1 - (traits.merchant.vars(1)[0] / 100 * fathom);
-                }
-                if (global.race['devious']){
-                    divide *= 1 - (traits.devious.vars()[0] / 100);
+                let gobFathom = fathomCheck('goblin');
+                if (gobFathom > 0){
+                    divide *= 1 - (traits.merchant.vars(1)[0] / 100 * gobFathom);
                 }
                 if (global.race['asymmetrical']){
                     divide *= 1 + (traits.asymmetrical.vars()[0] / 100);
                 }
-                return sizeApproximation(value * global.city.market.qty / divide,0);
-            },
-            trade(val){
-                if (name === 'Stone' && (val === 31 || val === -31)){
-                    let trick = trickOrTreat(3,12,false);
-                    if (trick.length > 0){
-                        return trick;
+                if (global.race['conniving']){
+                    divide *= 1 - (traits.conniving.vars()[1] / 100);
+                }
+                let impFathom = fathomCheck('imp');
+                if (impFathom > 0){
+                    divide *= 1 - (traits.conniving.vars(1)[1] / 100 * impFathom);
+                }
+                let price = global.resource[res].value / divide;
+                let amount = Math.floor(Math.min(qty, global.resource[res].amount,
+                  (global.resource.Money.max - global.resource.Money.amount) / price));
+                if (amount > 0) {
+                    global.resource[res].amount -= amount;
+                    global.resource.Money.amount += Math.round(price * amount);
+
+                    global.resource[res].value -= Number((amount / Math.rand(1000,10000)).toFixed(2));
+                    if (global.resource[res].value < Number(resource_values[res] / 2)){
+                        global.resource[res].value = Number(resource_values[res] / 2);
                     }
                 }
-                if (val < 0){
-                    val = 0 - val;
-                    return `-${val}`;
+            }
+        },
+        autoBuy(res, keyMult = keyMultiplier()){
+            for (let i=0; i<keyMult; i++){
+                if (govActive('dealmaker',0)){
+                    let exporting = 0;
+                    let importing = 0;
+                    Object.keys(global.resource).forEach(function(res){
+                        if (global.resource[res].hasOwnProperty('trade') && global.resource[res].trade < 0){
+                            exporting -= global.resource[res].trade;
+                        }
+                        if (global.resource[res].hasOwnProperty('trade') && global.resource[res].trade > 0){
+                            importing += global.resource[res].trade;
+                        }
+                    });
+                    if (exporting <= importing){
+                        break;
+                    }
                 }
-                else if (val > 0){
-                    return `+${val}`;
+                if (global.resource[res].trade >= 0){
+                    if (importRouteEnabled(res) && global.city.market.trade < global.city.market.mtrade){
+                        global.city.market.trade++;
+                        global.resource[res].trade++;
+                    }
+                    else {
+                        break;
+                    }
                 }
                 else {
-                    return 0;
+                    global.city.market.trade--;
+                    global.resource[res].trade++;
                 }
-            },
-            namespace(val){
-                return val.replace("_", " ");
             }
-        }
-    });
+            tradeRouteColor(res);
+        },
+        autoSell(res, keyMult = keyMultiplier()){
+            for (let i=0; i<keyMult; i++){
+                if (global.resource[res].trade <= 0){
+                    if (exportRouteEnabled(res) && global.city.market.trade < global.city.market.mtrade){
+                        global.city.market.trade++;
+                        global.resource[res].trade--;
+                    }
+                    else {
+                        break;
+                    }
+                }
+                else {
+                    global.city.market.trade--;
+                    global.resource[res].trade--;
+                }
+            }
+            tradeRouteColor(res);
+        },
+        zero(res){
+            if (global.resource[res].trade > 0){
+                m.autoSell(res, global.resource[res].trade);
+            }
+            else if (global.resource[res].trade < 0){
+                m.autoBuy(res, -global.resource[res].trade);
+            }
+        },
+        buyValue(value){
+            if (global.race['arrogant']){
+                value *= 1 + (traits.arrogant.vars()[0] / 100);
+            }
+            return sizeApproximation(value * global.city.market.qty,0);
+        },
+        sellValue(value){
+            let divide = 4;
+            if (global.race['merchant']){
+                divide *= 1 - (traits.merchant.vars()[0] / 100);
+            }
+            let fathom = fathomCheck('goblin');
+            if (fathom > 0){
+                divide *= 1 - (traits.merchant.vars(1)[0] / 100 * fathom);
+            }
+            if (global.race['devious']){
+                divide *= 1 - (traits.devious.vars()[0] / 100);
+            }
+            if (global.race['asymmetrical']){
+                divide *= 1 + (traits.asymmetrical.vars()[0] / 100);
+            }
+            return sizeApproximation(value * global.city.market.qty / divide,0);
+        },
+        trade(val){
+            if (name === 'Stone' && (val === 31 || val === -31)){
+                let trick = trickOrTreat(3,12,false);
+                if (trick.length > 0){
+                    return trick;
+                }
+            }
+            if (val < 0){
+                val = 0 - val;
+                return `-${val}`;
+            }
+            else if (val > 0){
+                return `+${val}`;
+            }
+            else {
+                return 0;
+            }
+        },
+        namespace(val){
+            return val.replace("_", " ");
+        },
+    };
+
+    // What the view calls. Each closes over `name`, so the row needs to know
+    // only which resource it is and nothing about how any of this is computed.
+    return {
+        buyPrice: () => m.buyValue(global.resource[name].value),
+        sellPrice: () => m.sellValue(global.resource[name].value),
+        tradeHtml: () => String(m.trade(global.resource[name].trade)),
+        sellDescription: () => m.aSell(name),
+        buyDescription: () => m.aBuy(name),
+        purchase: () => m.purchase(name),
+        sell: () => m.sell(name),
+        autoBuy: () => m.autoBuy(name),
+        autoSell: () => m.autoSell(name),
+        zero: () => m.zero(name),
+    };
 }
+
 
 function initGalaxyTrade(){
     if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 0)){
