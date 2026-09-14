@@ -287,3 +287,44 @@ export async function unlockFlags(
     }, flags);
 }
 
+/**
+ * A save fixture with content added, seeded before the page loads.
+ *
+ * The live-state helpers above run after boot, which is too late for anything
+ * the UI decides once: defineIndustry() settles which panels exist when its
+ * tab is first drawn, so a structure conjured after that never gets a panel
+ * however true its gate is. Seeding the save instead puts the content in place
+ * before any module evaluates, which is also closer to what it means for a
+ * game to have got there.
+ *
+ * Structure shapes still have to be supplied here rather than read from
+ * struct(), because there is no page yet to read the actions tree from. Where
+ * a panel only needs a count this is a line; where it needs more, the same
+ * caveat applies as everywhere else in this file.
+ *
+ * Verified on space.titan_mine, which seeds this way and gets its panel. Four
+ * industry panels resist both this and the live helpers and are not currently
+ * reachable by any means here: the pylon, nanite factory, replicator and mech
+ * station. Their gates read true after the save loads and no error is raised,
+ * yet defineIndustry() produces no container for them — unexplained rather
+ * than diagnosed, and left alone. All four are gated on race identity or
+ * universe rather than on progress, so a save of the relevant race is
+ * probably the honest way in.
+ */
+export function saveWith(name: string, mutate: (save: Record<string, any>) => void): string {
+    const save = readSaveFixture(name);
+    mutate(save);
+    return LZString.compressToUTF16(JSON.stringify(save));
+}
+
+/** Add a structure to a save, creating its region if the run never reached it. */
+export function addStructure(
+    save: Record<string, any>,
+    region: string,
+    key: string,
+    record: Record<string, unknown>,
+): void {
+    save[region] = save[region] ?? {};
+    save[region][key] = { count: 1, on: 1, ...record };
+}
+
