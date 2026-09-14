@@ -32,6 +32,10 @@ export const legacy = {
     gameLoop: null as any,
     loopTimers: null as any,
     initMessageQueue: null as any,
+    timeFormat: null as any,
+    eventActive: null as any,
+    easterEgg: null as any,
+    trickOrTreat: null as any,
 
     // From civics.ts
     /** Raise or lower the tax rate; honours keyMultiplier when n is omitted. */
@@ -52,6 +56,16 @@ export const legacy = {
     annexOffered: null as any,
     purchaseOffered: null as any,
     registerEspPopovers: null as any,
+    /** Total soldiers, or the housing cap when passed true. */
+    garrisonSize: null as any,
+    /** Combat rating for a number of soldiers. */
+    armyRating: null as any,
+    /** Buy a mercenary; refused when unaffordable or unhoused. */
+    hireMerc: null as any,
+    /** Launch or withdraw a campaign against a foreign government. */
+    war_campaign: null as any,
+    govTitle: null as any,
+    registerGarrisonPopovers: null as any,
 
     // From jobs.ts
     /** Ordered row specs for the job list. */

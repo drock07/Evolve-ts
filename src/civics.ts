@@ -2,6 +2,7 @@ import { mountTaxRates } from './components/mountTaxRates';
 import { mountMad } from './components/mountMad';
 import { mountGovernment } from './components/mountGovernment';
 import { openEspionageModal } from './components/mountEspionage';
+import { mountGarrison } from './components/mountGarrison';
 import { global, seededRandom, keyMultiplier, sizeApproximation, p_on } from './vars';
 import { loc } from './locale';
 import { calcPrestige, clearElement, popover, clearPopper, vBind, timeFormat, modRes, messageQueue, genCivName, darkEffect, eventActive, easterEgg, trickOrTreat } from './functions';
@@ -1130,7 +1131,7 @@ export function mercCost(){
     return Math.round(cost);
 }
 
-function hireMerc(num?){
+export function hireMerc(num?){
     let hired = 0;
     if (global.tech['mercs']){
         let repeats = num || keyMultiplier();
@@ -1152,191 +1153,29 @@ function hireMerc(num?){
     return hired;
 }
 
+/**
+ * Render the garrison.
+ *
+ * The markup is React's now (components/Garrison.tsx); this keeps the
+ * container and hands it over. `full` still selects between the two targets —
+ * #garrison under Military and #c_garrison under Government — and is passed
+ * straight through, so the one component serves both as the one builder did.
+ */
 export function buildGarrison(garrison,full){
     clearElement(garrison);
-    if (global.tech['world_control'] && !global.race['truepath']){
-        garrison.append($(`<div class="header"><h2 class="has-text-warning">${loc('civics_garrison')}</h2> - <span class="has-text-success"><span class="defenseRating">${loc('rating')} {{ g.workers | hell | rating }}</span> - <span class="soldierRating"><span class="has-text-warning">${loc(`civics_garrison_soldier_rating`)}</span> {{ g.workers | single | rating(true) }}</span></div>`));
-    }
-    else {
-        garrison.append($(`<div class="header"><h2 class="has-text-warning">${loc('civics_garrison')}</h2> - <span class="has-text-success"><span class="defenseRating">${loc('rating')} {{ g.workers | hell | rating }}</span> / <span class="offenseRating">{{ g.raid | rating }}</span></span> - <span class="soldierRating"><span class="has-text-warning">${loc(`civics_garrison_soldier_rating`)}</span> {{ g.workers | single | rating }}</span></div>`));
-    }
+    mountGarrison(full);
+}
 
-    var soliders = $(`<div></div>`);
-    garrison.append(soliders);
-
-    var barracks = $('<div class="columns is-mobile bunk"></div>');
-    soliders.append(barracks);
-
-    var bunks = $('<div class="bunks"></div>');
-    barracks.append(bunks);
-    let soldier_title = global.tech['world_control'] && !global.race['truepath'] ? loc('civics_garrison_peacekeepers') : loc('civics_garrison_soldiers');
-    if (!global.tech['isolation']){
-        bunks.append($(`<div class="barracks"><span class="soldier">${soldier_title}</span> <span v-html="$options.filters.stationed(g.workers)"></span> / <span>{{ g.max | s_max }}<span></div>`));
-        bunks.append($(`<div class="barracks" v-show="g.crew > 0"><span class="crew">${loc('civics_garrison_crew')}</span> <span>{{ g.crew }}</span></div>`));
-        bunks.append($(`<div class="barracks"><span class="wounded">${loc('civics_garrison_wounded')}</span> <span v-html="$options.filters.wounded(g.wounded)"></span></div>`));
-
-        barracks.append($(`<div class="hire"><button v-show="g.mercs" class="button first hmerc" @click="hire">${loc('civics_garrison_hire_mercenary')}</button><div>`));
-    }
-    
-    if (full){
-        let egg8 = '';
-        if (global.tech['isolation']){
-            egg8 = easterEgg(8,12);
-        }
-
-        garrison.append($(`<div class="training"><span>${loc('civics_garrison_training')} - ${loc('arpa_to_complete')} {{ g.rate, g.progress | trainTime }}${egg8}</span> <progress class="progress" :value="g.progress" max="100">{{ g.progress }}%</progress></div>`));
-    }
-
-    var campaign = $('<div class="columns is-mobile battle"></div>');
-    soliders.append(campaign);
-
-    var wrap = $('<div class="war"></div>');
-    campaign.append(wrap);
-
-    if ((!global.tech['world_control'] || global.race['truepath']) && !global.race['cataclysm'] && !global.tech['isolation']){
-        var tactics = $(`<div id="${full ? 'tactics' : 'c_tactics'}" v-show="g.display" class="tactics"><span>${loc('civics_garrison_campaign')}</span></div>`);
-        wrap.append(tactics);
-            
-        var strategy = $('<span class="current tactic">{{ g.tactic | tactics }}</span>');
-        var last = $('<span role="button" aria-label="easier campaign" class="sub" @click="last">&laquo;</span>');
-        var next = $('<span role="button" aria-label="harder campaign" class="add" @click="next">&raquo;</span>');
-        tactics.append(last);
-        tactics.append(strategy);
-        tactics.append(next);
-
-        var battalion = $(`<div id="${full ? 'battalion' : 'c_battalion'}" v-show="g.display" class="tactics"><span>${loc('civics_garrison_battalion')}</span></div>`);
-        wrap.append(battalion);
-            
-        var armysize = $('<span class="current bat">{{ g.raid }}</span>');
-        var alast = $('<span role="button" aria-label="remove soldiers from campaign" class="sub" @click="aLast">&laquo;</span>');
-        var anext = $('<span role="button" aria-label="add soldiers to campaign" class="add" @click="aNext">&raquo;</span>');
-        battalion.append(alast);
-        battalion.append(armysize);
-        battalion.append(anext);
-
-        if (full){
-            if (global.race['truepath'] && global.tech['rival']){
-                campaign.append($(`<div class="launch gov3" v-show="rvis()"><div class="has-text-caution">${govTitle(3)}</div><button class="button campaign" @click="campaign(3)"><span>${loc('civics_garrison_launch_campaign')}</span></button></div>`));
-            }
-            if (!global.tech['world_control']){
-                campaign.append($(`<div class="launch gov0"><div class="has-text-caution">${govTitle(0)}</div><button class="button campaign" @click="campaign(0)"><span v-show="!g0.occ && !g0.anx && !g0.buy">${loc('civics_garrison_launch_campaign')}</span><span v-show="g0.occ || g0.anx || g0.buy">${loc('civics_garrison_deoccupy')}</span></button></div>`));
-                campaign.append($(`<div class="launch gov1"><div class="has-text-caution">${govTitle(1)}</div><button class="button campaign" @click="campaign(1)"><span v-show="!g1.occ && !g1.anx && !g1.buy">${loc('civics_garrison_launch_campaign')}</span><span v-show="g1.occ || g1.anx || g1.buy">${loc('civics_garrison_deoccupy')}</span></button></div>`));
-                campaign.append($(`<div class="launch gov2"><div class="has-text-caution">${govTitle(2)}</div><button class="button campaign" @click="campaign(2)"><span v-show="!g2.occ && !g2.anx && !g2.buy">${loc('civics_garrison_launch_campaign')}</span><span v-show="g2.occ || g2.anx || g2.buy">${loc('civics_garrison_deoccupy')}</span></button></div>`));
-            }
-        }
-    }
-
-    let bindData = { 
-        g: global.civic.garrison,
-        g0: global.civic.foreign.gov0,
-        g1: global.civic.foreign.gov1,
-        g2: global.civic.foreign.gov2,
-    };
-    if (global.race['truepath']){
-        bindData['g3'] = global.civic.foreign.gov3;
-        bindData['g4'] = global.civic.foreign.gov4;
-    }
-
-    vBind({
-        el: full ? '#garrison' : '#c_garrison',
-        data: bindData,
-        methods: {
-            hire(){
-                let hired = hireMerc();
-                if (hired === 1 && !full){
-                    let trick = trickOrTreat(8,14,true);
-                    if (trick.length > 0){
-                        $(`#c_garrison .hire`).append(trick);
-                    }
-                }
-            },
-            campaign(gov){
-                war_campaign(gov);
-            },
-            next(){
-                if (global.civic.garrison.tactic < 4){
-                    global.civic.garrison.tactic++; 
-                }
-            },
-            last(){
-                if (global.civic.garrison.tactic > 0){
-                    global.civic.garrison.tactic-- 
-                }
-            },
-            aNext(){
-                let inc = keyMultiplier();
-                if (global.civic.garrison.raid < garrisonSize()){
-                    global.civic.garrison.raid += inc;
-                    if (global.civic.garrison.raid > garrisonSize()){
-                        global.civic.garrison.raid = garrisonSize();
-                    }
-                }
-            },
-            aLast(){
-                let dec = keyMultiplier();
-                if (global.civic.garrison.raid > 0){
-                    global.civic.garrison.raid -= dec;
-                    if (global.civic.garrison.raid < 0){
-                        global.civic.garrison.raid = 0;
-                    }
-                }
-            },
-            vis(){
-                return global.civic.garrison.display;
-            },
-            rvis(){
-                return global.tech['rival'] && !global.tech['isolation'] ? true : false;
-            }
-        },
-        filters: {
-            tactics(val){
-                switch(val){
-                    case 0:
-                        return loc('civics_garrison_tactic_ambush');
-                    case 1:
-                        return loc('civics_garrison_tactic_raid');
-                    case 2:
-                        return loc('civics_garrison_tactic_pillage');
-                    case 3:
-                        return loc('civics_garrison_tactic_assault');
-                    case 4:
-                        return loc('civics_garrison_tactic_siege');
-                }
-            },
-            rating(v,scale){
-                if (scale){
-                    return +(armyRating(v,'army',0) / v).toFixed(1);
-                }
-                return +armyRating(v,'army').toFixed(1);
-            },
-            hell(v){
-                return garrisonSize();
-            },
-            single(v){
-                return global.race['hivemind'] ? traits.hivemind.vars()[0] : 1;
-            },
-            stationed(v){
-                let size = garrisonSize();
-                let trickNum = global.race['cataclysm'] ? 13 : 31;
-                let trick = size === trickNum && !full ? trickOrTreat(2,14,true) : false;
-                return size === trickNum && trick.length > 0 ? trick : size;
-            },
-            s_max(v){
-                return garrisonSize(true);
-            },
-            wounded(w){
-                let egg = easterEgg(8,12);
-                if (full && w === 0 && egg.length > 0){
-                    return egg;
-                }
-                return eventActive('fool',2021) ? garrisonSize() - w : w;
-            },
-            trainTime(r,p){
-                return r === 0 ? timeFormat(-1) : timeFormat((100 - p) / (r * 4));
-            }
-        }
-    });
-
+/**
+ * Attach the garrison's description popovers.
+ *
+ * Kept in the legacy style deliberately. Each one renders a Vue template into
+ * the popover body and destroys it on the way out, and the popover system
+ * itself is still Vue's; porting these before that system is ported would mean
+ * writing a React popover that has to interoperate with it. They bind by
+ * selector, so they work unchanged on React-rendered nodes.
+ */
+export function registerGarrisonPopovers(full){
     ['tactic','bat','soldier','crew','wounded','hmerc','defenseRating','offenseRating','soldierRating'].forEach(function(k){
         popover(full ? `garrison${k}` : `cGarrison${k}`,
             function(){ return '<span v-html="label()"></span>'; },
@@ -1430,7 +1269,7 @@ export function buildGarrison(garrison,full){
     }
 }
 
-function soldierBreakdown(type){
+export function soldierBreakdown(type){
     let scale = global.race['hivemind'] ? traits.hivemind.vars()[0] : 1;
     let data = armyRating(scale,type,0,true);
 
@@ -1473,7 +1312,7 @@ export function describeSoldier(){
     return `${loc(soldiers_desc)} ${loc(loot_string, loot_args)}`;
 }
 
-function battleAssessment(gov){
+export function battleAssessment(gov){
     if (global.civic.foreign[`gov${gov}`].occ){
         return loc('civics_garrison_deoccupy_desc');
     }
@@ -1526,7 +1365,7 @@ function battleAssessment(gov){
     }
 }
 
-function war_campaign(gov){
+export function war_campaign(gov){
     if (global.civic.foreign[`gov${gov}`].occ){
         global.civic.foreign[`gov${gov}`].occ = false;
         global.civic.garrison.max += jobScale(global.civic.govern.type === 'federation' ? 15 : 20);

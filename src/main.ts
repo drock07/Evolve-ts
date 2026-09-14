@@ -61,7 +61,9 @@ import {
   shrineBonusActive,
   getShrineBonus,
   eventActive,
+  easterEgg,
   easterEggBind,
+  trickOrTreat,
   trickOrTreatBind,
   powerGrid,
   deepClone,
@@ -145,7 +147,8 @@ import {
   govEffect,
   weaponTechModifer, adjustTax, madArm, madLaunch, setGovernment, registerGovPopovers,
   spyAction, espionageAnnex, espionagePurchase, annexOffered, purchaseOffered,
-  registerEspPopovers } from "./civics";
+  registerEspPopovers, hireMerc, war_campaign,
+  registerGarrisonPopovers } from "./civics";
 import {
   actions,
   updateDesc,
@@ -268,6 +271,16 @@ legacy.espionagePurchase = espionagePurchase;
 legacy.annexOffered = annexOffered;
 legacy.purchaseOffered = purchaseOffered;
 legacy.registerEspPopovers = registerEspPopovers;
+legacy.garrisonSize = garrisonSize;
+legacy.armyRating = armyRating;
+legacy.hireMerc = hireMerc;
+legacy.war_campaign = war_campaign;
+legacy.govTitle = govTitle;
+legacy.registerGarrisonPopovers = registerGarrisonPopovers;
+legacy.timeFormat = timeFormat;
+legacy.eventActive = eventActive;
+legacy.easterEgg = easterEgg;
+legacy.trickOrTreat = trickOrTreat;
 legacy.loadTab = loadTab;
 legacy.execGameLoops = execGameLoops;
 legacy.petPet = petPet;

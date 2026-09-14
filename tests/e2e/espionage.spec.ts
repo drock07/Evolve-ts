@@ -182,14 +182,26 @@ test.describe('espionage modal', () => {
     test('the modal does not leak React roots across repeated opens', async ({ page }) => {
         await openCivics(page);
 
+        const islands = () => page.evaluate(
+            () => (window as any).__evolveTest__.islandCount() as number,
+        );
+
+        await openModal(page);
+        await page.keyboard.press('Escape');
+        await expect(page.locator('dialog[open]')).toHaveCount(0);
+
+        // Count after the first open: the host island exists from then on, so
+        // this is the level it must stay at. Asserting no growth rather than
+        // an absolute number keeps this about leaking, and stops it failing
+        // every time some unrelated widget is ported into an island.
+        const settled = await islands();
+
         for (let i = 0; i < 3; i++) {
             await openModal(page);
             await page.keyboard.press('Escape');
             await expect(page.locator('dialog[open]')).toHaveCount(0);
         }
 
-        // One host island, however many times it has been opened.
-        const islands = await page.evaluate(() => (window as any).__evolveTest__.islandCount() as number);
-        expect(islands).toBeLessThanOrEqual(6);
+        expect(await islands()).toBe(settled);
     });
 });
