@@ -181,10 +181,12 @@ test.describe('garrison — what its controls do', () => {
     test('the tactic description popover reflects the selected tactic', async ({ page }) => {
         await openCompact(page);
 
-        // Popovers all render into a single #popper element, tagged with the
-        // id they were registered under.
+        // Selected by class rather than by the legacy #popper id: both popover
+        // systems render a .popper carrying the id they were registered under,
+        // so this assertion reads the same before and after a widget's
+        // descriptions are ported.
         await page.locator('#c_tactics .current.tactic').hover();
-        const popper = page.locator('#popper[data-id="cGarrisontactic"]');
+        const popper = page.locator('.popper[data-id="cGarrisontactic"]');
         await expect(popper).toBeVisible();
         await expect(popper).toContainText('siege', { ignoreCase: true });
     });

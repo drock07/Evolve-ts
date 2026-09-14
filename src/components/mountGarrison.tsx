@@ -10,7 +10,6 @@ import { createElement, useEffect } from 'react';
 import { mountIsland } from '../engine/islands';
 import { Garrison } from './Garrison';
 import { useGarrisonData } from '../hooks/useGarrisonData';
-import { legacy } from '../hooks/legacyBridge';
 
 function GarrisonIsland({ full }: { full: boolean }) {
     const { data, callbacks } = useGarrisonData(full);
@@ -21,12 +20,6 @@ function GarrisonIsland({ full }: { full: boolean }) {
         const el = document.getElementById(full ? 'garrison' : 'c_garrison');
         if (el) el.style.display = data.display ? '' : 'none';
     }, [data.display, full]);
-
-    // The popovers bind to elements by selector at call time, so they can only
-    // be attached once this has rendered.
-    useEffect(() => {
-        legacy.registerGarrisonPopovers?.(full);
-    }, [full]);
 
     return createElement(Garrison, { data, callbacks, full });
 }

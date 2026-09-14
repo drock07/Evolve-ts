@@ -137,8 +137,75 @@ export function useGarrisonData(full: boolean): {
             : legacy.timeFormat?.((100 - g.progress) / (g.rate * 4));
     }
 
+    /**
+     * The hover descriptions, by the key their trigger is known as.
+     *
+     * Functions rather than values: several are expensive (the army rating
+     * breakdown walks every modifier) and all of them would otherwise be
+     * recomputed on every tick for descriptions nobody is looking at. The
+     * popover calls these only while open.
+     *
+     * They return HTML, as the legacy label() did — the breakdown is a table
+     * of markup — so the popover renders them as such.
+     */
+    const describe = useCallback((key: string): string => {
+        switch (key) {
+            case 'tactic': {
+                const tactic = TACTICS[global.civic.garrison.tactic] ?? TACTICS[0];
+                if (tactic === 'siege') {
+                    // Siege alone names the troops it ties up, and a federation
+                    // ties up fewer.
+                    const held = legacy.jobScale?.(
+                        global.civic.govern.type === 'federation' ? 15 : 20,
+                    );
+                    return loc('civics_garrison_tactic_siege_desc', [held]);
+                }
+                return loc(`civics_garrison_tactic_${tactic}_desc`);
+            }
+            case 'bat':
+                return loc('civics_garrison_army_label');
+            case 'soldier':
+                return legacy.describeSoldier?.() ?? '';
+            case 'crew':
+                return loc('civics_garrison_crew_desc');
+            case 'wounded':
+                return loc('civics_garrison_wounded_desc');
+            case 'hmerc': {
+                const cost = Math.round(legacy.mercCost?.() ?? 0).toLocaleString();
+                return loc('civics_garrison_hire_mercenary_cost', [cost]);
+            }
+            case 'defenseRating':
+                return loc('civics_garrison_defensive_rate');
+            case 'offenseRating':
+                return loc('civics_garrison_offensive_rate');
+            case 'soldierRating':
+                return legacy.soldierBreakdown?.('army') ?? '';
+            default:
+                return '';
+        }
+    }, []);
+
+    const describeCampaign = useCallback(
+        (gov: number): string => legacy.battleAssessment?.(gov) ?? '',
+        [],
+    );
+
+    /**
+     * The truepath rival's description, shown on its name rather than its
+     * button — it explains who they are, not how a fight would go.
+     */
+    const describeRival = useCallback((): string => {
+        const home = legacy.races?.[global.race.species]?.home ?? '';
+        return loc('civics_gov_tp_rival', [legacy.govTitle?.(3) ?? '', home]);
+    }, []);
+
     return {
         data: {
+            describe,
+            describeCampaign,
+            describeRival,
+            /** Prefixes the popover ids, keeping the two targets distinct. */
+            popPrefix: full ? 'garrison' : 'cGarrison',
             display: !!g.display,
             title: loc('civics_garrison'),
 

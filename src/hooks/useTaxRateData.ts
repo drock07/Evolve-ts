@@ -65,6 +65,7 @@ export function useTaxRateData(): { data: TaxRatesData; callbacks: TaxRatesCallb
         data: {
             display: !!taxes?.display,
             title: loc('civics_tax_rates'),
+            description: loc('civics_tax_rates_desc'),
             rate,
             ...formatRate(rate),
         },

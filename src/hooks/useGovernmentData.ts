@@ -68,6 +68,20 @@ export function useGovernmentData(): { data: GovernmentData; callbacks: Governme
         legacy.registerGovPopovers?.();
     }, []);
 
+    // Computed on hover rather than per tick: both read engine state that the
+    // description is only worth deriving when someone is looking at it.
+    const currentDescription = useCallback(
+        (): string => legacy.describeCurrentGovernment?.() ?? '',
+        [],
+    );
+
+    const changeDescription = useCallback((): string => {
+        const rev = global.civic.govern?.rev ?? 0;
+        return rev > 0
+            ? loc('civics_change_desc', [rev])
+            : loc('civics_change_desc2');
+    }, []);
+
     return {
         data: {
             display: !!global.tech['govern'],
@@ -82,6 +96,8 @@ export function useGovernmentData(): { data: GovernmentData; callbacks: Governme
             disabled: (govern?.rev ?? 0) > 0,
             modalTitle: loc('civics_government_type'),
             options: availableGovernments(),
+            currentDescription,
+            changeDescription,
         },
         callbacks: { onSelect, onOptionsRendered },
     };

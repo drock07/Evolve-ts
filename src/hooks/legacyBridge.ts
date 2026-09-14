@@ -47,6 +47,8 @@ export const legacy = {
     /** Switch government; refused while a revolution is running. */
     setGovernment: null as any,
     registerGovPopovers: null as any,
+    /** HTML description of the government currently in force. */
+    describeCurrentGovernment: null as any,
     /** Start influence, sabotage or incite against a foreign government. */
     spyAction: null as any,
     /** Annex a foreign government; false when its preconditions fail. */
@@ -65,7 +67,14 @@ export const legacy = {
     /** Launch or withdraw a campaign against a foreign government. */
     war_campaign: null as any,
     govTitle: null as any,
-    registerGarrisonPopovers: null as any,
+    /** Cost of the next mercenary. */
+    mercCost: null as any,
+    /** Prose description of a single soldier's strength. */
+    describeSoldier: null as any,
+    /** HTML breakdown of what makes up the army rating. */
+    soldierBreakdown: null as any,
+    /** Prose estimate of how a campaign against a government would go. */
+    battleAssessment: null as any,
 
     // From jobs.ts
     /** Ordered row specs for the job list. */

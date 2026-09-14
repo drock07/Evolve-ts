@@ -97,7 +97,26 @@ if ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mob
     });
 }
 
+/**
+ * Closes a React-rendered popover, when one is open.
+ *
+ * React popovers render their own element rather than into #popper, so
+ * clearPopper cannot dismiss them by emptying that node. The React side
+ * registers a closer here at module load, and clearPopper calls it, which is
+ * what keeps the two systems to one visible description between them.
+ */
+var reactPopoverCloser: ((id?: string) => void) | null = null;
+
+export function registerReactPopoverCloser(fn: (id?: string) => void){
+    reactPopoverCloser = fn;
+}
+
 export function clearPopper(id?){
+    // Before the early return below: a targeted clearPopper(id) may be aimed
+    // at the React popover, in which case #popper is not the one to check.
+    if (reactPopoverCloser){
+        reactPopoverCloser(id);
+    }
     if (id && $(`#popper`).data('id') !== id){
         return;
     }

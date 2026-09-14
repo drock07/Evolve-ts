@@ -11,7 +11,8 @@
  * recomputing any of them here would be a second source of truth.
  */
 
-import { Fragment } from 'react';
+import { Fragment, type ElementType, type ReactNode } from 'react';
+import { usePopover } from './Popover';
 
 export interface GarrisonCampaign {
     gov: number;
@@ -21,6 +22,14 @@ export interface GarrisonCampaign {
 }
 
 export interface GarrisonData {
+    /** Hover description for a trigger, computed on demand. Returns HTML. */
+    describe: (key: string) => string;
+    /** Hover assessment of a campaign against a government. Returns HTML. */
+    describeCampaign: (gov: number) => string;
+    /** Who the truepath rival is. Shown on their name. Returns HTML. */
+    describeRival: () => string;
+    /** Popover id prefix, so the two render targets do not collide. */
+    popPrefix: string;
     display: boolean;
     title: string;
     /** Headline ratings. `offense` is absent once the world is controlled. */
@@ -65,6 +74,37 @@ export interface GarrisonCallbacks {
     onCampaign: (gov: number) => void;
 }
 
+/**
+ * An element that shows a hover description.
+ *
+ * The description is rendered as HTML because that is what the engine returns
+ * — the army rating breakdown is a small table — exactly as the Vue template
+ * inside the legacy popover body did.
+ *
+ * `as` exists because these triggers are not all spans: the mercenary one is
+ * the hire button itself. Wrapping instead would change the markup the
+ * stylesheet selects on.
+ */
+function Described({ as: Tag = 'span', popId, describe, children, ...rest }: {
+    as?: ElementType;
+    popId: string;
+    describe: () => string;
+    children?: ReactNode;
+    [key: string]: unknown;
+}) {
+    const { triggerProps, popover } = usePopover(
+        () => <span dangerouslySetInnerHTML={{ __html: describe() }} />,
+        { id: popId },
+    );
+
+    return (
+        <>
+            <Tag {...rest} {...triggerProps}>{children}</Tag>
+            {popover}
+        </>
+    );
+}
+
 export function Garrison({ data, callbacks, full }: {
     data: GarrisonData;
     callbacks: GarrisonCallbacks;
@@ -80,42 +120,76 @@ export function Garrison({ data, callbacks, full }: {
                 <h2 className="has-text-warning">{data.title}</h2>
                 {' - '}
                 <span className="has-text-success">
-                    <span className="defenseRating">{data.defenseLabel} {data.defenseRating}</span>
+                    <Described
+                        className="defenseRating"
+                        popId={`${data.popPrefix}defenseRating`}
+                        describe={() => data.describe('defenseRating')}
+                    >
+                        {data.defenseLabel} {data.defenseRating}
+                    </Described>
                     {data.offenseRating !== null && (
                         <>
                             {' / '}
-                            <span className="offenseRating">{data.offenseRating}</span>
+                            <Described
+                                className="offenseRating"
+                                popId={`${data.popPrefix}offenseRating`}
+                                describe={() => data.describe('offenseRating')}
+                            >
+                                {data.offenseRating}
+                            </Described>
                         </>
                     )}
                 </span>
                 {' - '}
-                <span className="soldierRating">
+                <Described
+                    className="soldierRating"
+                    popId={`${data.popPrefix}soldierRating`}
+                    describe={() => data.describe('soldierRating')}
+                >
                     <span className="has-text-warning">{data.soldierRatingLabel}</span> {data.soldierRating}
-                </span>
+                </Described>
             </div>
 
             <div>
                 <div className="columns is-mobile bunk">
                     <div className="bunks">
                         <div className="barracks">
-                            <span className="soldier">{data.soldiersLabel}</span>{' '}
+                            <Described
+                                className="soldier"
+                                popId={`${data.popPrefix}soldier`}
+                                describe={() => data.describe('soldier')}
+                            >{data.soldiersLabel}</Described>{' '}
                             <span dangerouslySetInnerHTML={{ __html: data.stationed }} />
                             {' / '}
                             <span>{data.max}</span>
                         </div>
                         <div className="barracks" hidden={data.crew <= 0}>
-                            <span className="crew">{data.crewLabel}</span> <span>{data.crew}</span>
+                            <Described
+                                className="crew"
+                                popId={`${data.popPrefix}crew`}
+                                describe={() => data.describe('crew')}
+                            >{data.crewLabel}</Described> <span>{data.crew}</span>
                         </div>
                         <div className="barracks">
-                            <span className="wounded">{data.woundedLabel}</span>{' '}
+                            <Described
+                                className="wounded"
+                                popId={`${data.popPrefix}wounded`}
+                                describe={() => data.describe('wounded')}
+                            >{data.woundedLabel}</Described>{' '}
                             <span dangerouslySetInnerHTML={{ __html: data.wounded }} />
                         </div>
                     </div>
                     {data.showMercs && (
                         <div className="hire">
-                            <button className="button first hmerc" onClick={callbacks.onHire}>
+                            <Described
+                                as="button"
+                                className="button first hmerc"
+                                onClick={callbacks.onHire}
+                                popId={`${data.popPrefix}hmerc`}
+                                describe={() => data.describe('hmerc')}
+                            >
                                 {data.hireLabel}
-                            </button>
+                            </Described>
                             <div />
                         </div>
                     )}
@@ -144,7 +218,11 @@ export function Garrison({ data, callbacks, full }: {
                                         className="sub"
                                         onClick={callbacks.onTacticDown}
                                     >&laquo;</span>
-                                    <span className="current tactic">{data.tacticName}</span>
+                                    <Described
+                                        className="current tactic"
+                                        popId={`${data.popPrefix}tactic`}
+                                        describe={() => data.describe('tactic')}
+                                    >{data.tacticName}</Described>
                                     <span
                                         role="button"
                                         aria-label="harder campaign"
@@ -160,7 +238,11 @@ export function Garrison({ data, callbacks, full }: {
                                         className="sub"
                                         onClick={callbacks.onBattalionDown}
                                     >&laquo;</span>
-                                    <span className="current bat">{data.raid}</span>
+                                    <Described
+                                        className="current bat"
+                                        popId={`${data.popPrefix}bat`}
+                                        describe={() => data.describe('bat')}
+                                    >{data.raid}</Described>
                                     <span
                                         role="button"
                                         aria-label="add soldiers to campaign"
@@ -175,10 +257,25 @@ export function Garrison({ data, callbacks, full }: {
                     {full && data.campaigns.map(c => (
                         <Fragment key={c.gov}>
                             <div className={`launch gov${c.gov}`}>
-                                <div className="has-text-caution">{c.title}</div>
-                                <button className="button campaign" onClick={() => callbacks.onCampaign(c.gov)}>
+                                {c.gov === 3 ? (
+                                    <Described
+                                        as="div"
+                                        className="has-text-caution"
+                                        popId="garRivaldesc2"
+                                        describe={data.describeRival}
+                                    >{c.title}</Described>
+                                ) : (
+                                    <div className="has-text-caution">{c.title}</div>
+                                )}
+                                <Described
+                                    as="button"
+                                    className="button campaign"
+                                    onClick={() => callbacks.onCampaign(c.gov)}
+                                    popId={`${data.popPrefix}${c.gov}`}
+                                    describe={() => data.describeCampaign(c.gov)}
+                                >
                                     <span>{c.controlled ? data.withdrawLabel : data.launchLabel}</span>
-                                </button>
+                                </Described>
                             </div>
                         </Fragment>
                     ))}

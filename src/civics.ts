@@ -303,22 +303,22 @@ function government(govern){
     // polled every 50ms waiting for that modal's DOM to appear.
     mountGovernment();
 
-    popover('govLabel', function(){
-            let effect_type = global.tech['unify'] && global.tech['unify'] >= 2 && global.civic.govern.type === 'federation' ? 'federation_alt' : global.civic.govern.type;
-            if (effect_type === 'theocracy' && global.genes['ancients'] && global.genes['ancients'] >= 2 && global.civic.priest.display){
-                effect_type = 'theocracy_alt';
-            }
-            return $(`<div>${govDescription(global.civic.govern.type)}</div><div class="has-text-advanced">${government_desc(effect_type)}</div>`);
-        }
-    );
 
-    popover(`govTypeChange`, function(){
-            return global.civic.govern.rev > 0 ? loc('civics_change_desc',[global.civic.govern.rev]) : loc('civics_change_desc2');
-        },
-        {
-            elm: `#govType .change`
-        }
-    );
+}
+
+/**
+ * The current government's description, as the #govLabel popover shows it.
+ *
+ * Split out of that popover when it moved to React: the effect text varies by
+ * tech and genes, and that selection is engine knowledge rather than view
+ * logic.
+ */
+export function describeCurrentGovernment(){
+    let effect_type = global.tech['unify'] && global.tech['unify'] >= 2 && global.civic.govern.type === 'federation' ? 'federation_alt' : global.civic.govern.type;
+    if (effect_type === 'theocracy' && global.genes['ancients'] && global.genes['ancients'] >= 2 && global.civic.priest.display){
+        effect_type = 'theocracy_alt';
+    }
+    return `<div>${govDescription(global.civic.govern.type)}</div><div class="has-text-advanced">${government_desc(effect_type)}</div>`;
 }
 
 function govDescription(type){
@@ -1068,20 +1068,13 @@ function taxRates(govern){
     var tax_rates = $('<div id="tax_rates" v-show="display" class="taxRate"></div>');
     govern.append(tax_rates);
     
-    var label = $(`<h3 id="taxRateLabel">${loc('civics_tax_rates')}</h3>`);
-    tax_rates.append(label);
-    
-    // Contents are rendered by the React TaxRates island; civics.ts still owns
-    // the container so the surrounding legacy layout is untouched.
+    // Contents are rendered by the React TaxRates island, heading included;
+    // civics.ts still owns the container so the surrounding legacy layout is
+    // untouched. The heading used to be appended here as well and then
+    // immediately replaced by the island's own, which left the popover that
+    // was bound to it attached to a node no longer in the document — so the
+    // description never appeared. It is a React popover now.
     mountTaxRates();
-
-    popover('taxRateLabel', function(){
-            return loc('civics_tax_rates_desc');
-        },
-        {
-            classes: `has-background-light has-text-dark`
-        }
-    );
 }
 
 export function govCivics(f,v?){
@@ -1166,108 +1159,6 @@ export function buildGarrison(garrison,full){
     mountGarrison(full);
 }
 
-/**
- * Attach the garrison's description popovers.
- *
- * Kept in the legacy style deliberately. Each one renders a Vue template into
- * the popover body and destroys it on the way out, and the popover system
- * itself is still Vue's; porting these before that system is ported would mean
- * writing a React popover that has to interoperate with it. They bind by
- * selector, so they work unchanged on React-rendered nodes.
- */
-export function registerGarrisonPopovers(full){
-    ['tactic','bat','soldier','crew','wounded','hmerc','defenseRating','offenseRating','soldierRating'].forEach(function(k){
-        popover(full ? `garrison${k}` : `cGarrison${k}`,
-            function(){ return '<span v-html="label()"></span>'; },
-            {
-                elm: `${full ? '#garrison' : '#c_garrison'} .${k}`,
-                in: function(obj){
-                    vBind({
-                        el: `#${obj.id} > span`,
-                        data: { test: 'val' },
-                        methods: {
-                            label(){
-                                switch(k){
-                                    case 'tactic':
-                                        {
-                                            switch (global.civic.garrison.tactic){
-                                                case 0:
-                                                    return loc('civics_garrison_tactic_ambush_desc');
-                                                case 1:
-                                                    return loc('civics_garrison_tactic_raid_desc');
-                                                case 2:
-                                                    return loc('civics_garrison_tactic_pillage_desc');
-                                                case 3:
-                                                    return loc('civics_garrison_tactic_assault_desc');
-                                                case 4:
-                                                    return loc('civics_garrison_tactic_siege_desc',[jobScale(global.civic.govern.type === 'federation' ? 15 : 20)]);
-                                            }
-                                        }
-                                    case 'bat':
-                                        return loc('civics_garrison_army_label');
-                                    case 'soldier':
-                                        return describeSoldier();
-                                    case 'crew':
-                                        return loc('civics_garrison_crew_desc');
-                                    case 'wounded':
-                                        return loc('civics_garrison_wounded_desc');
-                                    case 'hmerc':
-                                        {
-                                            let cost = Math.round(mercCost()).toLocaleString();
-                                            return loc('civics_garrison_hire_mercenary_cost',[cost]);
-                                        }
-                                    case 'defenseRating':
-                                        return loc('civics_garrison_defensive_rate');
-                                    case 'offenseRating':
-                                        return loc('civics_garrison_offensive_rate');
-                                    case 'soldierRating':
-                                        return soldierBreakdown('army');
-                                }
-                            }
-                        }
-                    });
-                },
-                out: function(obj){
-                    vBind({el: obj.id},'destroy');
-                },
-            }
-        );
-    });
-
-    if (full){
-        let end = global.race['truepath'] ? 4 : 3;
-        for (let i=0; i<end; i++){
-            popover(`garrison${i}`,
-                function(){ return '<span>{{ label() }}</span>'; },
-                {
-                    elm: `#garrison .gov${i} button`,
-                    in: function(obj){
-                        vBind({
-                            el: `#${obj.id} > span`,
-                            data: { test: 'val' },
-                            methods: {
-                                label(){
-                                    return battleAssessment(i);
-                                }
-                            }
-                        });
-                    },
-                    out: function(obj){
-                        vBind({el: obj.id},'destroy');
-                    },
-                }
-            );
-        }
-        if (global.race['truepath'] && !global.tech['isolation']){
-            popover(`garRivaldesc2`,
-                function(){ return loc(`civics_gov_tp_rival`,[govTitle(3),races[global.race.species].home]); },
-                {
-                    elm: `#garrison .gov3 > div`,
-                }
-            );
-        }
-    }
-}
 
 export function soldierBreakdown(type){
     let scale = global.race['hivemind'] ? traits.hivemind.vars()[0] : 1;

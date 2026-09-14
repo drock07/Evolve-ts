@@ -5,6 +5,8 @@
  * island inside the container civics.ts still builds (see engine/islands.ts).
  */
 
+import { usePopover } from './Popover';
+
 export interface TaxRatesData {
     /** Whether the control is shown at all; false before a government exists. */
     display: boolean;
@@ -20,6 +22,8 @@ export interface TaxRatesData {
     label: string;
     /** True when `label` is engine-supplied markup rather than plain text. */
     labelIsMarkup: boolean;
+    /** Hover description for the heading. */
+    description: string;
 }
 
 export interface TaxRatesCallbacks {
@@ -28,11 +32,18 @@ export interface TaxRatesCallbacks {
 }
 
 export function TaxRates({ data, callbacks }: { data: TaxRatesData; callbacks: TaxRatesCallbacks }) {
+    // Before the early return: hooks cannot run conditionally.
+    const { triggerProps, popover } = usePopover(
+        () => <span>{data.description}</span>,
+        { id: 'taxRateLabel', classes: 'has-background-light has-text-dark' },
+    );
+
     if (!data.display) return null;
 
     return (
         <>
-            <h3 id="taxRateLabel">{data.title}</h3>
+            <h3 id="taxRateLabel" {...triggerProps}>{data.title}</h3>
+            {popover}
             <span
                 role="button"
                 aria-label="decrease taxes"

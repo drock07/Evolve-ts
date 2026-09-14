@@ -146,9 +146,10 @@ import {
   govCivics,
   govEffect,
   weaponTechModifer, adjustTax, madArm, madLaunch, setGovernment, registerGovPopovers,
+  describeCurrentGovernment,
   spyAction, espionageAnnex, espionagePurchase, annexOffered, purchaseOffered,
-  registerEspPopovers, hireMerc, war_campaign,
-  registerGarrisonPopovers } from "./civics";
+  registerEspPopovers, hireMerc, war_campaign, mercCost, describeSoldier,
+  soldierBreakdown, battleAssessment } from "./civics";
 import {
   actions,
   updateDesc,
@@ -265,6 +266,7 @@ legacy.madArm = madArm;
 legacy.madLaunch = madLaunch;
 legacy.setGovernment = setGovernment;
 legacy.registerGovPopovers = registerGovPopovers;
+legacy.describeCurrentGovernment = describeCurrentGovernment;
 legacy.spyAction = spyAction;
 legacy.espionageAnnex = espionageAnnex;
 legacy.espionagePurchase = espionagePurchase;
@@ -276,7 +278,10 @@ legacy.armyRating = armyRating;
 legacy.hireMerc = hireMerc;
 legacy.war_campaign = war_campaign;
 legacy.govTitle = govTitle;
-legacy.registerGarrisonPopovers = registerGarrisonPopovers;
+legacy.mercCost = mercCost;
+legacy.describeSoldier = describeSoldier;
+legacy.soldierBreakdown = soldierBreakdown;
+legacy.battleAssessment = battleAssessment;
 legacy.timeFormat = timeFormat;
 legacy.eventActive = eventActive;
 legacy.easterEgg = easterEgg;

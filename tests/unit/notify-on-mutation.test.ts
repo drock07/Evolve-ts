@@ -57,6 +57,20 @@ const READ_ONLY_LEGACY = new Set([
     'flib',
     'registerGovPopovers',
     'registerEspPopovers',
+    // Description providers. These are called from popover content functions,
+    // which run on hover and must not disturb anything they describe.
+    'describeSoldier',
+    'describeCurrentGovernment',
+    'soldierBreakdown',
+    'battleAssessment',
+    'mercCost',
+    'govTitle',
+    'garrisonSize',
+    'armyRating',
+    'timeFormat',
+    'eventActive',
+    'easterEgg',
+    'trickOrTreat',
 ]);
 
 function sourceFiles(): string[] {

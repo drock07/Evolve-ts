@@ -8,6 +8,7 @@
 
 import { useEffect } from 'react';
 import { Modal } from './Modal';
+import { usePopover } from './Popover';
 
 export interface GovernmentOption {
     /** Government id, exposed as data-gov for the description popovers. */
@@ -27,6 +28,10 @@ export interface GovernmentData {
     disabled: boolean;
     modalTitle: string;
     options: GovernmentOption[];
+    /** What the government in force does. HTML. */
+    currentDescription: () => string;
+    /** What the change button will do, given whether a revolution is running. */
+    changeDescription: () => string;
 }
 
 export interface GovernmentCallbacks {
@@ -49,15 +54,33 @@ export function GovernmentSelector({
         if (open) callbacks.onOptionsRendered();
     }, [open, callbacks]);
 
+    // These two were legacy popovers until they stopped working. Both bound by
+    // selector immediately after mountGovernment(), and React renders
+    // asynchronously, so they attached to elements that did not exist yet and
+    // neither description ever appeared.
+    const label = usePopover(
+        () => <span dangerouslySetInnerHTML={{ __html: data.currentDescription() }} />,
+        { id: 'govLabel' },
+    );
+    const change = usePopover(
+        () => <span>{data.changeDescription()}</span>,
+        { id: 'govTypeChange' },
+    );
+
     if (!data.display) return null;
 
     return (
         <>
             <div>
-                {data.prefix} <span id="govLabel" className="has-text-warning">{data.current}</span>
+                {data.prefix}{' '}
+                <span id="govLabel" className="has-text-warning" {...label.triggerProps}>
+                    {data.current}
+                </span>
+                {label.popover}
             </div>
             <div>
-                <span className="change inline">
+                <span className="change inline" {...change.triggerProps}>
+                    {change.popover}
                     <button
                         className="button"
                         disabled={data.disabled}
