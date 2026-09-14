@@ -161,3 +161,48 @@ test.describe('smelter panel — what its controls do', () => {
             .toContainText(String(before.Steel - 1));
     });
 });
+
+/**
+ * The same panel renders in the Industry tab.
+ *
+ * One component, two targets, differing only in the element ids the
+ * stylesheet hangs off — the same arrangement the garrison has. The baseline
+ * above reaches the panel through the options modal, so this covers the other
+ * target, which is what a port collapses by accident.
+ */
+test.describe('the smelter also renders in the Industry tab', () => {
+    async function openIndustry(page: Page): Promise<void> {
+        await bootGame(page, { save: loadSaveFixture(SAVE) });
+        await runTicks(page, 50);
+        await page.locator('.tabs').first().locator('li').nth(2).click();
+        await page.locator('#mTabCivic .tabs li').nth(1).click();
+        await expect(page.locator('#smelterFuels')).toBeVisible();
+    }
+
+    test('renders the same rows under the tab-specific ids', async ({ page }) => {
+        await openIndustry(page);
+
+        for (const fuel of ['wood', 'coal', 'oil']) {
+            await expect(page.locator(`#smelterFuels .current.${fuel}`)).toHaveCount(1);
+        }
+        for (const mat of ['iron', 'steel']) {
+            await expect(page.locator(`#smelterMats .current.${mat}`)).toHaveCount(1);
+        }
+    });
+
+    test('its steppers drive the same engine state', async ({ page }) => {
+        await openIndustry(page);
+        const before = await smelter(page);
+
+        await stepper(page, '#mSmelterFuels, #smelterFuels', 'coal').less.click();
+        expect((await smelter(page)).Coal).toBe(before.Coal - 1);
+    });
+
+    test('each row describes itself on hover', async ({ page }) => {
+        await openIndustry(page);
+
+        await page.locator('#smelterFuels .current.coal').hover();
+        await expect(page.locator('.popper')).toHaveCount(1);
+        await expect(page.locator('.popper')).toContainText(/Coal/);
+    });
+});
