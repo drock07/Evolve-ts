@@ -1,5 +1,6 @@
 import { mountSmelter } from './components/mountSmelter';
 import { mountFactory } from './components/mountFactory';
+import { mountRatioSlider } from './components/mountRatioSlider';
 import { global, keyMultiplier, sizeApproximation, p_on, support_on, quantum_level, callback_queue, active_rituals } from './vars';
 import { loc } from './locale';
 import { vBind, popover, clearElement, powerGrid, easterEgg, trickOrTreat, binary_limit_test } from './functions';
@@ -925,35 +926,17 @@ export function cancelRituals(){
     }
 }
 
+/**
+ * Render the smoldering quarry's output split between stone and chrysotile.
+ */
 function loadQuarry(parent,bind){
-    parent.append($(`<div>${loc('modal_quarry_ratio',[global.resource.Chrysotile.name])}</div>`));
-
-    let slider = $(`<div class="sliderbar"><span class="sub" role="button" @click="sub" aria-label="Increase Stone Production">&laquo;</span><b-slider v-model="asbestos" format="percent"></b-slider><span class="add" role="button" @click="add" aria-label="Increase Chrysotile Production">&raquo;</span></div>`);
-    parent.append(slider);
-
-    vBind({
-        el: bind ? bind : '#specialModal',
-        data: global.city.rock_quarry,
-        methods: {
-            sub(){
-                let keyMult = keyMultiplier();
-                if (global.city.rock_quarry.asbestos > 0){
-                    global.city.rock_quarry.asbestos -= keyMult;
-                    if (global.city.rock_quarry.asbestos < 0){
-                        global.city.rock_quarry.asbestos = 0;
-                    }
-                }
-            },
-            add(){
-                let keyMult = keyMultiplier();
-                if (global.city.rock_quarry.asbestos < 100){
-                    global.city.rock_quarry.asbestos += keyMult;
-                    if (global.city.rock_quarry.asbestos > 100){
-                        global.city.rock_quarry.asbestos = 100;
-                    }
-                }
-            }
-        }
+    clearElement(parent);
+    mountRatioSlider(bind ? $(bind)[0] : parent[0], {
+        path: ['city', 'rock_quarry', 'asbestos'],
+        description: loc('modal_quarry_ratio',[global.resource.Chrysotile.name]),
+        subLabel: 'Increase Stone Production',
+        addLabel: 'Increase Chrysotile Production',
+        sliderLabel: loc('modal_quarry_ratio',[global.resource.Chrysotile.name]),
     });
 }
 
@@ -1001,35 +984,21 @@ function loadMechStation(parent,bind){
     });
 }
 
+/**
+ * Render the titan mine's output split.
+ *
+ * Markup is React's now — one component shared with the quarry, the mining
+ * ship and the alien station, all of which are the same control
+ * (components/RatioSlider.tsx).
+ */
 function loadTMine(parent,bind){
-    parent.append($(`<div>${loc('modal_quarry_ratio',[global.resource.Adamantite.name])}</div>`));
-
-    let slider = $(`<div class="sliderbar"><span class="sub" role="button" @click="sub" aria-label="Increase Aluminium Production">&laquo;</span><b-slider v-model="ratio" format="percent"></b-slider><span class="add" role="button" @click="add" aria-label="Increase Adamantite Production">&raquo;</span></div>`);
-    parent.append(slider);
-
-    vBind({
-        el: bind ? bind : '#specialModal',
-        data: global.space.titan_mine,
-        methods: {
-            sub(){
-                let keyMult = keyMultiplier();
-                if (global.space.titan_mine.ratio > 0){
-                    global.space.titan_mine.ratio -= keyMult;
-                    if (global.space.titan_mine.ratio < 0){
-                        global.space.titan_mine.ratio = 0;
-                    }
-                }
-            },
-            add(){
-                let keyMult = keyMultiplier();
-                if (global.space.titan_mine.ratio < 100){
-                    global.space.titan_mine.ratio += keyMult;
-                    if (global.space.titan_mine.ratio > 100){
-                        global.space.titan_mine.ratio = 100;
-                    }
-                }
-            }
-        }
+    clearElement(parent);
+    mountRatioSlider(bind ? $(bind)[0] : parent[0], {
+        path: ['space', 'titan_mine', 'ratio'],
+        description: loc('modal_quarry_ratio',[global.resource.Adamantite.name]),
+        subLabel: 'Increase Aluminium Production',
+        addLabel: 'Increase Adamantite Production',
+        sliderLabel: loc('modal_quarry_ratio',[global.resource.Adamantite.name]),
     });
 }
 
