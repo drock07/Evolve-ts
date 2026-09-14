@@ -8,23 +8,10 @@
  * rather than bending the smelter's into two shapes.
  */
 
-import { usePopover } from './Popover';
+import { ProductRow, type ProductOption } from './ProductRow';
 
-export interface FactoryProduct {
-    /** Engine key, e.g. 'Alloy'. */
-    key: string;
-    /** Display name, already localised. */
-    label: string;
-    /** Number of factories on this product. HTML: a trick can replace it. */
-    valueHtml: string;
-    /** What it consumes and how many are on it, as the accessible label. */
-    ariaLabel: string;
-    /** What it consumes, shown on hover. */
-    description: string;
-    popId: string;
-    subLabel: string;
-    addLabel: string;
-}
+
+export type FactoryProduct = ProductOption;
 
 export interface FactoryData {
     /** "Operating" heading. */
@@ -41,34 +28,6 @@ export interface FactoryCallbacks {
     onSub: (key: string) => void;
 }
 
-function ProductRow({ product, onSub, onAdd }: {
-    product: FactoryProduct;
-    onSub: (key: string) => void;
-    onAdd: (key: string) => void;
-}) {
-    // Was a legacy popover bound by selector after the panel was drawn, which
-    // React's asynchronous render would have left attached to nothing.
-    const { triggerProps, popover } = usePopover(
-        () => <span dangerouslySetInnerHTML={{ __html: product.description }} />,
-        { id: product.popId },
-    );
-
-    return (
-        <div className="factory">
-            <span className={product.key} aria-label={product.ariaLabel} {...triggerProps}>
-                {product.label}
-            </span>
-            {popover}
-            <span className="sub" role="button" aria-label={product.subLabel} onClick={() => onSub(product.key)}>
-                &laquo;
-            </span>
-            <span className="current" dangerouslySetInnerHTML={{ __html: product.valueHtml }} />
-            <span className="add" role="button" aria-label={product.addLabel} onClick={() => onAdd(product.key)}>
-                &raquo;
-            </span>
-        </div>
-    );
-}
 
 export function FactoryPanel({ data, callbacks }: {
     data: FactoryData;

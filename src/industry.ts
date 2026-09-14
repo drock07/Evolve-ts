@@ -2,6 +2,7 @@ import { mountSmelter } from './components/mountSmelter';
 import { mountFactory } from './components/mountFactory';
 import { mountRatioSlider } from './components/mountRatioSlider';
 import { mountGraphene } from './components/mountGraphene';
+import { mountDroid } from './components/mountDroid';
 import { global, keyMultiplier, sizeApproximation, p_on, support_on, quantum_level, callback_queue, active_rituals } from './vars';
 import { loc } from './locale';
 import { vBind, popover, clearElement, powerGrid, easterEgg, trickOrTreat, binary_limit_test } from './functions';
@@ -489,92 +490,17 @@ function loadNFactory(parent,bind){
     });
 }
 
+/**
+ * Render the mining droid's ore assignment.
+ *
+ * Markup is React's now (components/DroidPanel.tsx), sharing the factory's
+ * product row. tooltip() below stays: it describes what each ore yields.
+ */
 function loadDroid(parent,bind){
-    let fuel = $(`<div><span class="has-text-warning">${loc('modal_factory_operate')}:</span> <span :class="level()">{{count | on}}/{{ on | max }}</span></div>`);
-    parent.append(fuel);
-
-    let adam = $(`<div class="factory"><span class="adam" :aria-label="buildLabel('adam') + ariaProd('adam')">${global.resource.Adamantite.name}</span></div>`);
-    parent.append(adam);
-    let adamCount = $(`<span class="current">{{ adam }}</span>`);
-    let adamSub = $(`<span class="sub" @click="subItem('adam')" role="button" aria-label="Decrease Adamantite production">&laquo;</span>`);
-    let adamAdd = $(`<span class="add" @click="addItem('adam')" role="button" aria-label="Increase Adamantite production">&raquo;</span>`);
-    adam.append(adamSub);
-    adam.append(adamCount);
-    adam.append(adamAdd);
-
-    let uran = $(`<div class="factory"><span class="uran" :aria-label="buildLabel('uran') + ariaProd('uran')">${global.resource.Uranium.name}</span></div>`);
-    parent.append(uran);
-    let uranCount = $(`<span class="current">{{ uran }}</span>`);
-    let uranSub = $(`<span class="sub" @click="subItem('uran')" role="button" aria-label="Decrease Uranium production">&laquo;</span>`);
-    let uranAdd = $(`<span class="add" @click="addItem('uran')" role="button" aria-label="Increase Uranium production">&raquo;</span>`);
-    uran.append(uranSub);
-    uran.append(uranCount);
-    uran.append(uranAdd);
-
-    let coal = $(`<div class="factory"><span class="coal" :aria-label="buildLabel('coal') + ariaProd('coal')">${global.resource.Coal.name}</span></div>`);
-    parent.append(coal);
-    let coalCount = $(`<span class="current">{{ coal }}</span>`);
-    let coalSub = $(`<span class="sub" @click="subItem('coal')" role="button" aria-label="Decrease Coal production">&laquo;</span>`);
-    let coalAdd = $(`<span class="add" @click="addItem('coal')" role="button" aria-label="Increase Coal production">&raquo;</span>`);
-    coal.append(coalSub);
-    coal.append(coalCount);
-    coal.append(coalAdd);
-
-    let alum = $(`<div class="factory"><span class="alum" :aria-label="buildLabel('alum') + ariaProd('alum')">${global.resource.Aluminium.name}</span></div>`);
-    parent.append(alum);
-    let alumCount = $(`<span class="current">{{ alum }}</span>`);
-    let alumSub = $(`<span class="sub" @click="subItem('alum')" role="button" aria-label="Decrease Aluminium production">&laquo;</span>`);
-    let alumAdd = $(`<span class="add" @click="addItem('alum')" role="button" aria-label="Increase Aluminium production">&raquo;</span>`);
-    alum.append(alumSub);
-    alum.append(alumCount);
-    alum.append(alumAdd);
-
-    vBind({
-        el: bind ? bind : '#specialModal',
-        data: global.interstellar['mining_droid'],
-        methods: {
-            subItem: function(item){
-                let keyMult = keyMultiplier();
-                for (var i=0; i<keyMult; i++){
-                    if (global.interstellar.mining_droid[item] > 0){
-                        global.interstellar.mining_droid[item]--;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            },
-            addItem: function(item){
-                let keyMult = keyMultiplier();
-                for (var i=0; i<keyMult; i++){
-                    if (global.interstellar.mining_droid.adam + global.interstellar.mining_droid.uran + global.interstellar.mining_droid.coal + global.interstellar.mining_droid.alum < global.interstellar.mining_droid.on){
-                        global.interstellar.mining_droid[item]++;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            },
-            buildLabel: function(type){
-                return tooltip(type);
-            },
-            ariaProd(prod){
-                return `. ${global.interstellar.mining_droid[prod]} driod mining ${prod}.`;
-            },
-            level(){
-                let on = global.interstellar.mining_droid.adam + global.interstellar.mining_droid.uran + global.interstellar.mining_droid.coal + global.interstellar.mining_droid.alum;
-                let max = global.interstellar.mining_droid.on;
-                return colorRange(on,max);
-            }
-        },
-        filters: {
-            on(){
-                return global.interstellar.mining_droid.adam + global.interstellar.mining_droid.uran + global.interstellar.mining_droid.coal + global.interstellar.mining_droid.alum;
-            },
-            max(){
-                return global.interstellar.mining_droid.on;
-            }
-        }
+    clearElement(parent);
+    mountDroid(bind ? $(bind)[0] : parent[0], {
+        isModal: !bind,
+        engine: { tooltip, colorRange },
     });
 
     function tooltip(type){
