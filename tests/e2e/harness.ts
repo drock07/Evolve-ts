@@ -225,3 +225,59 @@ export function loadSaveFixture(name: string): string {
 export function readSaveFixture(name: string): Record<string, any> {
     return JSON.parse(LZString.decompressFromBase64(readFixture(name))!);
 }
+
+/**
+ * Force-unlock content the save fixtures never reach.
+ *
+ * Most of the game is gated behind progress a mid-game save does not have:
+ * ten of the twelve industry panels, and most of space, the portal and beyond.
+ * Without this they cannot be rendered at all, so they cannot be pinned before
+ * being ported — which is the whole method.
+ *
+ * What this is and is not: a structure is created from its own struct()
+ * declaration in the actions tree, which is the same source initStruct() uses
+ * at runtime, so the record shape is the engine's rather than a guess. What it
+ * cannot do is reproduce the rest of a game that had actually got there —
+ * the techs, resources and traits that would normally accompany it. A panel
+ * seeded this way renders and responds, but it is a world the game does not
+ * quite produce, and a test written against one is weaker evidence than a test
+ * written against a real save. Prefer a fixture where one exists.
+ */
+export async function unlockStructure(
+    page: Page,
+    region: string,
+    key: string,
+    opts: { count?: number; on?: number } = {},
+): Promise<void> {
+    const { count = 1, on = count } = opts;
+    await page.evaluate(args => {
+        const hooks = (window as any).__evolveTest__;
+        const g = hooks.global;
+
+        // The structure's canonical default shape, straight from its own
+        // struct() declaration rather than invented here.
+        const declared = hooks.structDefaults()
+            .find((s: any) => s.region === args.region && s.key === args.key);
+
+        g[args.region] = g[args.region] ?? {};
+        g[args.region][args.key] = {
+            ...(declared?.shape ?? {}),
+            ...(g[args.region][args.key] ?? {}),
+            count: args.count,
+            on: args.on,
+        };
+    }, { region, key, count, on });
+}
+
+/** Set tech levels and race traits together, for gates that need both. */
+export async function unlockFlags(
+    page: Page,
+    flags: { tech?: Record<string, number>; race?: Record<string, number | boolean> } = {},
+): Promise<void> {
+    await page.evaluate(f => {
+        const g = (window as any).__evolveTest__.global;
+        for (const [k, v] of Object.entries(f.tech ?? {})) g.tech[k] = v;
+        for (const [k, v] of Object.entries(f.race ?? {})) g.race[k] = v;
+    }, flags);
+}
+
