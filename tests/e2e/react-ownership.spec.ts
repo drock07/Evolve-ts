@@ -24,12 +24,13 @@ import { bootGame, runTicks, loadSaveFixture } from './harness';
  * this is a standing hazard rather than a one-off, and the list is the price
  * of catching it.
  *
- * Worth being straight about what has and has not been demonstrated: the
- * detector is verified below against a node replaced by a copy of itself,
- * which is the signature the original bug left (its pause button carried no
- * React fiber). Re-adding the offending vBind does not reproduce that bug on
- * its own — the binding that caused it had a full data/methods/filters set —
- * so this guard has not been run end-to-end against the original defect.
+ * Verified end-to-end: re-adding a vBind on #topBar and rebuilding makes this
+ * report `#topBar .planet` and `#topBar #pausegame` as taken, and the pause
+ * button's own tests fail alongside it. An earlier attempt at that check
+ * appeared to pass with the bug present, which was a stale build being served
+ * — playwright.config reuses an already-running preview server, so a source
+ * edit without a rebuild tests the previous bundle. Build before verifying
+ * that a test can fail.
  */
 
 const SAVE = 'orc-midgame-1.2.20';

@@ -237,7 +237,9 @@ import { swissKnife } from "./tech";
 import { vacuumCollapse } from "./resets";
 import { initTabs, loadTab } from "./index";
 import { setWeather, seasonDesc, astrologySign, astroVal } from "./seasons";
-import { getTopChange } from "./wiki/change";
+// Kept in its original position: module evaluation order matters here, and
+// moving this import to the end of the block breaks the boot.
+import { topChangeHtml } from "./wiki/change";
 import { enableDebug, updateDebugData } from "./debug";
 import { legacy } from './hooks/legacyBridge';
 import { installTestHooks } from './testHooks';
@@ -267,6 +269,7 @@ legacy.madLaunch = madLaunch;
 legacy.setGovernment = setGovernment;
 legacy.registerGovPopovers = registerGovPopovers;
 legacy.describeCurrentGovernment = describeCurrentGovernment;
+legacy.topChangeHtml = topChangeHtml;
 legacy.spyAction = spyAction;
 legacy.espionageAnnex = espionageAnnex;
 legacy.espionagePurchase = espionagePurchase;
@@ -17980,8 +17983,9 @@ intervals["version_check"] = setInterval(function () {
   });
 }, 900000);
 
-let changeLog = $(`<div class="infoBox"></div>`);
-popover("versionLog", getTopChange(changeLog), { wide: true });
+// The version number's changelog popover is React's now (components/TopBar).
+// It was registered here, at module scope, long before React had rendered
+// #versionLog — so it bound to nothing and the changelog never appeared.
 
 if (global.race["start_cataclysm"]) {
   start_cataclysm();

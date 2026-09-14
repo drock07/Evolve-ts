@@ -25,7 +25,9 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { createPopper, type Instance, type Placement } from '@popperjs/core';
-import { clearPopper, registerReactPopoverCloser } from '../functions';
+import {
+    closeLegacyPopover, registerReactPopoverCloser,
+} from '../engine/popoverCoordinator';
 
 export interface PopoverOptions {
     /** Where to put it relative to the trigger. Matches the legacy default. */
@@ -129,7 +131,7 @@ export function usePopover(content: () => ReactNode, opts: PopoverOptions = {}) 
     const onMouseOver = useCallback(() => {
         // Closes the legacy popover, and through the registered closer any
         // other React one, before taking the slot.
-        clearPopper();
+        closeLegacyPopover();
         setOpen(true);
     }, []);
 

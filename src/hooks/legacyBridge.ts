@@ -49,6 +49,8 @@ export const legacy = {
     registerGovPopovers: null as any,
     /** HTML description of the government currently in force. */
     describeCurrentGovernment: null as any,
+    /** Recent changelog entries as HTML, for the version popover. */
+    topChangeHtml: null as any,
     /** Start influence, sabotage or incite against a foreign government. */
     spyAction: null as any,
     /** Annex a foreign government; false when its preconditions fail. */

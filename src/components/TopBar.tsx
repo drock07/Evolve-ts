@@ -4,6 +4,8 @@
  * Displays planet name, universe, calendar info, pause button, and version.
  */
 
+import { usePopover } from './Popover';
+
 export interface CalendarData {
     year: number;
     day: number;
@@ -23,6 +25,8 @@ export interface TopBarData {
     calendar: CalendarData | null;
     isPaused: boolean;
     version: string;
+    /** Recent changelog entries, shown on the version number. HTML. */
+    versionDescription: () => string;
     infoTimer: string | null;
     acceleratedTime: string | null;
 }
@@ -33,6 +37,14 @@ export interface TopBarCallbacks {
 }
 
 export function TopBar({ data, callbacks }: { data: TopBarData; callbacks: TopBarCallbacks }) {
+    // Was a legacy popover registered at module scope, long before React had
+    // rendered #versionLog, so it bound to nothing and the changelog never
+    // appeared for anyone.
+    const version = usePopover(
+        () => <span dangerouslySetInnerHTML={{ __html: data.versionDescription() }} />,
+        { id: 'versionLog', wide: true },
+    );
+
     return (
         <>
             <h2 className="is-sr-only">Top Bar</h2>
@@ -77,9 +89,10 @@ export function TopBar({ data, callbacks }: { data: TopBarData; callbacks: TopBa
                     </span>
                 )}
             </span>
-            <span className="version" id="versionLog">
+            <span className="version" id="versionLog" {...version.triggerProps}>
                 <a href="wiki.html#changelog" target="_blank">{data.version}</a>
             </span>
+            {version.popover}
         </>
     );
 }

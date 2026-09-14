@@ -45,12 +45,17 @@ const REVIVED = [
     { name: 'government label', selector: '#govLabel', id: 'govLabel' },
     { name: 'change government button', selector: '#govType .change', id: 'govTypeChange' },
     { name: 'tax rates heading', selector: '#taxRateLabel', id: 'taxRateLabel' },
+    // Found by the popover audit rather than by hand. Registered at module
+    // scope, before React had rendered anything at all.
+    { name: 'version number changelog', selector: '#versionLog', id: 'versionLog' },
 ];
 
 test.describe('descriptions that had gone missing', () => {
     for (const target of REVIVED) {
         test(`the ${target.name} has one again`, async ({ page }) => {
             await openCivics(page);
+            // #versionLog lives in the top bar, so it needs no particular tab;
+            // openCivics is simply a booted page for it.
 
             await page.locator(target.selector).hover();
             await expect(poppers(page)).toHaveCount(1);

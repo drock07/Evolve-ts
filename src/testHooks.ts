@@ -18,6 +18,7 @@ import { global, webWorker, seededRandom, setGlobal } from './vars';
 import { sentience, actions } from './actions';
 import { islandCount } from './engine/islands';
 import { isE2E } from './engine/e2e';
+import { deadPopovers, popoverBindingCount } from './engine/popoverAudit';
 
 /** Seed used for every deterministic run. Arbitrary, but must never change. */
 export const TEST_SEED = 12345;
@@ -55,6 +56,13 @@ export interface TestHooks {
     structDefaults(): Array<{ region: string; key: string; shape: Record<string, unknown> }>;
     /** Live React islands mounted inside legacy DOM (see engine/islands.ts). */
     islandCount(): number;
+    /**
+     * Legacy popovers that cannot fire — bound to nothing, or to an element
+     * that has since been replaced. See engine/popoverAudit.ts.
+     */
+    deadPopovers(): Array<{ id: string; selector: string; reason: string }>;
+    /** How many popover registrations the audit has seen. */
+    popoverBindingCount(): number;
     /** Deep clone of `global` with volatile fields stripped. */
     snapshot(): Record<string, unknown>;
 }
@@ -206,6 +214,8 @@ export function installTestHooks(execGameLoops: (periods?: number) => void): voi
         },
 
         islandCount,
+        deadPopovers,
+        popoverBindingCount,
 
         snapshot() {
             const clone = stableClone(global) as Record<string, unknown>;

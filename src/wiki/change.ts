@@ -3603,6 +3603,16 @@ export function changeLog(){
     }
 }
 
+/**
+ * The most recent changelog entries as HTML, for the version popover.
+ *
+ * getTopChange() appends into a jQuery element and hands it back, which suited
+ * a popover whose body was built with jQuery. The React one needs markup.
+ */
+export function topChangeHtml(): string {
+    return getTopChange($(`<div class="infoBox"></div>`)).prop('outerHTML');
+}
+
 export function getTopChange(elm){
     let index = 0;
     for (index=0; index<changeList.length; index++){

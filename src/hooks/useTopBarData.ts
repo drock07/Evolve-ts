@@ -89,6 +89,9 @@ export function useTopBarData(): { data: TopBarData; callbacks: TopBarCallbacks 
         version,
         infoTimer,
         acceleratedTime,
+        // Built on hover: the changelog is a few hundred entries of markup and
+        // nothing else needs it.
+        versionDescription: () => legacy.topChangeHtml?.() ?? '',
     };
 
     const callbacks: TopBarCallbacks = {

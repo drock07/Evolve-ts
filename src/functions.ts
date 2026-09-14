@@ -13,11 +13,17 @@ import { universeLevel, universeAffix, alevel } from './achieve';
 import { astrologySign, astroVal } from './seasons';
 import { shipCosts, TPShipDesc } from './truepath';
 import { mechCost, mechDesc } from './portal';
+import { recordPopoverBinding } from './engine/popoverAudit';
+import { closeReactPopover, registerLegacyPopoverCloser } from './engine/popoverCoordinator';
 
 var popperRef = false;
 export function popover(id,content,opts?){
     if (!opts){ opts = {}; }
     if (!opts.hasOwnProperty('elm')){ opts['elm'] = '#'+id; }
+    // Records what this bound to, under the test driver only. See
+    // engine/popoverAudit.ts: a popover that matches nothing here is a
+    // description that will never appear, and nothing else would say so.
+    recordPopoverBinding(id, opts['elm'], $(opts.elm).toArray());
     if (!opts.hasOwnProperty('bind')){ opts['bind'] = true; }
     if (!opts.hasOwnProperty('unbind')){ opts['unbind'] = true; }
     if (!opts.hasOwnProperty('placement')){ opts['placement'] = 'bottom'; }
@@ -97,26 +103,12 @@ if ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mob
     });
 }
 
-/**
- * Closes a React-rendered popover, when one is open.
- *
- * React popovers render their own element rather than into #popper, so
- * clearPopper cannot dismiss them by emptying that node. The React side
- * registers a closer here at module load, and clearPopper calls it, which is
- * what keeps the two systems to one visible description between them.
- */
-var reactPopoverCloser: ((id?: string) => void) | null = null;
-
-export function registerReactPopoverCloser(fn: (id?: string) => void){
-    reactPopoverCloser = fn;
-}
-
 export function clearPopper(id?){
     // Before the early return below: a targeted clearPopper(id) may be aimed
     // at the React popover, in which case #popper is not the one to check.
-    if (reactPopoverCloser){
-        reactPopoverCloser(id);
-    }
+    // React popovers render their own element rather than into #popper, so
+    // emptying that node would not dismiss them.
+    closeReactPopover(id);
     if (id && $(`#popper`).data('id') !== id){
         return;
     }
@@ -127,6 +119,9 @@ export function clearPopper(id?){
     }
     clearElement($(`#popper`),true);
 }
+
+// Lets the React popover dismiss this one without importing this module.
+registerLegacyPopoverCloser(clearPopper);
 
 export function gameLoop(act){
     switch(act){
