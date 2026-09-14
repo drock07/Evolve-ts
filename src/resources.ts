@@ -1,4 +1,5 @@
 import { mountMarketRow } from './components/mountMarketRow';
+import { mountStorageRow } from './components/mountStorageRow';
 import { global, tmp_vars, keyMultiplier, breakdown, sizeApproximation, p_on, support_on, active_rituals } from './vars';
 import { vBind, clearElement, modRes, flib, calc_mastery, calcPillar, eventActive, easterEgg, trickOrTreat, popover, harmonyEffect, darkEffect, hoovedRename, messageQueue } from './functions';
 import { traits, fathomCheck } from './races';
@@ -1586,68 +1587,50 @@ function assignContainer(res){
     }
 }
 
+/**
+ * Render a storage row.
+ *
+ * The markup is React's now (components/StorageRow.tsx). The assignment
+ * arithmetic stays here: moving a crate also moves the resource's cap by the
+ * crate's current worth, which changes with tech, and a second copy of that
+ * would drift.
+ *
+ * The two seasonal substitutions the counts carried are kept as closures, so
+ * the row renders them without knowing what they are.
+ */
 export function containerItem(mount,market_item,name,color){
     if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 1)){
         return;
     }
 
-    market_item.append($(`<h3 class="res has-text-${color}">{{ name }}</h3>`));
-
-    if (global.resource.Crates.display){
-        let crate = $(`<span class="trade"><span class="has-text-warning">${global.resource.Crates.name}</span></span>`);
-        market_item.append(crate);
-
-        crate.append($(`<span role="button" aria-label="remove ${global.resource[name].name} ${global.resource.Crates.name}" class="sub has-text-danger" @click="subCrate('${name}')"><span>&laquo;</span></span>`));
-        crate.append($(`<span class="current" v-html="$options.filters.cCnt(crates,'${name}')"></span>`));
-        crate.append($(`<span role="button" aria-label="add ${global.resource[name].name} ${global.resource.Crates.name}" class="add has-text-success" @click="addCrate('${name}')"><span>&raquo;</span></span>`));
-    }
-
-    if (global.resource.Containers.display){
-        let container = $(`<span class="trade"><span class="has-text-warning">${global.resource.Containers.name}</span></span>`);
-        market_item.append(container);
-
-        container.append($(`<span role="button" aria-label="remove ${global.resource[name].name} ${global.resource.Containers.name}" class="sub has-text-danger" @click="subCon('${name}')"><span>&laquo;</span></span>`));
-        container.append($(`<span class="current" v-html="$options.filters.trick(containers)"></span>`));
-        container.append($(`<span role="button" aria-label="add ${global.resource[name].name} ${global.resource.Containers.name}" class="add has-text-success" @click="addCon('${name}')"><span>&raquo;</span></span>`));
-    }
-
-    vBind({
-        el: mount,
-        data: global.resource[name],
-        methods: {
-            addCrate(res){
-                assignCrate(res);
+    mountStorageRow($(mount)[0], {
+        res: name,
+        color,
+        engine: {
+            assignCrate: () => assignCrate(name),
+            unassignCrate: () => unassignCrate(name),
+            assignContainer: () => assignContainer(name),
+            unassignContainer: () => unassignContainer(name),
+            crateHtml(){
+                let ct = global.resource[name].crates;
+                if ((name === 'Food' && !global.race['artifical']) || (global.race['artifical'] && name === 'Coal') || name === 'Souls'){
+                    let egg = easterEgg(13,10);
+                    if (ct === 10 && egg.length > 0){
+                        return '1'+egg;
+                    }
+                }
+                return String(ct);
             },
-            subCrate(res){
-                unassignCrate(res);
-            },
-            addCon(res){
-                assignContainer(res);
-            },
-            subCon(res){
-                unassignContainer(res);
-            }
-        },
-        filters: {
-            trick(v){
+            containerHtml(){
                 if (name === 'Stone' && global.resource[name].crates === 10 && global.resource[name].containers === 31){
                     let trick = trickOrTreat(4,13,true);
                     if (trick.length > 0){
                         return trick;
                     }
                 }
-                return v;
+                return String(global.resource[name].containers);
             },
-            cCnt(ct,res){
-                if ((res === 'Food' && !global.race['artifical']) || (global.race['artifical'] && res === 'Coal') || res === 'Souls'){
-                    let egg = easterEgg(13,10);
-                    if (ct === 10 && egg.length > 0){
-                        return '1'+egg;
-                    }
-                }
-                return ct;
-            }
-        }
+        },
     });
 }
 
