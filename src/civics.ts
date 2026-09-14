@@ -1,6 +1,7 @@
 import { mountTaxRates } from './components/mountTaxRates';
 import { mountMad } from './components/mountMad';
 import { mountGovernment } from './components/mountGovernment';
+import { openEspionageModal } from './components/mountEspionage';
 import { global, seededRandom, keyMultiplier, sizeApproximation, p_on } from './vars';
 import { loc } from './locale';
 import { calcPrestige, clearElement, popover, clearPopper, vBind, timeFormat, modRes, messageQueue, genCivName, darkEffect, eventActive, easterEgg, trickOrTreat } from './functions';
@@ -529,10 +530,6 @@ export function foreignGov(){
         foreign.append($(`<div class="header"><h2 class="has-text-warning">${loc('civics_foreign')}</h2></div>`));
         $('#r_govern0').append(foreign);
 
-        var modal = {
-            template: '<div id="modalBox" class="modalBox"></div>'
-        };
-
         let govEnd = global.race['truepath'] ? 5 : 3;
         for (let i=0;i<govEnd;i++){
             let gov = $(`<div id="gov${i}" class="foreign" v-show="gvis(${i})"><span class="has-text-caution">{{ '${i}' | gov }}</span><span v-if="f${i}.occ" class="has-text-advanced"> - ${loc('civics_garrison_occupy')}</span><span v-else-if="f${i}.anx" class="has-text-advanced"> - ${loc('civics_garrison_annex')}</span></span><span v-else-if="f${i}.buy" class="has-text-advanced"> - ${loc('civics_garrison_purchase')}</span></div>`);
@@ -675,17 +672,10 @@ export function foreignGov(){
                     return battleAssessment(gov);
                 },
                 trigModal(i){
-                    this.$buefy.modal.open({
-                        parent: this,
-                        component: modal
-                    });
-
-                    var checkExist = setInterval(function() {
-                    if ($('#modalBox').length > 0) {
-                        clearInterval(checkExist);
-                        drawEspModal(i);
-                    }
-                    }, 50);
+                    // The React modal owns its own open state, so this is a
+                    // plain call rather than the old open-then-poll-for-the-DOM
+                    // dance the Buefy modal required.
+                    openEspionageModal(i);
                 },
                 spy_disabled(i){
                     return global.civic.foreign[`gov${i}`].trn > 0 || spyCost(i) > global.resource.Money.amount ? true : false;
@@ -823,7 +813,7 @@ function trainSpy(i){
     }
 }
 
-function govPrice(gov){
+export function govPrice(gov){
     let price = global.civic.foreign[`gov${gov}`].eco * 15384;
     price *= 1 + global.civic.foreign[`gov${gov}`].hstl * 1.6 / 100;
     price *= 1 - global.civic.foreign[`gov${gov}`].unrest * 0.25 / 100;
@@ -837,7 +827,7 @@ export function checkControlling(gov?){
     return global.civic.foreign.gov0.occ || global.civic.foreign.gov1.occ || global.civic.foreign.gov2.occ || global.civic.foreign.gov0.anx || global.civic.foreign.gov1.anx || global.civic.foreign.gov2.anx || global.civic.foreign.gov0.buy || global.civic.foreign.gov1.buy || global.civic.foreign.gov2.buy;
 }
 
-function spyAction(sa,g){
+export function spyAction(sa,g){
     // Espionage researched
     if (global.tech['spy'] && global.tech['spy'] >= 2){
         // At least 1 spy and no ongoing espionage action
@@ -893,101 +883,85 @@ function spyAction(sa,g){
     }
 }
 
-function drawEspModal(gov){
-    $('#modalBox').append($(`<p id="modalBoxTitle" class="has-text-warning modalTitle">${loc('civics_espionage_actions')}</p>`));
-    
-    var body = $('<div id="espModal" class="modalBody max40"></div>');
-    $('#modalBox').append(body);
-
-    if (global.tech['spy'] && global.tech['spy'] >= 2 && global.civic.foreign[`gov${gov}`].spy >= 1){
-        body.append($(`<button class="button gap" data-esp="influence" @click="influence('${gov}')">${loc(`civics_spy_influence`)}</button>`));
-        body.append($(`<button class="button gap" data-esp="sabotage" @click="sabotage('${gov}')">${loc(`civics_spy_sabotage`)}</button>`));
-        if (gov < 3){
-            body.append($(`<button class="button gap" data-esp="incite" @click="incite('${gov}')">${loc(`civics_spy_incite`)}</button>`));
-        }
-        if (gov < 3 && global.civic.foreign[`gov${gov}`].hstl <= 50 && global.civic.foreign[`gov${gov}`].unrest >= 50){
-            body.append($(`<button class="button gap" data-esp="annex" @click="annex('${gov}')">${loc(`civics_spy_annex`)}</button>`));
-        }
-        if (gov < 3 && global.civic.foreign[`gov${gov}`].spy >= 3){
-            body.append($(`<button class="button gap" data-esp="purchase" @click="purchase('${gov}')">${loc(`civics_spy_purchase`)}</button>`));
-        }
+/**
+ * The befuddle/fathom reduction applied to every espionage timer.
+ *
+ * spyAction applies the governor gene on top of this; annex and purchase do
+ * not, which is why the shared part stops here rather than folding it in.
+ */
+function espTimer(base: number): number {
+    let timer = base;
+    if (global.race['befuddle']){
+        timer = Math.round(timer * (1 - traits.befuddle.vars()[0] / 100));
     }
+    let fathom = fathomCheck('dryad');
+    if (fathom > 0){
+        timer = Math.round(timer * (1 - traits.befuddle.vars(1)[0] / 100 * fathom));
+    }
+    return timer;
+}
 
-    vBind({
-        el: '#espModal',
-        data: global.civic.foreign[`gov${gov}`],
-        methods: {
-            influence(g){
-                if (global.tech['spy'] && global.tech['spy'] >= 2 && global.civic.foreign[`gov${g}`].spy >= 1){
-                    spyAction('influence',g);
-                    vBind({el: '#espModal'},'destroy');
-                    $('.modal-background').click();
-                    clearPopper();
-                }
-            },
-            sabotage(g){
-                if (global.tech['spy'] && global.tech['spy'] >= 2 && global.civic.foreign[`gov${g}`].spy >= 1){
-                    spyAction('sabotage',g);
-                    vBind({el: '#espModal'},'destroy');
-                    $('.modal-background').click();
-                    $('#popGov').hide();
-                    clearPopper();
-                }
-            },
-            incite(g){
-                if (g >= 3){ return; }
-                if (global.tech['spy'] && global.tech['spy'] >= 2 && global.civic.foreign[`gov${g}`].spy >= 1){
-                    spyAction('incite',g);
-                    vBind({el: '#espModal'},'destroy');
-                    $('.modal-background').click();
-                    clearPopper();
-                }
-            },
-            annex(g){
-                if (g >= 3){ return; }
-                if (global.civic.foreign[`gov${gov}`].hstl <= 50 && global.civic.foreign[`gov${gov}`].unrest >= 50 && global.city.morale.current >= (200 + global.civic.foreign[`gov${gov}`].hstl - global.civic.foreign[`gov${gov}`].unrest)){
-                    if (global.tech['spy'] && global.tech['spy'] >= 2 && global.civic.foreign[`gov${g}`].spy >= 1 && global.civic.foreign[`gov${g}`].sab === 0){
-                        let timer = global.tech['spy'] >= 4 ? 150 : 300;
-                        if (global.race['befuddle']){
-                            timer = Math.round(timer * (1 - traits.befuddle.vars()[0] / 100));
-                        }
-                        let fathom = fathomCheck('dryad');
-                        if (fathom > 0){
-                            timer = Math.round(timer * (1 - traits.befuddle.vars(1)[0] / 100 * fathom));
-                        }
-                        global.civic.foreign[`gov${g}`].sab = timer;
-                        global.civic.foreign[`gov${g}`].act = 'annex';
-                        vBind({el: '#espModal'},'destroy');
-                        $('.modal-background').click();
-                        clearPopper();
-                    }
-                }
-            },
-            purchase(g){
-                if (g >= 3){ return; }
-                let price = govPrice(g);
-                if (price <= global.resource.Money.amount){
-                    if (global.tech['spy'] && global.tech['spy'] >= 2 && global.civic.foreign[`gov${g}`].spy >= 3 && global.civic.foreign[`gov${g}`].sab === 0){
-                        global.resource.Money.amount -= price;
-                        let timer = global.tech['spy'] >= 4 ? 150 : 300;
-                        if (global.race['befuddle']){
-                            timer = Math.round(timer * (1 - traits.befuddle.vars()[0] / 100));
-                        }
-                        let fathom = fathomCheck('dryad');
-                        if (fathom > 0){
-                            timer = Math.round(timer * (1 - traits.befuddle.vars(1)[0] / 100 * fathom));
-                        }
-                        global.civic.foreign[`gov${g}`].sab = timer;
-                        global.civic.foreign[`gov${g}`].act = 'purchase';
-                        vBind({el: '#espModal'},'destroy');
-                        $('.modal-background').click();
-                        clearPopper();
-                    }
-                }
-            }
-        }
-    });
+/** Morale needed before a government will accept annexation. */
+export function annexMoraleGoal(gov){
+    return 200 + global.civic.foreign[`gov${gov}`].hstl - global.civic.foreign[`gov${gov}`].unrest;
+}
 
+/** Whether annex is offered at all: relations calm enough, unrest high enough. */
+export function annexOffered(gov){
+    return gov < 3
+        && global.civic.foreign[`gov${gov}`].hstl <= 50
+        && global.civic.foreign[`gov${gov}`].unrest >= 50;
+}
+
+/**
+ * Annex a foreign government.
+ *
+ * Lifted verbatim out of the espionage modal's Vue methods so React can call
+ * it. Returns whether the action was actually started — the guards are the
+ * original ones, and the UI is not trusted to have enforced them.
+ */
+export function espionageAnnex(gov){
+    if (!annexOffered(gov)){ return false; }
+    if (global.city.morale.current < annexMoraleGoal(gov)){ return false; }
+    if (!(global.tech['spy'] && global.tech['spy'] >= 2)){ return false; }
+    if (global.civic.foreign[`gov${gov}`].spy < 1 || global.civic.foreign[`gov${gov}`].sab !== 0){ return false; }
+
+    global.civic.foreign[`gov${gov}`].sab = espTimer(global.tech['spy'] >= 4 ? 150 : 300);
+    global.civic.foreign[`gov${gov}`].act = 'annex';
+    return true;
+}
+
+/** Whether purchase is offered: needs three spies in place. */
+export function purchaseOffered(gov){
+    return gov < 3 && global.civic.foreign[`gov${gov}`].spy >= 3;
+}
+
+/**
+ * Buy a foreign government outright. Debits the price before starting the
+ * timer, so a failed guard must not have charged anything — hence the checks
+ * all run first.
+ */
+export function espionagePurchase(gov){
+    if (!purchaseOffered(gov)){ return false; }
+    if (!(global.tech['spy'] && global.tech['spy'] >= 2)){ return false; }
+    if (global.civic.foreign[`gov${gov}`].sab !== 0){ return false; }
+
+    let price = govPrice(gov);
+    if (price > global.resource.Money.amount){ return false; }
+
+    global.resource.Money.amount -= price;
+    global.civic.foreign[`gov${gov}`].sab = espTimer(global.tech['spy'] >= 4 ? 150 : 300);
+    global.civic.foreign[`gov${gov}`].act = 'purchase';
+    return true;
+}
+
+/**
+ * Attach the description popovers to the espionage modal's buttons.
+ *
+ * Called once the buttons are on the page: the popover system binds to a
+ * selector at call time, so it cannot run before they exist.
+ */
+export function registerEspPopovers(gov){
     popover('GovLabel', function(obj){
             let esp = $(obj.this).data('esp');
             let desc = '';
@@ -996,22 +970,21 @@ function drawEspModal(gov){
                 desc = loc(`civics_spy_${esp}_desc`,[govTitle(gov),price])
             }
             else if (esp === 'annex'){
-                if (global.city.morale.current >= (200 + global.civic.foreign[`gov${gov}`].hstl - global.civic.foreign[`gov${gov}`].unrest)){
+                if (global.city.morale.current >= annexMoraleGoal(gov)){
                     desc = loc(`civics_spy_${esp}_desc`,[govTitle(gov)]);
                 }
                 else {
-                    let morale = 200 + global.civic.foreign[`gov${gov}`].hstl - global.civic.foreign[`gov${gov}`].unrest
-                    desc = loc(`civics_spy_${esp}_goal`,[govTitle(gov),morale]);
+                    desc = loc(`civics_spy_${esp}_goal`,[govTitle(gov),annexMoraleGoal(gov)]);
                 }
             }
             else {
                 desc = loc(`civics_spy_${esp}_desc`,[govTitle(gov)]);
             }
-            
+
             let warn = '';
             if (
-                (esp === 'influence' && global.civic.foreign[`gov${gov}`].hstl === 0) || 
-                (esp === 'sabotage' && global.civic.foreign[`gov${gov}`].spy >= 2 && global.civic.foreign[`gov${gov}`].mil === 50) || 
+                (esp === 'influence' && global.civic.foreign[`gov${gov}`].hstl === 0) ||
+                (esp === 'sabotage' && global.civic.foreign[`gov${gov}`].spy >= 2 && global.civic.foreign[`gov${gov}`].mil === 50) ||
                 (esp === 'incite' && global.civic.foreign[`gov${gov}`].spy >= 4 && global.civic.foreign[`gov${gov}`].unrest === 100)
             ){
                 warn = `<div class="has-text-danger">${loc(`civics_spy_warning`)}</div>`;

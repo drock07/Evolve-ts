@@ -17,6 +17,7 @@
 import { global, webWorker, seededRandom, setGlobal } from './vars';
 import { sentience, actions } from './actions';
 import { islandCount } from './engine/islands';
+import { isE2E } from './engine/e2e';
 
 /** Seed used for every deterministic run. Arbitrary, but must never change. */
 export const TEST_SEED = 12345;
@@ -117,8 +118,7 @@ function stableClone(value: any, seen = new WeakSet()): any {
 }
 
 export function installTestHooks(execGameLoops: (periods?: number) => void): void {
-    if (typeof window === 'undefined') return;
-    if (!new URLSearchParams(window.location.search).has('e2e')) return;
+    if (!isE2E()) return;
 
     const hooks: TestHooks = {
         global,

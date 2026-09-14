@@ -56,6 +56,7 @@ const READ_ONLY_LEGACY = new Set([
     'seasonDesc',
     'flib',
     'registerGovPopovers',
+    'registerEspPopovers',
 ]);
 
 function sourceFiles(): string[] {

@@ -43,6 +43,15 @@ export const legacy = {
     /** Switch government; refused while a revolution is running. */
     setGovernment: null as any,
     registerGovPopovers: null as any,
+    /** Start influence, sabotage or incite against a foreign government. */
+    spyAction: null as any,
+    /** Annex a foreign government; false when its preconditions fail. */
+    espionageAnnex: null as any,
+    /** Buy a foreign government outright; false when it cannot be afforded. */
+    espionagePurchase: null as any,
+    annexOffered: null as any,
+    purchaseOffered: null as any,
+    registerEspPopovers: null as any,
 
     // From jobs.ts
     /** Ordered row specs for the job list. */
@@ -60,4 +69,6 @@ export const legacy = {
 
     // From main.ts
     execGameLoops: null as any,
+    /** Pet the pet; no-op while the cooldown is running. */
+    petPet: null as any,
 };

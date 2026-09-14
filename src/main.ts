@@ -143,7 +143,9 @@ import {
   govTitle,
   govCivics,
   govEffect,
-  weaponTechModifer, adjustTax, madArm, madLaunch, setGovernment, registerGovPopovers } from "./civics";
+  weaponTechModifer, adjustTax, madArm, madLaunch, setGovernment, registerGovPopovers,
+  spyAction, espionageAnnex, espionagePurchase, annexOffered, purchaseOffered,
+  registerEspPopovers } from "./civics";
 import {
   actions,
   updateDesc,
@@ -260,8 +262,15 @@ legacy.madArm = madArm;
 legacy.madLaunch = madLaunch;
 legacy.setGovernment = setGovernment;
 legacy.registerGovPopovers = registerGovPopovers;
+legacy.spyAction = spyAction;
+legacy.espionageAnnex = espionageAnnex;
+legacy.espionagePurchase = espionagePurchase;
+legacy.annexOffered = annexOffered;
+legacy.purchaseOffered = purchaseOffered;
+legacy.registerEspPopovers = registerEspPopovers;
 legacy.loadTab = loadTab;
 legacy.execGameLoops = execGameLoops;
+legacy.petPet = petPet;
 
 // No-op unless the page URL carries ?e2e=1 (see src/testHooks.ts)
 installTestHooks(execGameLoops);
@@ -979,122 +988,16 @@ function legacyDOMInit() {
     },
   );
 
-  if (global.settings.pause) {
-    $(`#pausegame`).addClass("pause");
-  } else {
-    $(`#pausegame`).addClass("play");
-  }
-
-  vBind({
-    el: "#topBar",
-    data: {
-      city: global.city,
-      race: global.race,
-      s: global.settings,
-    },
-    methods: {
-      sign() {
-        return seasonDesc("sign");
-      },
-      getAstroSign() {
-        return seasonDesc("astrology");
-      },
-      weather() {
-        return seasonDesc("weather");
-      },
-      temp() {
-        return seasonDesc("temp");
-      },
-      moon() {
-        return seasonDesc("moon");
-      },
-      season() {
-        return seasonDesc("season");
-      },
-      showUniverse() {
-        return global.race.universe === "standard" ||
-          global.race.universe === "bigbang"
-          ? false
-          : true;
-      },
-      showSim() {
-        return global["sim"] ? true : false;
-      },
-      atRemain() {
-        return loc(`accelerated_time`);
-      },
-      pause() {
-        $(`#pausegame`).removeClass("play");
-        $(`#pausegame`).removeClass("pause");
-        if (global.settings.pause) {
-          global.settings.pause = false;
-          $(`#pausegame`).addClass("play");
-        } else {
-          global.settings.pause = true;
-          $(`#pausegame`).addClass("pause");
-        }
-        if (!global.settings.pause && !webWorker.s) {
-          gameLoop("start");
-        }
-      },
-      pausedesc() {
-        return global.settings.pause ? loc("game_play") : loc("game_pause");
-      },
-      showPet() {
-        return global.race["pet"] ? true : false;
-      },
-      petPet() {
-        if (global.race["pet"] && global.race.pet.pet === 0) {
-          let outcome =
-            global.race.pet.type === "cat" ? Math.rand(0, 3) : Math.rand(0, 10);
-          if (outcome === 0) {
-            global.race.pet.pet = -60;
-            messageQueue(
-              loc(`event_${global.race.pet.type}_pet_failure`, [
-                loc(
-                  `event_${global.race.pet.type}_name${global.race.pet.name}`,
-                ),
-              ]),
-              false,
-              false,
-              ["events", "minor_events"],
-            );
-          } else {
-            global.race.pet.pet = 60;
-            messageQueue(
-              loc(`event_${global.race.pet.type}_pet_success`, [
-                loc(
-                  `event_${global.race.pet.type}_name${global.race.pet.name}`,
-                ),
-              ]),
-              false,
-              false,
-              ["events", "minor_events"],
-            );
-          }
-        }
-      },
-    },
-    filters: {
-      planet(species) {
-        return races[species].home;
-      },
-      universe(universe) {
-        return universe === "standard" || universe === "bigbang"
-          ? ""
-          : universe_types[universe].name;
-      },
-      remain(at) {
-        let minutes = Math.ceil((at * loopTimers().longTimer) / 60000);
-        if (minutes > 0) {
-          let hours = Math.floor(minutes / 60);
-          minutes -= hours * 60;
-          return `${hours}:${minutes.toString().padStart(2, "0")}`;
-        }
-        return;
-      },
-    },
-  });
+  // #topBar is React's (see components/TopBar.tsx). It used to be bound to
+  // Vue here as well, which quietly won: Vue takes ownership of the element it
+  // mounts on and re-renders its subtree, so the nodes React had put there were
+  // replaced by Vue's own. React's delegated events then matched nothing and
+  // every control in the top bar was inert — the pause button did nothing at
+  // all. The jQuery that set #pausegame's class by hand went the same way; the
+  // class is rendered from state now.
+  //
+  // The popovers below are not part of that: they attach to elements by
+  // selector without taking ownership, so they work on React-rendered nodes.
 
   ["astroSign"].forEach(function (topId) {
     popover(
@@ -1411,6 +1314,34 @@ function legacyDOMInit() {
 var moraleCap = 125;
 
 var loopTick = 0; // Used to synchronize the fast, mid, and long loops to each other
+/**
+ * Pet the pet.
+ *
+ * Lifted out of the #topBar Vue binding when React took the top bar over.
+ * `pet` is a cooldown in ticks as well as a flag: 60 on a success, -60 on a
+ * failure, counted back to 0 by the loop, and only 0 accepts another attempt.
+ * Cats are harder to please than the alternatives, which is the whole joke.
+ */
+export function petPet(): void {
+  if (!global.race["pet"] || global.race.pet.pet !== 0) {
+    return;
+  }
+
+  const outcome =
+    global.race.pet.type === "cat" ? Math.rand(0, 3) : Math.rand(0, 10);
+  const success = outcome !== 0;
+  global.race.pet.pet = success ? 60 : -60;
+
+  messageQueue(
+    loc(`event_${global.race.pet.type}_pet_${success ? "success" : "failure"}`, [
+      loc(`event_${global.race.pet.type}_name${global.race.pet.name}`),
+    ]),
+    false,
+    false,
+    ["events", "minor_events"],
+  );
+}
+
 export function execGameLoops(periods = 1) {
   // Currently there is no smart catch-up mechanism
   // Limit to 1 minute (12 game days) of simulation per call

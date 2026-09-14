@@ -5,7 +5,7 @@
 
 import { useGameTick } from './useGameState';
 import { notifyStateChange } from '../state';
-import { global } from '../vars';
+import { global, webWorker } from '../vars';
 import { loc } from '../locale';
 import { TopBarData, TopBarCallbacks } from '../components/TopBar';
 import { legacy } from './legacyBridge';
@@ -92,10 +92,21 @@ export function useTopBarData(): { data: TopBarData; callbacks: TopBarCallbacks 
     };
 
     const callbacks: TopBarCallbacks = {
+        onPetClick: () => {
+            legacy.petPet?.();
+            notifyStateChange();
+        },
         onPause: () => {
             if (global.settings.pause) {
                 global.settings.pause = false;
-                if (!legacy.webWorkerS?.() && legacy.gameLoop) {
+                // Only start the loop if it is not already running.
+                // Pausing does not stop the worker — the loops just skip their
+                // work while global.settings.pause is set — so webWorker.s is
+                // normally still true here. Starting it again would leave the
+                // previous timer chain running alongside the new one (the
+                // worker's 'start' overwrites its timer id without clearing
+                // it), permanently doubling the tick rate for each unpause.
+                if (!webWorker.s && legacy.gameLoop) {
                     legacy.gameLoop('start');
                 }
             } else {

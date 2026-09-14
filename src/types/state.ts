@@ -199,6 +199,57 @@ export interface CivicGovernment {
 }
 
 /** The keys of `global.civic` that are not jobs. */
+/**
+ * A rival government.
+ *
+ * gov0..gov2 are the three original powers, created at the start of every
+ * game. gov3 and gov4 exist only in truepath runs and are NOT the same shape:
+ * actions.ts creates them without `occ`, `anx` or `buy`, because they cannot
+ * be occupied, annexed or bought — they are rivals, not neighbours. The code
+ * reads those fields on all five anyway and relies on undefined being falsy,
+ * which is why they are optional here rather than defaulted.
+ *
+ * That difference is a schema smell worth remembering: two kinds of thing are
+ * sharing one record, distinguished only by index. Splitting them is a change
+ * to the save format, so it is documented here, not made.
+ */
+export interface ForeignGov {
+    /** Discontent, 0-100. Visible to the player from two spies. */
+    unrest: number;
+    /** Hostility, 0-100. */
+    hstl: number;
+    /** Military rating. */
+    mil: number;
+    /** Economic rating; drives govPrice(). */
+    eco: number;
+    /** Spies in place. */
+    spy: number;
+    /**
+     * Written at game start and carried through every save, but never read:
+     * no code outside the initialisers touches it. Kept because it is in
+     * existing saves, not because it does anything.
+     */
+    esp: number;
+    /** Ticks remaining until a spy finishes training. */
+    trn: number;
+    /** Ticks remaining on the running espionage action; 0 when idle. */
+    sab: number;
+    /** The running espionage action, or 'none'. Reads with `sab`. */
+    act: 'none' | 'influence' | 'sabotage' | 'incite' | 'annex' | 'purchase';
+    /** Occupied by force. Absent on gov3/gov4. */
+    occ?: boolean;
+    /** Annexed. Absent on gov3/gov4. */
+    anx?: boolean;
+    /** Bought outright. Absent on gov3/gov4. */
+    buy?: boolean;
+    /**
+     * Generated name, added lazily — older saves predate it, which is why
+     * every read is guarded. `s0` is a numeric suffix selecting the
+     * civics_gov<N> locale string; `s1` fills its placeholder.
+     */
+    name?: { s0: number; s1: string };
+}
+
 export interface CivicFixed {
     govern: CivicGovernment;
     // These three are absent for the whole evolution phase and only appear
@@ -217,8 +268,8 @@ export interface CivicFixed {
      * is documented rather than corrected.
      */
     mad?: { display: boolean; armed: boolean };
-    /** Rival governments, keyed gov0..govN. */
-    foreign: Record<string, Record<string, StateScalar>>;
+    /** Rival governments, keyed gov0..govN. See ForeignGov. */
+    foreign: Record<string, ForeignGov>;
     homeless: number;
     /** Default job new citizens are assigned to. */
     d_job: string;
