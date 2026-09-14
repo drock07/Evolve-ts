@@ -1,5 +1,6 @@
 import { mountMarketRow } from './components/mountMarketRow';
 import { mountStorageRow } from './components/mountStorageRow';
+import { mountStorageHeader } from './components/mountStorageHeader';
 import { global, tmp_vars, keyMultiplier, breakdown, sizeApproximation, p_on, support_on, active_rituals } from './vars';
 import { vBind, clearElement, modRes, flib, calc_mastery, calcPillar, eventActive, easterEgg, trickOrTreat, popover, harmonyEffect, darkEffect, hoovedRename, messageQueue } from './functions';
 import { traits, fathomCheck } from './races';
@@ -2379,34 +2380,19 @@ function initStorage(){
     if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 1)){
         return;
     }
-    let store = $(`<div id="createHead" class="storage-header"><h2 class="is-sr-only">${loc('tab_storage')}</h2></div>`);
+    let store = $(`<div id="createHead" class="storage-header"></div>`);
     clearElement($('#resStorage'));
     $('#resStorage').append(store);
-    
-    if (global.resource['Crates'] && global.resource['Containers']){
-        store.append($(`<b-tooltip :label="buildCrateDesc()" position="is-bottom" class="crate" animated multilined><button :aria-label="buildCrateDesc()" v-show="cr.display" class="button" @click="crate">${loc('resource_modal_crate_construct')}</button></b-tooltip>`));
-        store.append($(`<b-tooltip :label="buildContainerDesc()" position="is-bottom" class="container" animated multilined><button :aria-label="buildContainerDesc()" v-show="cn.display" class="button" @click="container">${loc('resource_modal_container_construct')}</button></b-tooltip>`));
 
-        vBind({
-            el: '#createHead',
-            data: {
-                cr: global.resource.Crates,
-                cn: global.resource.Containers
-            },
-            methods: {
-                crate(){
-                    buildCrate();
-                },
-                container(){
-                    buildContainer();
-                },
-                buildCrateDesc(){
-                    return buildCrateLabel();
-                },
-                buildContainerDesc(){
-                    return buildContainerLabel();
-                },
-            }
+    if (global.resource['Crates'] && global.resource['Containers']){
+        // The buttons and their descriptions are React's now
+        // (components/StorageHeader.tsx); the <b-tooltip> wrappers they used
+        // to carry are gone with them.
+        mountStorageHeader(store[0], {
+            buildCrate,
+            buildContainer,
+            crateLabel: buildCrateLabel,
+            containerLabel: buildContainerLabel,
         });
     }
 }
